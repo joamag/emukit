@@ -21,7 +21,3 @@ export * from "./section/section";
 export * from "./tiles/tiles";
 export * from "./title/title";
 export * from "./toast/toast";
-
-export * from "./app";
-export * from "./structs";
-export * from "./util";
