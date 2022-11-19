@@ -1,0 +1,24 @@
+{
+    "name": "emukit",
+    "version": "0.1.0",
+    "description": "Emulation Web UI toolkit",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/joamag/emukit.git"
+    },
+    "license": "Apache-2.0",
+    "scripts": {
+        "pretty": "prettier --config .prettierrc \"./**/*.{ts,tsx,json}\" --write"
+    },
+    "source": "index.ts",
+    "peerDependencies": {
+        "@types/react": "^18.0.21",
+        "@types/react-dom": "^18.0.6",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
+    },
+    "devDependencies": {
+        "prettier": "^2.7.1",
+        "typescript": "^4.8.4"
+    }
+}
