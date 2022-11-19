@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "module": "ES2015",
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "allowSyntheticDefaultImports": true,
+        "target": "es6",
+        "noImplicitAny": true,
+        "noImplicitThis": true,
+        "noUnusedLocals": true,
+        "alwaysStrict": true,
+        "strictBindCallApply": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "strictPropertyInitialization": true,
+        "sourceMap": true,
+        "jsx": "react",
+        "outDir": ".",
+        "baseUrl": ".",
+        "lib": ["es2019", "dom"],
+        "paths": {
+            "*": ["node_modules/*", "src/types/*"]
+        }
+    },
+    "include": ["**/*"],
+    "exclude": []
+}
