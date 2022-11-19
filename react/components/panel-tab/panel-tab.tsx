@@ -30,6 +30,7 @@ export const PanelTab: FC<PanelTabProps> = ({
                         ].join(" ");
                         return (
                             <span
+                                key={tabIndex}
                                 className={classes}
                                 onClick={() => setTabIndexState(tabIndex)}
                             >
