@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+*
+
+### Fixed
+
+*
+
+## [0.2.0] - 2022-11-20
+
+### Changed
+
 * Improved CHP-8 keyboard
 
 ### Fixed
