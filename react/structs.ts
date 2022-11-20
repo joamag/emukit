@@ -38,7 +38,14 @@ export enum Feature {
     Benchmark,
     Keyboard,
     KeyboardChip8,
-    KeyboardGB
+    KeyboardGB,
+    RomTypeInfo
+}
+
+export enum Frequency {
+    Hz = "Hz",
+    Khz = "KHz",
+    MHz = "MHz"
 }
 
 /**
@@ -49,6 +56,12 @@ export enum PixelFormat {
     RGB = 3,
     RGBA = 4
 }
+
+export const frequencyRatios = {
+    Hz: 1,
+    KHz: 1000,
+    MHz: 1000 * 1000
+};
 
 export interface ObservableI {
     bind(event: string, callback: Callback<this>): void;
@@ -148,6 +161,8 @@ export interface Emulator extends ObservableI {
      */
     get frequency(): number;
     set frequency(value: number);
+
+    get frequencyUnit(): Frequency | null;
 
     /**
      * The recommended frequency delta in hertz for scale up
@@ -273,6 +288,10 @@ export class EmulatorBase extends Observable {
 
     get features(): Feature[] {
         return [];
+    }
+
+    get frequencyUnit(): Frequency | null {
+        return Frequency.MHz;
     }
 
     get frequencyDelta(): number | null {

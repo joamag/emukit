@@ -32,6 +32,7 @@ import {
 import {
     Emulator,
     Feature,
+    frequencyRatios,
     FREQUENCY_DELTA,
     PixelFormat,
     RomInfo
@@ -85,6 +86,8 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const errorRef = useRef<boolean>(false);
     const modalCallbackRef =
         useRef<(value: boolean | PromiseLike<boolean>) => void>();
+
+    const frequencyRatio = frequencyRatios[emulator.frequencyUnit || "Hz"];
 
     useEffect(() => {
         document.body.style.backgroundColor = `#${getBackground()}`;
@@ -329,7 +332,8 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         setBackgroundIndex((backgroundIndex + 1) % backgrounds.length);
     };
     const onPaletteClick = () => {
-        const palette = emulator.changePalette?.();
+        if (!emulator.changePalette) return;
+        const palette = emulator.changePalette();
         setPaletteName(palette);
     };
     const onUploadFile = async (file: File) => {
@@ -345,11 +349,11 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         );
     };
     const onFrequencyChange = (value: number) => {
-        emulator.frequency = value * 1000 * 1000;
+        emulator.frequency = value * frequencyRatio;
     };
     const onFrequencyReady = (handler: (value: number) => void) => {
         emulator.bind("frequency", (emulator: Emulator, frequency: number) => {
-            handler(frequency / 1000000);
+            handler(frequency / frequencyRatio);
         });
     };
     const onMinimize = () => {
@@ -566,32 +570,35 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                                             <ButtonIncrement
                                                 value={
                                                     emulator.frequency /
-                                                    1000 /
-                                                    1000
+                                                    frequencyRatio
                                                 }
                                                 delta={
                                                     (emulator.frequencyDelta ??
                                                         FREQUENCY_DELTA) /
-                                                    1000 /
-                                                    1000
+                                                    frequencyRatio
                                                 }
                                                 min={0}
-                                                suffix={"MHz"}
+                                                suffix={
+                                                    emulator.frequencyUnit ??
+                                                    "Hz"
+                                                }
                                                 decimalPlaces={2}
                                                 onChange={onFrequencyChange}
                                                 onReady={onFrequencyReady}
                                             />
                                         }
                                     />
-                                    <Pair
-                                        key="rom-type"
-                                        name={"ROM Type"}
-                                        value={
-                                            romInfo.extra?.romType
-                                                ? `${romInfo.extra?.romType}`
-                                                : "-"
-                                        }
-                                    />
+                                    {hasFeature(Feature.RomTypeInfo) && (
+                                        <Pair
+                                            key="rom-type"
+                                            name={"ROM Type"}
+                                            value={
+                                                romInfo.extra?.romType
+                                                    ? `${romInfo.extra?.romType}`
+                                                    : "-"
+                                            }
+                                        />
+                                    )}
                                     <Pair
                                         key="framerate"
                                         name={"Framerate"}
@@ -599,14 +606,16 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                                     />
                                 </Info>,
                                 <Info>
-                                    <Pair
-                                        key="palette"
-                                        name={"Palette"}
-                                        value={paletteName}
-                                    />
+                                    {hasFeature(Feature.Palettes) && (
+                                        <Pair
+                                            key="palette"
+                                            name={"Palette"}
+                                            value={paletteName}
+                                        />
+                                    )}
                                 </Info>
                             ]}
-                            tabNames={["General", "Detailed"]}
+                            tabNames={["General", "Details"]}
                             selectors={true}
                         />
                     </Section>
@@ -628,15 +637,16 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                             style={["simple", "border", "padded"]}
                             onClick={onResetClick}
                         />
-                        {hasFeature(Feature.Benchmark) && emulator.benchmark && (
-                            <Button
-                                text={"Benchmark"}
-                                image={require("../res/bolt.svg")}
-                                imageAlt="benchmark"
-                                style={["simple", "border", "padded"]}
-                                onClick={onBenchmarkClick}
-                            />
-                        )}
+                        {hasFeature(Feature.Benchmark) &&
+                            emulator.benchmark && (
+                                <Button
+                                    text={"Benchmark"}
+                                    image={require("../res/bolt.svg")}
+                                    imageAlt="benchmark"
+                                    style={["simple", "border", "padded"]}
+                                    onClick={onBenchmarkClick}
+                                />
+                            )}
                         <Button
                             text={"Fullscreen"}
                             image={require("../res/maximise.svg")}
@@ -686,15 +696,16 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                             style={["simple", "border", "padded"]}
                             onClick={onThemeClick}
                         />
-                        {hasFeature(Feature.Palettes) && (
-                            <Button
-                                text={"Palette"}
-                                image={require("../res/brightness.svg")}
-                                imageAlt="palette"
-                                style={["simple", "border", "padded"]}
-                                onClick={onPaletteClick}
-                            />
-                        )}
+                        {hasFeature(Feature.Palettes) &&
+                            emulator.changePalette && (
+                                <Button
+                                    text={"Palette"}
+                                    image={require("../res/brightness.svg")}
+                                    imageAlt="palette"
+                                    style={["simple", "border", "padded"]}
+                                    onClick={onPaletteClick}
+                                />
+                            )}
                         <Button
                             text={"Load ROM"}
                             image={require("../res/upload.svg")}
