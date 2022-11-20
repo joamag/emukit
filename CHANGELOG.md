@@ -13,18 +13,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* Made `getTile()` optional
+*
 
 ### Fixed
 
 *
+
+## [0.2.2] - 2022-11-20
+
+### Changed
+
+* Made `getTile()` optional
 
 ## [0.2.1] - 2022-11-20
 
 ### Added
 
 * Support for dynamic frequency units
-
 
 ## [0.2.0] - 2022-11-20
 
