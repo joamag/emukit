@@ -1,9 +1,29 @@
-import React, { FC, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 
 import "./keyboard-chip8.css";
 
+const KEYS: Record<string, string> = {
+    "1": "1",
+    "2": "2",
+    "3": "3",
+    "4": "4",
+    q: "Q",
+    w: "W",
+    e: "E",
+    r: "R",
+    a: "A",
+    s: "S",
+    d: "D",
+    f: "F",
+    z: "Z",
+    x: "X",
+    c: "C",
+    v: "V"
+};
+
 type KeyboardChip8Props = {
     focusable?: boolean;
+    physical?: boolean;
     style?: string[];
     onKeyDown?: (key: string) => void;
     onKeyUp?: (key: string) => void;
@@ -11,14 +31,53 @@ type KeyboardChip8Props = {
 
 export const KeyboardChip8: FC<KeyboardChip8Props> = ({
     focusable = true,
+    physical = true,
     style = [],
     onKeyDown,
     onKeyUp
 }) => {
     const classes = () => ["keyboard", "keyboard-chip8", ...style].join(" ");
-    const renderKey = (key: string, styles: string[] = []) => {
-        const [pressed, setPressed] = useState(false);
+    const recordRef =
+        useRef<Record<string, React.Dispatch<React.SetStateAction<boolean>>>>();
+    useEffect(() => {
+        if (!physical) return;
+        const _onKeyDown = (event: KeyboardEvent) => {
+            const keyCode = KEYS[event.key];
+            if (keyCode !== undefined) {
+                const records = recordRef.current ?? {};
+                const setter = records[keyCode];
+                setter(true);
+                onKeyDown && onKeyDown(keyCode);
+                return;
+            }
+        };
+        const _onKeyUp = (event: KeyboardEvent) => {
+            const keyCode = KEYS[event.key];
+            if (keyCode !== undefined) {
+                const records = recordRef.current ?? {};
+                const setter = records[keyCode];
+                setter(false);
+                onKeyUp && onKeyUp(keyCode);
+                return;
+            }
+        };
+        document.addEventListener("keydown", _onKeyDown);
+        document.addEventListener("keyup", _onKeyUp);
+        return () => {
+            document.removeEventListener("keydown", _onKeyDown);
+            document.removeEventListener("keyup", _onKeyUp);
+        };
+    }, []);
+    const renderKey = (
+        key: string,
+        selected = false,
+        styles: string[] = []
+    ) => {
+        const [pressed, setPressed] = useState(selected);
         const classes = ["key", pressed ? "pressed" : "", ...styles].join(" ");
+        const records = recordRef.current ?? {};
+        records[key ?? "undefined"] = setPressed;
+        recordRef.current = records;
         return (
             <span
                 className={classes}

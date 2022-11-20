@@ -158,16 +158,14 @@ export const Display: FC<DisplayProps> = ({
                     alt="minimise"
                 />
             </span>
-            <div
-                className="display-frame"
-                style={{ width: width ?? options.width, height: height }}
-            >
+            <div className="display-frame">
                 <canvas
                     ref={canvasRef}
                     tabIndex={-1}
                     className="display-canvas"
                     width={options.width * options.scale}
                     height={options.height * options.scale}
+                    style={{ width: width ?? options.width, height: height }}
                 ></canvas>
             </div>
         </div>
