@@ -715,7 +715,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                             image={require("../res/upload.svg")}
                             imageAlt="upload"
                             file={true}
-                            accept={".gb"}
+                            accept={emulator.romExts.map(e => `.${e}`).join(",")}
                             style={["simple", "border", "padded"]}
                             onFile={onUploadFile}
                         />

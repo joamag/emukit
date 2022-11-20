@@ -93,8 +93,8 @@
 }
 
 .display > .display-frame > .display-canvas {
-    outline: none;
     max-width: 100%;
+    outline: none;
     -o-outline: none;
     -ms-outline: none;
     -moz-outline: none;
