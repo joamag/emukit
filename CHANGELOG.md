@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Support for dynamic frequency units
+*
 
 ### Changed
 
@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 *
+
+## [0.2.1] - 2022-11-20
+
+### Added
+
+* Support for dynamic frequency units
+
 
 ## [0.2.0] - 2022-11-20
 
