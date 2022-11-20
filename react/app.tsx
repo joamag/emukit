@@ -341,7 +341,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const onEngineChange = (engine: string) => {
         emulator.boot({ engine: engine.toLowerCase() });
         showToast(
-            `${emulator.device.text} running in engine "${engine}" from now on!`
+            `${emulator.device.text} running on engine "${engine}" from now on!`
         );
     };
     const onFrequencyChange = (value: number) => {
@@ -628,7 +628,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                             style={["simple", "border", "padded"]}
                             onClick={onResetClick}
                         />
-                        {hasFeature(Feature.Benchmark) && (
+                        {hasFeature(Feature.Benchmark) && emulator.benchmark && (
                             <Button
                                 text={"Benchmark"}
                                 image={require("../res/bolt.svg")}
