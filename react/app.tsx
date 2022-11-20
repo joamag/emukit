@@ -499,22 +499,26 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 </Section>
                 {debugVisible && (
                     <Section>
-                        <div
-                            style={{
-                                display: "inline-block",
-                                verticalAlign: "top",
-                                marginRight: 32,
-                                width: 256
-                            }}
-                        >
-                            <h3>VRAM Tiles</h3>
-                            <Tiles
-                                getTile={(index) => emulator.getTile(index)}
-                                tileCount={384}
-                                width={"100%"}
-                                contentBox={false}
-                            />
-                        </div>
+                        {emulator.getTile && (
+                            <div
+                                style={{
+                                    display: "inline-block",
+                                    verticalAlign: "top",
+                                    marginRight: 32,
+                                    width: 256
+                                }}
+                            >
+                                <h3>VRAM Tiles</h3>
+                                <Tiles
+                                    getTile={(index) =>
+                                        emulator.getTile!(index)
+                                    }
+                                    tileCount={384}
+                                    width={"100%"}
+                                    contentBox={false}
+                                />
+                            </div>
+                        )}
                         <div
                             style={{
                                 display: "inline-block",

@@ -189,15 +189,6 @@ export interface Emulator extends ObservableI {
     set palette(value: string | undefined);
 
     /**
-     * Obtains the pixel buffer for the VRAM tile at the given
-     * index.
-     *
-     * @param index The index of the tile to obtain pixel buffer.
-     * @returns The pixel buffer of the tile at the given index.
-     */
-    getTile(index: number): Uint8Array;
-
-    /**
      * Boot (or reboots) the emulator according to the provided
      * set of options.
      *
@@ -225,6 +216,15 @@ export interface Emulator extends ObservableI {
     keyPress(key: string): void;
 
     keyLift(key: string): void;
+
+    /**
+     * Obtains the pixel buffer for the VRAM tile at the given
+     * index.
+     *
+     * @param index The index of the tile to obtain pixel buffer.
+     * @returns The pixel buffer of the tile at the given index.
+     */
+    getTile?: { (index: number): Uint8Array };
 
     /**
      * Changes the palette of the emulator to the "next" one,
