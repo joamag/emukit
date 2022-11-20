@@ -412,6 +412,16 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 left={
                     <div className="display-container">
                         <Display
+                            options={{
+                                width:
+                                    emulator.dimensions.width *
+                                    (emulator.dimensions.scale ?? 2),
+                                height:
+                                    emulator.dimensions.height *
+                                    (emulator.dimensions.scale ?? 2),
+                                logicWidth: emulator.dimensions.width,
+                                logicHeight: emulator.dimensions.height
+                            }}
                             fullscreen={fullscreenState}
                             onDrawHandler={onDrawHandler}
                             onClearHandler={onClearHandler}

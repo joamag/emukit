@@ -21,6 +21,12 @@ export type Entry = {
     url?: string;
 };
 
+export type Size = {
+    width: number;
+    height: number;
+    scale?: number;
+};
+
 /**
  * Enumeration to be used to describe the set of
  * features that a certain emulator supports, this
@@ -107,6 +113,12 @@ export interface Emulator extends ObservableI {
      * supports.
      */
     get romExts(): string[];
+
+    /**
+     * The dimensions of the screen for the device that is
+     * currently in emulation.
+     */
+    get dimensions(): Size;
 
     /**
      * The pixel format of the emulator's display

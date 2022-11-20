@@ -58,8 +58,8 @@ export const Display: FC<DisplayProps> = ({
     onMinimize
 }) => {
     options = {
-        ...options,
-        ...{ width: 320, height: 288, logicWidth: 160, logicHeight: 144 }
+        ...{ width: 320, height: 288, logicWidth: 160, logicHeight: 144 },
+        ...options
     };
     if (!options.scale) {
         options.scale = window.devicePixelRatio ? window.devicePixelRatio : 1;
