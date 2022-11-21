@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* More flexible support for help panel
+*
 
 ### Changed
 
@@ -17,7 +17,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-* Load rom extension problem
+*
+
+## [0.3.0] - 2022-11-21
+
+### Added
+
+* More flexible support for help panel
+
+### Fixed
+
+* Load ROM extension problem
 
 ## [0.2.2] - 2022-11-20
 
