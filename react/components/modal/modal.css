@@ -122,7 +122,8 @@
 
 .modal > .modal-window > .modal-text {
     font-size: 20px;
-    line-height: 22px;
+    line-height: 24px;
+    margin: 0px 0px 0px 0px;
     overflow: auto;
 }
 
