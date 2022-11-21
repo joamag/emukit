@@ -1,5 +1,6 @@
 .keyboard-chip8 {
     font-size: 0px;
+    -webkit-tap-highlight-color: transparent;
     text-align: center;
     touch-callout: none !important;
     -o-touch-callout: none !important;
