@@ -14,7 +14,7 @@ const KEYS: Record<string, string> = {
     s: "B"
 };
 
-const KEYS_XBOX: Record<number, string> = {
+const KEYS_STANDARD: Record<number, string> = {
     12: "ArrowUp",
     102: "ArrowUp",
     13: "ArrowDown",
@@ -41,6 +41,7 @@ declare const require: any;
 
 enum Gamepad {
     Unknown = 1,
+    Standard,
     Xbox,
     Playstation,
     Switch
@@ -61,7 +62,7 @@ type KeyboardGBProps = {
  * The sequence of game pads that are considered
  * supported by the current implementation.
  */
-const SUPPORTED_PADS = [Gamepad.Xbox];
+const SUPPORTED_PADS = [Gamepad.Standard];
 
 export const KeyboardGB: FC<KeyboardGBProps> = ({
     focusable = true,
@@ -88,8 +89,8 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
         if (!physical) return;
         const getGamepadType = (gamepad: globalThis.Gamepad): Gamepad => {
             let gamepadType = Gamepad.Unknown;
-            const isXbox = gamepad.id.includes("Xbox");
-            if (isXbox) gamepadType = Gamepad.Xbox;
+            const isStandard = gamepad.mapping === "standard";
+            if (isStandard) gamepadType = Gamepad.Standard;
             return gamepadType;
         };
         const _onKeyDown = (event: KeyboardEvent) => {
@@ -125,8 +126,8 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
 
             let keySolver: Record<number, string>;
             switch (gamepadType) {
-                case Gamepad.Xbox:
-                    keySolver = KEYS_XBOX;
+                case Gamepad.Standard:
+                    keySolver = KEYS_STANDARD;
                     break;
             }
 
