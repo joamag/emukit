@@ -34,6 +34,12 @@ export type HelpPanel = {
     node: ReactNode;
 };
 
+export type FrequencySpecs = {
+    unit?: Frequency;
+    delta?: number;
+    places?: number;
+};
+
 /**
  * Enumeration to be used to describe the set of
  * features that a certain emulator supports, this
@@ -176,13 +182,11 @@ export interface Emulator extends ObservableI {
     get frequency(): number;
     set frequency(value: number);
 
-    get frequencyUnit(): Frequency | null;
-
     /**
-     * The recommended frequency delta in hertz for scale up
-     * and scale down operations in the CPU frequency.
+     * The specification to be used for frequency representation
+     * and adjustments, includes unit and other stuff.
      */
-    get frequencyDelta(): number | null;
+    get frequencySpecs(): FrequencySpecs;
 
     /**
      * The current logic framerate of the running emulator.
@@ -308,12 +312,12 @@ export class EmulatorBase extends Observable {
         return [];
     }
 
-    get frequencyUnit(): Frequency | null {
-        return Frequency.MHz;
-    }
-
-    get frequencyDelta(): number | null {
-        return FREQUENCY_DELTA;
+    get frequencySpecs(): FrequencySpecs {
+        return {
+            unit: Frequency.MHz,
+            delta: FREQUENCY_DELTA,
+            places: 2
+        };
     }
 
     get palette(): string | undefined {

@@ -32,6 +32,7 @@ import {
 import {
     Emulator,
     Feature,
+    Frequency,
     frequencyRatios,
     FREQUENCY_DELTA,
     PixelFormat,
@@ -87,7 +88,8 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const modalCallbackRef =
         useRef<(value: boolean | PromiseLike<boolean>) => void>();
 
-    const frequencyRatio = frequencyRatios[emulator.frequencyUnit || "Hz"];
+    const frequencyRatio =
+        frequencyRatios[emulator.frequencySpecs.unit || Frequency.Hz];
 
     useEffect(() => {
         document.body.style.backgroundColor = `#${getBackground()}`;
@@ -96,12 +98,12 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         switch (keyaction) {
             case "Plus":
                 emulator.frequency +=
-                    emulator.frequencyDelta ?? FREQUENCY_DELTA;
+                    emulator.frequencySpecs.delta ?? FREQUENCY_DELTA;
                 setKeyaction(undefined);
                 break;
             case "Minus":
                 emulator.frequency -=
-                    emulator.frequencyDelta ?? FREQUENCY_DELTA;
+                    emulator.frequencySpecs.delta ?? FREQUENCY_DELTA;
                 setKeyaction(undefined);
                 break;
             case "Escape":
@@ -584,16 +586,20 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                                                     frequencyRatio
                                                 }
                                                 delta={
-                                                    (emulator.frequencyDelta ??
+                                                    (emulator.frequencySpecs
+                                                        .delta ??
                                                         FREQUENCY_DELTA) /
                                                     frequencyRatio
                                                 }
                                                 min={0}
                                                 suffix={
-                                                    emulator.frequencyUnit ??
-                                                    "Hz"
+                                                    emulator.frequencySpecs
+                                                        .unit ?? "Hz"
                                                 }
-                                                decimalPlaces={2}
+                                                decimalPlaces={
+                                                    emulator.frequencySpecs
+                                                        .places ?? 0
+                                                }
                                                 onChange={onFrequencyChange}
                                                 onReady={onFrequencyReady}
                                             />
