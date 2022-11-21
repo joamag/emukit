@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export const FREQUENCY_DELTA = 100000;
 
 export type Callback<T> = (owner: T, params?: any) => void;
@@ -27,13 +29,19 @@ export type Size = {
     scale?: number;
 };
 
+export type HelpPanel = {
+    name: string;
+    node: ReactNode;
+};
+
 /**
  * Enumeration to be used to describe the set of
  * features that a certain emulator supports, this
  * is going to condition its runtime execution.
  */
 export enum Feature {
-    Debug = 1,
+    Help = 1,
+    Debug,
     Palettes,
     Benchmark,
     Keyboard,
@@ -108,6 +116,12 @@ export interface Emulator extends ObservableI {
      * these values will influence the associated GUIs.
      */
     get features(): Feature[];
+
+    /**
+     * The multiple panels that are going to be presented to
+     * support the end-user as part of the help process.
+     */
+    get help(): HelpPanel[];
 
     /**
      * The complete set of engine names that can be used
@@ -287,6 +301,10 @@ export class EmulatorBase extends Observable {
     }
 
     get features(): Feature[] {
+        return [];
+    }
+
+    get help(): HelpPanel[] {
         return [];
     }
 

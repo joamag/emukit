@@ -234,7 +234,14 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         return result;
     };
     const showHelp = async (title = "Help") => {
-        await showModal(title, undefined, <Help />);
+        await showModal(
+            title,
+            undefined,
+            <Help
+                panels={emulator.help.map((h) => h.node)}
+                names={emulator.help.map((h) => h.name)}
+            />
+        );
     };
     const showToast = async (text: string, error = false, timeout = 3500) => {
         setToastText(text);
@@ -676,13 +683,15 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                             style={["simple", "border", "padded"]}
                             onClick={onInformationClick}
                         />
-                        <Button
-                            text={"Help"}
-                            image={require("../res/help.svg")}
-                            imageAlt="help"
-                            style={["simple", "border", "padded"]}
-                            onClick={onHelpClick}
-                        />
+                        {hasFeature(Feature.Help) && (
+                            <Button
+                                text={"Help"}
+                                image={require("../res/help.svg")}
+                                imageAlt="help"
+                                style={["simple", "border", "padded"]}
+                                onClick={onHelpClick}
+                            />
+                        )}
                         {hasFeature(Feature.Debug) && (
                             <Button
                                 text={"Debug"}
