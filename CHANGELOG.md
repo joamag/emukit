@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Support for the `frequencySpecs()` to obtain information on how to handle frequency
+*
 
 ### Changed
 
@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 *
+
+## [0.4.0] - 2022-11-21
+
+### Added
+
+* Support for the `frequencySpecs()` to obtain information on how to handle frequency
 
 ## [0.3.0] - 2022-11-21
 
