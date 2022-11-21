@@ -106,7 +106,7 @@
 
 @media only screen and (max-width: 600px) {
     .keyboard-gb > .dpad {
-        width: 162px;
+        width: 160px;
     }
 }
 
@@ -201,7 +201,7 @@
 
 @media only screen and (max-width: 600px) {
     .keyboard-gb > .action {
-        margin-right: 8px;
+        margin-right: 12px;
     }
 }
 
