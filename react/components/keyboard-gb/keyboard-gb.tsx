@@ -119,7 +119,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
         };
         const onGamepadConnected = (event: GamepadEvent) => {
             const gamepad = event.gamepad;
-            let gamepadType = getGamepadType(gamepad);
+            const gamepadType = getGamepadType(gamepad);
             const isValid = SUPPORTED_PADS.includes(gamepadType);
 
             onGamepad && onGamepad(gamepad.id, isValid);
@@ -178,7 +178,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
         };
         const onGamepadDisconnected = (event: GamepadEvent) => {
             const gamepad = event.gamepad;
-            let gamepadType = getGamepadType(gamepad);
+            const gamepadType = getGamepadType(gamepad);
             const isValid = SUPPORTED_PADS.includes(gamepadType);
 
             onGamepad && onGamepad(gamepad.id, isValid, false);
@@ -206,7 +206,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
         const [pressed, setPressed] = useState(selected);
         const classes = ["key", pressed ? "pressed" : "", ...styles].join(" ");
         const records = recordRef.current ?? {};
-        records[keyName ?? key ?? "undefined"] = setPressed;
+        records[keyName ?? key ?? undefined] = setPressed;
         recordRef.current = records;
         return (
             <span
