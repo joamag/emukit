@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+*
+
+## [0.4.1] - 2022-11-22
+
+### Fixed
+
 * Issue related to double registration
 
 ## [0.4.0] - 2022-11-21
