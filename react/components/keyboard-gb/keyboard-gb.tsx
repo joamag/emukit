@@ -124,7 +124,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
 
             onGamepad && onGamepad(gamepad.id, isValid);
 
-            let keySolver: Record<number, string>;
+            let keySolver: Record<number, string> = {};
             switch (gamepadType) {
                 case Gamepad.Standard:
                     keySolver = KEYS_STANDARD;
