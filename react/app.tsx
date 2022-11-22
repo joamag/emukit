@@ -68,6 +68,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const [romInfo, setRomInfo] = useState<RomInfo>({});
     const [framerate, setFramerate] = useState(0);
     const [paletteName, setPaletteName] = useState(emulator.palette);
+    const [gamepads, setGamepads] = useState<Record<number, Gamepad>>({});
     const [keyaction, setKeyaction] = useState<string>();
     const [modalTitle, setModalTitle] = useState<string>();
     const [modalText, setModalText] = useState<string>();
@@ -220,6 +221,102 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const getPauseIcon = () =>
         paused ? require("../res/play.svg") : require("../res/pause.svg");
     const getBackground = () => backgrounds[backgroundIndex];
+    const renderGeneralTab = () => (
+        <Info>
+            <Pair
+                key="button-engine"
+                name={"Engine"}
+                valueNode={
+                    <ButtonSwitch
+                        options={emulator.engines.map((e) => e.toUpperCase())}
+                        size={"large"}
+                        style={["simple"]}
+                        onChange={onEngineChange}
+                    />
+                }
+            />
+            <Pair key="rom" name={"ROM"} value={romInfo.name ?? "-"} />
+            <Pair
+                key="rom-size"
+                name={"ROM Size"}
+                value={
+                    romInfo.size
+                        ? `${new Intl.NumberFormat().format(
+                              romInfo.size
+                          )} bytes`
+                        : "-"
+                }
+            />
+            <Pair
+                key="button-frequency"
+                name={"CPU Frequency"}
+                valueNode={
+                    <ButtonIncrement
+                        value={emulator.frequency / frequencyRatio}
+                        delta={
+                            (emulator.frequencySpecs.delta ?? FREQUENCY_DELTA) /
+                            frequencyRatio
+                        }
+                        min={0}
+                        suffix={emulator.frequencySpecs.unit ?? "Hz"}
+                        decimalPlaces={emulator.frequencySpecs.places ?? 0}
+                        onChange={onFrequencyChange}
+                        onReady={onFrequencyReady}
+                    />
+                }
+            />
+            {hasFeature(Feature.RomTypeInfo) && (
+                <Pair
+                    key="rom-type"
+                    name={"ROM Type"}
+                    value={
+                        romInfo.extra?.romType
+                            ? `${romInfo.extra?.romType}`
+                            : "-"
+                    }
+                />
+            )}
+            <Pair
+                key="framerate"
+                name={"Framerate"}
+                value={`${framerate} fps`}
+            />
+        </Info>
+    );
+    const renderDetailsTab = () => (
+        <Info>
+            {hasFeature(Feature.Palettes) && (
+                <Pair key="palette" name={"Palette"} value={paletteName} />
+            )}
+        </Info>
+    );
+    const renderControllersTab = () =>
+        hasControllersTab() ? (
+            <Info style={["small"]}>
+                {Object.entries(gamepads).map(([index, gamepad]) => (
+                    <Pair
+                        key={`#${index}`}
+                        name={`#${index}`}
+                        value={gamepad.id}
+                    />
+                ))}
+            </Info>
+        ) : null;
+    const hasControllersTab = () => Object.keys(gamepads).length > 0;
+    const getTabs = () => {
+        const tabs = [];
+        tabs.push(renderGeneralTab());
+        tabs.push(renderDetailsTab());
+        hasControllersTab() && tabs.push(renderControllersTab());
+        return tabs;
+    };
+    const getTabNames = () => {
+        const tabNames = [];
+        tabNames.push("General");
+        tabNames.push("Details");
+        hasControllersTab() && tabNames.push("Controllers");
+        return tabNames;
+    };
 
     const showModal = async (
         title = "Alert",
@@ -374,12 +471,24 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const onKeyUp = (key: string) => {
         emulator.keyLift(key);
     };
-    const onGamepad = (id: string, isValid: boolean, connected = true) => {
+    const onGamepad = (
+        gamepad: Gamepad,
+        isValid: boolean,
+        connected = true
+    ) => {
+        const { index, id } = gamepad;
         if (connected) {
-            if (isValid) showToast(`🕹️ Gamepad connect ${id}`);
-            else showToast(`😥 Unsupported gamepad connect ${id}`, true);
+            if (isValid) {
+                gamepads[gamepad.index] = gamepad;
+                setGamepads(gamepads);
+                showToast(`🕹️ Gamepad #${index} connect ${id}`);
+            } else {
+                showToast(`😥 Unsupported gamepad connect ${id}`, true);
+            }
         } else if (isValid) {
-            showToast(`🕹️ Gamepad disconnected ${id}`, true);
+            delete gamepads[index];
+            setGamepads(gamepads);
+            showToast(`🕹️ Gamepad #${index} disconnected ${id}`, true);
         }
     };
     const onDrawHandler = (handler: DrawHandler) => {
@@ -544,95 +653,8 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 {infoVisible && (
                     <Section>
                         <PanelTab
-                            tabs={[
-                                <Info>
-                                    <Pair
-                                        key="button-engine"
-                                        name={"Engine"}
-                                        valueNode={
-                                            <ButtonSwitch
-                                                options={emulator.engines.map(
-                                                    (e) => e.toUpperCase()
-                                                )}
-                                                size={"large"}
-                                                style={["simple"]}
-                                                onChange={onEngineChange}
-                                            />
-                                        }
-                                    />
-                                    <Pair
-                                        key="rom"
-                                        name={"ROM"}
-                                        value={romInfo.name ?? "-"}
-                                    />
-                                    <Pair
-                                        key="rom-size"
-                                        name={"ROM Size"}
-                                        value={
-                                            romInfo.size
-                                                ? `${new Intl.NumberFormat().format(
-                                                      romInfo.size
-                                                  )} bytes`
-                                                : "-"
-                                        }
-                                    />
-                                    <Pair
-                                        key="button-frequency"
-                                        name={"CPU Frequency"}
-                                        valueNode={
-                                            <ButtonIncrement
-                                                value={
-                                                    emulator.frequency /
-                                                    frequencyRatio
-                                                }
-                                                delta={
-                                                    (emulator.frequencySpecs
-                                                        .delta ??
-                                                        FREQUENCY_DELTA) /
-                                                    frequencyRatio
-                                                }
-                                                min={0}
-                                                suffix={
-                                                    emulator.frequencySpecs
-                                                        .unit ?? "Hz"
-                                                }
-                                                decimalPlaces={
-                                                    emulator.frequencySpecs
-                                                        .places ?? 0
-                                                }
-                                                onChange={onFrequencyChange}
-                                                onReady={onFrequencyReady}
-                                            />
-                                        }
-                                    />
-                                    {hasFeature(Feature.RomTypeInfo) && (
-                                        <Pair
-                                            key="rom-type"
-                                            name={"ROM Type"}
-                                            value={
-                                                romInfo.extra?.romType
-                                                    ? `${romInfo.extra?.romType}`
-                                                    : "-"
-                                            }
-                                        />
-                                    )}
-                                    <Pair
-                                        key="framerate"
-                                        name={"Framerate"}
-                                        value={`${framerate} fps`}
-                                    />
-                                </Info>,
-                                <Info>
-                                    {hasFeature(Feature.Palettes) && (
-                                        <Pair
-                                            key="palette"
-                                            name={"Palette"}
-                                            value={paletteName}
-                                        />
-                                    )}
-                                </Info>
-                            ]}
-                            tabNames={["General", "Details"]}
+                            tabs={getTabs()}
+                            tabNames={getTabNames()}
                             selectors={true}
                         />
                     </Section>

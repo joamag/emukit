@@ -53,7 +53,7 @@ export const Button: FC<ButtonProps> = ({
         event.stopPropagation();
         event.preventDefault();
     };
-    const onKeyPress = (event: React.KeyboardEvent) => {
+    const onKeyDown = (event: React.KeyboardEvent) => {
         if (event.key !== "Enter") return;
         if (file) fileRef.current?.click();
         onClick && onClick();
@@ -62,7 +62,7 @@ export const Button: FC<ButtonProps> = ({
         <span
             className={classes()}
             onClick={onClick}
-            onKeyPress={onKeyPress}
+            onKeyDown={onKeyDown}
             tabIndex={focusable ? 0 : undefined}
         >
             {text}
@@ -74,7 +74,7 @@ export const Button: FC<ButtonProps> = ({
             onClick={onClick}
             onMouseDown={onMouseDown}
             onMouseUp={onMouseUp}
-            onKeyPress={onKeyPress}
+            onKeyDown={onKeyDown}
             tabIndex={focusable ? 0 : undefined}
         >
             {image && <img src={image} alt={imageAlt ?? text ?? "button"} />}

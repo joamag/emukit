@@ -4,6 +4,10 @@
     vertical-align: top;
 }
 
+.info.small {
+    font-size: 18px;
+}
+
 .info > dt {
     clear: both;
     float: left;

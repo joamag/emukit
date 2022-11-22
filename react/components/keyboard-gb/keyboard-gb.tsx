@@ -39,13 +39,19 @@ const PREVENT_KEYS: Record<string, boolean> = {
 
 declare const require: any;
 
-enum Gamepad {
+enum GamepadType {
     Unknown = 1,
     Standard,
     Xbox,
     Playstation,
     Switch
 }
+
+type Gamepad = {
+    index: number;
+    id: string;
+    type: GamepadType;
+};
 
 type KeyboardGBProps = {
     focusable?: boolean;
@@ -55,14 +61,18 @@ type KeyboardGBProps = {
     style?: string[];
     onKeyDown?: (key: string) => void;
     onKeyUp?: (key: string) => void;
-    onGamepad?: (id: string, isValid: boolean, connected?: boolean) => void;
+    onGamepad?: (
+        gamepad: Gamepad,
+        isValid: boolean,
+        connected?: boolean
+    ) => void;
 };
 
 /**
  * The sequence of game pads that are considered
  * supported by the current implementation.
  */
-const SUPPORTED_PADS = [Gamepad.Standard];
+const SUPPORTED_PADS = [GamepadType.Standard];
 
 export const KeyboardGB: FC<KeyboardGBProps> = ({
     focusable = true,
@@ -87,10 +97,10 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
         ].join(" ");
     useEffect(() => {
         if (!physical) return;
-        const getGamepadType = (gamepad: globalThis.Gamepad): Gamepad => {
-            let gamepadType = Gamepad.Unknown;
+        const getGamepadType = (gamepad: globalThis.Gamepad): GamepadType => {
+            let gamepadType = GamepadType.Unknown;
             const isStandard = gamepad.mapping === "standard";
-            if (isStandard) gamepadType = Gamepad.Standard;
+            if (isStandard) gamepadType = GamepadType.Standard;
             return gamepadType;
         };
         const _onKeyDown = (event: KeyboardEvent) => {
@@ -122,11 +132,19 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
             const gamepadType = getGamepadType(gamepad);
             const isValid = SUPPORTED_PADS.includes(gamepadType);
 
-            onGamepad && onGamepad(gamepad.id, isValid);
+            onGamepad &&
+                onGamepad(
+                    {
+                        index: gamepad.index,
+                        id: gamepad.id,
+                        type: gamepadType
+                    },
+                    isValid
+                );
 
             let keySolver: Record<number, string> = {};
             switch (gamepadType) {
-                case Gamepad.Standard:
+                case GamepadType.Standard:
                     keySolver = KEYS_STANDARD;
                     break;
             }
@@ -181,7 +199,16 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
             const gamepadType = getGamepadType(gamepad);
             const isValid = SUPPORTED_PADS.includes(gamepadType);
 
-            onGamepad && onGamepad(gamepad.id, isValid, false);
+            onGamepad &&
+                onGamepad(
+                    {
+                        index: gamepad.index,
+                        id: gamepad.id,
+                        type: gamepadType
+                    },
+                    isValid,
+                    false
+                );
         };
         document.addEventListener("keydown", _onKeyDown);
         document.addEventListener("keyup", _onKeyUp);
