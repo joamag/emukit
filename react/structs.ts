@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 
 export const FREQUENCY_DELTA = 100000;
 
-export type Callback<T> = (owner: T, params?: any) => void;
+export type Callback<T> = (owner: T, params?: unknown) => void;
 
 export type RomInfo = {
     name?: string;
@@ -213,7 +213,7 @@ export interface Emulator extends ObservableI {
      * @param options The options that are going to be used for
      * the booting operation of the emulator.
      */
-    boot(options: any): void;
+    boot(options: unknown): void;
 
     /**
      * Toggle the running state of the emulator between paused
@@ -289,7 +289,7 @@ export class Observable {
         this.events[event] = callbacks;
     }
 
-    trigger(event: string, params?: any) {
+    trigger(event: string, params?: unknown) {
         const callbacks = this.events[event] ?? [];
         callbacks.forEach((c) => c(this, params));
     }

@@ -8,7 +8,8 @@
     },
     "license": "Apache-2.0",
     "scripts": {
-        "pretty": "prettier --config .prettierrc \"./**/*.{ts,tsx,json}\" --write",
+        "eslint": "eslint .",
+        "pretty": "prettier --config .prettierrc \"./**/*.{js,ts,tsx,json}\" --write",
         "test": "npm run test:mocha",
         "test:mocha": "mocha --recursive test"
     },
@@ -22,6 +23,9 @@
     "devDependencies": {
         "@types/react": "^18.0.25",
         "@types/react-dom": "^18.0.9",
+        "@typescript-eslint/eslint-plugin": "^5.44.0",
+        "@typescript-eslint/parser": "^5.44.0",
+        "eslint": "^8.28.0",
         "mocha": "^10.1.0",
         "prettier": "^2.7.1",
         "react": "^18.2.0",

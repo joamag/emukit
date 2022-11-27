@@ -33,7 +33,7 @@ export const Tiles: FC<TilesProps> = ({
     }, []);
     const onCanvas = (structure: CanvasStructure) => {
         const drawTiles = () => {
-            for (let index = 0; index < 384; index++) {
+            for (let index = 0; index < tileCount; index++) {
                 const pixels = getTile(index);
                 drawTile(index, pixels, structure);
             }

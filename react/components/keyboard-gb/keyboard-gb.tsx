@@ -37,9 +37,7 @@ const PREVENT_KEYS: Record<string, boolean> = {
     " ": true
 };
 
-declare const require: any;
-
-enum GamepadType {
+export enum GamepadType {
     Unknown = 1,
     Standard,
     Xbox,
@@ -47,7 +45,7 @@ enum GamepadType {
     Switch
 }
 
-type Gamepad = {
+export type Gamepad = {
     index: number;
     id: string;
     type: GamepadType;
@@ -254,7 +252,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
                     event.stopPropagation();
                     event.preventDefault();
                 }}
-                onBlur={(event) => {
+                onBlur={() => {
                     setPressed(false);
                     onKeyUp && onKeyUp(key);
                 }}

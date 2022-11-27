@@ -97,7 +97,7 @@ export const KeyboardChip8: FC<KeyboardChip8Props> = ({
                     event.stopPropagation();
                     event.preventDefault();
                 }}
-                onBlur={(event) => {
+                onBlur={() => {
                     setPressed(false);
                     onKeyUp && onKeyUp(key);
                 }}

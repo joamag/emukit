@@ -36,7 +36,7 @@ export const Canvas: FC<CanvasProps> = ({
                 scale,
                 canvasRef.current
             );
-            onCanvas && onCanvas(structure);
+            structure && onCanvas && onCanvas(structure);
         }
     }, [canvasRef]);
     return (
@@ -56,8 +56,12 @@ const initCanvas = (
     scale: number,
     canvas: HTMLCanvasElement,
     smoothing = false
-): CanvasStructure => {
-    const canvasContext = canvas.getContext("2d")!;
+): CanvasStructure | undefined => {
+    const canvasContext = canvas.getContext("2d");
+    if (!canvasContext) {
+        throw new Error("Not possible to obtain 2D context");
+    }
+
     canvasContext.imageSmoothingEnabled = smoothing;
 
     const canvasImage = canvasContext.createImageData(width, height);

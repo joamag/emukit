@@ -2,6 +2,7 @@ import React, { FC, useEffect, useState } from "react";
 
 import "./overlay.css";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const require: any;
 
 type OverlayProps = {

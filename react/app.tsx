@@ -1,6 +1,7 @@
 import React, { FC, ReactNode, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const require: any;
 
 import {
@@ -11,6 +12,7 @@ import {
     ClearHandler,
     Display,
     DrawHandler,
+    Gamepad,
     Footer,
     Help,
     Info,
@@ -131,9 +133,10 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         if (palette) {
             emulator.palette = palette;
         }
-        const onFullChange = (event: Event) => {
+        const onFullChange = () => {
             if (
                 !document.fullscreenElement &&
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 !(document as any).webkitFullscreenElement
             ) {
                 setFullscreenState(false);
@@ -192,11 +195,13 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             setRomInfo(emulator.romInfo);
             setPaused(false);
         };
-        const onMessage = (
-            emulator: Emulator,
-            params: Record<string, any> = {}
-        ) => {
-            showToast(params.text, params.error, params.timeout);
+        const onMessage = (emulator: Emulator, _params: unknown = {}) => {
+            const params = _params as Record<string, unknown>;
+            showToast(
+                params.text as string,
+                params.error as boolean,
+                params.timeout as number
+            );
         };
         document.addEventListener("fullscreenchange", onFullChange);
         document.addEventListener("webkitfullscreenchange", onFullChange);
@@ -458,8 +463,8 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         emulator.frequency = value * frequencyRatio;
     };
     const onFrequencyReady = (handler: (value: number) => void) => {
-        emulator.bind("frequency", (emulator: Emulator, frequency: number) => {
-            handler(frequency / frequencyRatio);
+        emulator.bind("frequency", (emulator: Emulator, frequency: unknown) => {
+            handler((frequency as number) / frequencyRatio);
         });
     };
     const onMinimize = () => {
@@ -629,7 +634,9 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                                 <h3>VRAM Tiles</h3>
                                 <Tiles
                                     getTile={(index) =>
-                                        emulator.getTile!(index)
+                                        emulator.getTile
+                                            ? emulator.getTile(index)
+                                            : new Uint8Array()
                                     }
                                     tileCount={384}
                                     width={"100%"}

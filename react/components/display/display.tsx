@@ -5,6 +5,7 @@ import "./display.css";
 
 const PIXEL_UNSET_COLOR = 0x1b1a17ff;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const require: any;
 
 /**
@@ -101,8 +102,10 @@ export const Display: FC<DisplayProps> = ({
                 document.body.requestFullscreen().catch(() => {});
             } else if (
                 nativeFullscreen &&
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 (document.body as any).webkitRequestFullscreen
             ) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 (document.body as any).webkitRequestFullscreen();
             }
         } else {
@@ -119,8 +122,10 @@ export const Display: FC<DisplayProps> = ({
                 document.exitFullscreen().catch(() => {});
             } else if (
                 nativeFullscreen &&
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 (document as any).webkitExitFullscreen
             ) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 (document as any).webkitExitFullscreen();
             }
         }
@@ -184,7 +189,10 @@ const initCanvas = (
     const canvasBuffer = document.createElement("canvas");
     canvasBuffer.width = width;
     canvasBuffer.height = height;
-    const canvasBufferCtx = canvasBuffer.getContext("2d")!;
+    const canvasBufferCtx = canvasBuffer.getContext("2d");
+    if (!canvasBufferCtx) {
+        throw new Error("Not possible to obtain 2D context");
+    }
     const imageData = canvasBufferCtx.createImageData(
         canvasBuffer.width,
         canvasBuffer.height
@@ -194,7 +202,10 @@ const initCanvas = (
     // initializes the visual canvas (where data is going to be written)
     // with, resetting the transform vector to the identity and re-calculating
     // the scale of the drawing properly
-    const canvasCtx = canvas.getContext("2d")!;
+    const canvasCtx = canvas.getContext("2d");
+    if (!canvasCtx) {
+        throw new Error("Not possible to obtain 2D context");
+    }
     canvasCtx.setTransform(1, 0, 0, 1, 0, 0);
     canvasCtx.scale(
         canvas.width / canvasBuffer.width,
