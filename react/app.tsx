@@ -49,6 +49,7 @@ type EmulatorAppProps = {
     debug?: boolean;
     keyboard?: boolean;
     palette?: string;
+    background?: string;
     backgrounds?: string[];
 };
 
@@ -62,11 +63,14 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     debug = false,
     keyboard = false,
     palette,
+    background,
     backgrounds = ["264653"]
 }) => {
     const [paused, setPaused] = useState(false);
     const [fullscreenState, setFullscreenState] = useState(fullscreen);
-    const [backgroundIndex, setBackgroundIndex] = useState(0);
+    const [backgroundIndex, setBackgroundIndex] = useState(
+        background ? Math.max(backgrounds.indexOf(background), 0) : 0
+    );
     const [romInfo, setRomInfo] = useState<RomInfo>({});
     const [framerate, setFramerate] = useState(0);
     const [paletteName, setPaletteName] = useState(emulator.palette);
@@ -780,6 +784,7 @@ export const startApp = (
         debug = false,
         keyboard = false,
         palette,
+        background,
         backgrounds = []
     }: {
         emulator: Emulator;
@@ -787,6 +792,7 @@ export const startApp = (
         debug?: boolean;
         keyboard?: boolean;
         palette?: string;
+        background?: string;
         backgrounds: string[];
     }
 ) => {
@@ -801,6 +807,7 @@ export const startApp = (
             debug={debug}
             keyboard={keyboard}
             palette={palette}
+            background={background}
             backgrounds={backgrounds}
         />
     );
