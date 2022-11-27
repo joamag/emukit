@@ -596,7 +596,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                     </Paragraph>
                     {emulator.repository && (
                         <Paragraph>
-                            You can check the source code of it at{" "}
+                            You can check the source code of it on{" "}
                             {emulator.repository.url ? (
                                 <Link
                                     href={emulator.repository.url}
