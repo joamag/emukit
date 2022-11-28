@@ -263,6 +263,15 @@ export interface Emulator extends ObservableI {
      * @returns The result metrics from the benchmark run.
      */
     benchmark?: { (count?: number): BenchmarkResult };
+
+    /**
+     * Callback method to be called whenever a background/theme
+     * is changed by the hosting environment.
+     * 
+     * @param theme The name of the new background to which the
+     * current environment has been changed into.
+     */
+    onBackground?: { (background: string): void };
 }
 
 /**

@@ -51,6 +51,7 @@ type EmulatorAppProps = {
     palette?: string;
     background?: string;
     backgrounds?: string[];
+    onBackground?: (background: string) => void;
 };
 
 const isTouchDevice = () => {
@@ -64,7 +65,8 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     keyboard = false,
     palette,
     background,
-    backgrounds = ["264653"]
+    backgrounds = ["264653"],
+    onBackground
 }) => {
     const [paused, setPaused] = useState(false);
     const [fullscreenState, setFullscreenState] = useState(fullscreen);
@@ -99,7 +101,10 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         frequencyRatios[emulator.frequencySpecs.unit || Frequency.Hz];
 
     useEffect(() => {
-        document.body.style.backgroundColor = `#${getBackground()}`;
+        const background = getBackground();
+        document.body.style.backgroundColor = `#${background}`;
+        onBackground && onBackground(background);
+        emulator.onBackground && emulator.onBackground(background);
     }, [backgroundIndex]);
     useEffect(() => {
         switch (keyaction) {
@@ -785,7 +790,7 @@ export const startApp = (
         keyboard = false,
         palette,
         background,
-        backgrounds = []
+        backgrounds,
     }: {
         emulator: Emulator;
         fullscreen?: boolean;
@@ -793,7 +798,7 @@ export const startApp = (
         keyboard?: boolean;
         palette?: string;
         background?: string;
-        backgrounds: string[];
+        backgrounds?: string[];
     }
 ) => {
     const elementRef = document.getElementById(element);
