@@ -5,7 +5,12 @@ module.exports = {
     plugins: ["@typescript-eslint"],
     rules: {
         "@typescript-eslint/no-empty-function": "off",
-        "no-constant-condition": ["error", { checkLoops: false }],
+        "no-constant-condition": [
+            "error",
+            {
+                checkLoops: false
+            }
+        ],
         semi: ["error", "always"]
     },
     root: true
