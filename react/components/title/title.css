@@ -4,7 +4,7 @@
 }
 
 .title > .icon {
+    height: 32px;
     margin-left: 14px;
-    vertical-align: middle;
-    width: 32px;
+    vertical-align: top;
 }

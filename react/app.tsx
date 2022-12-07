@@ -586,7 +586,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                     text={emulator.name}
                     version={emulator.version?.text}
                     versionUrl={emulator.version?.url}
-                    iconSrc={require("../res/thunder.png")}
+                    iconSrc={emulator.icon ?? require("../res/thunder.png")}
                 ></Title>
                 <Section>
                     <Paragraph>
@@ -790,7 +790,7 @@ export const startApp = (
         keyboard = false,
         palette,
         background,
-        backgrounds,
+        backgrounds
     }: {
         emulator: Emulator;
         fullscreen?: boolean;

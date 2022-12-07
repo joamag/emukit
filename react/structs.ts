@@ -103,6 +103,12 @@ export interface Emulator extends ObservableI {
     get device(): Entry;
 
     /**
+     * A string reference to a resource that can be used as
+     * a safe path to the display of the emulator icon.
+     */
+    get icon(): string | undefined;
+
+    /**
      * A semantic version string for the current version
      * of the emulator, can include a URL pointing to a
      * changelog or equivalent document.
@@ -267,7 +273,7 @@ export interface Emulator extends ObservableI {
     /**
      * Callback method to be called whenever a background/theme
      * is changed by the hosting environment.
-     * 
+     *
      * @param theme The name of the new background to which the
      * current environment has been changed into.
      */
@@ -305,6 +311,10 @@ export class Observable {
 }
 
 export class EmulatorBase extends Observable {
+    get icon(): string | undefined {
+        return undefined;
+    }
+
     get version(): Entry | undefined {
         return undefined;
     }
