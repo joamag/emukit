@@ -1,9 +1,6 @@
 import React, { FC, ReactNode, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare const require: any;
-
 import {
     Button,
     ButtonContainer,
@@ -42,6 +39,9 @@ import {
 } from "./structs";
 
 import "./app.css";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare const require: any;
 
 type EmulatorAppProps = {
     emulator: Emulator;
