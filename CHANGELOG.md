@@ -9,15 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+*
+
+### Changed
+
+*
+
+### Fixed
+
+*
+
+## [0.6.1] - 2022-12-07
+
+### Added
+
 * Support for the `icon()` getter
 
 ### Changed
 
 * Better background callback handling
-
-### Fixed
-
-*
 
 ## [0.6.0] - 2022-11-27
 
