@@ -16,7 +16,6 @@ import {
     KeyboardChip8,
     KeyboardGB,
     Link,
-    Modal,
     Overlay,
     Pair,
     PanelSplit,
@@ -26,7 +25,10 @@ import {
     Section,
     Tiles,
     Title,
-    Toast
+    ToastManager,
+    ModalManager,
+    ToastManagerHandle,
+    ModalManagerHandle
 } from "./components";
 import {
     Emulator,
@@ -78,24 +80,16 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const [paletteName, setPaletteName] = useState(emulator.palette);
     const [gamepads, setGamepads] = useState<Record<number, Gamepad>>({});
     const [keyaction, setKeyaction] = useState<string>();
-    const [modalTitle, setModalTitle] = useState<string>();
-    const [modalText, setModalText] = useState<string>();
-    const [modalContents, setModalContents] = useState<ReactNode>();
-    const [modalVisible, setModalVisible] = useState(false);
-    const [toastText, setToastText] = useState<string>();
-    const [toastError, setToastError] = useState(false);
-    const [toastVisible, setToastVisible] = useState(false);
     const [keyboardVisible, setKeyboardVisible] = useState(
         isTouchDevice() || keyboard
     );
     const [infoVisible, setInfoVisible] = useState(true);
     const [debugVisible, setDebugVisible] = useState(debug);
 
-    const toastCounterRef = useRef(0);
+    const modalManagerRef = useRef<ModalManagerHandle>(null);
+    const toastManagerRef = useRef<ToastManagerHandle>(null);
     const frameRef = useRef<boolean>(false);
     const errorRef = useRef<boolean>(false);
-    const modalCallbackRef =
-        useRef<(value: boolean | PromiseLike<boolean>) => void>();
 
     const frequencyRatio =
         frequencyRatios[emulator.frequencySpecs.unit || Frequency.Hz];
@@ -337,14 +331,10 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         text?: string,
         contents?: ReactNode
     ): Promise<boolean> => {
-        setModalTitle(title);
-        setModalText(text);
-        setModalContents(contents);
-        setModalVisible(true);
-        const result = (await new Promise((resolve) => {
-            modalCallbackRef.current = resolve;
-        })) as boolean;
-        return result;
+        return (
+            (await modalManagerRef.current?.showModal(title, text, contents)) ??
+            true
+        );
     };
     const showHelp = async (title = "Help") => {
         await showModal(
@@ -357,18 +347,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         );
     };
     const showToast = async (text: string, error = false, timeout = 3500) => {
-        setToastText(text);
-        setToastError(error);
-        setToastVisible(true);
-        toastCounterRef.current++;
-        const counter = toastCounterRef.current;
-        await new Promise((resolve) => {
-            setTimeout(() => {
-                if (counter !== toastCounterRef.current) return;
-                setToastVisible(false);
-                resolve(true);
-            }, timeout);
-        });
+        return await toastManagerRef.current?.showToast(text, error, timeout);
     };
     const hasFeature = (feature: Feature) => {
         return emulator.features.includes(feature);
@@ -390,23 +369,6 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         emulator.boot({ engine: null, romName: file.name, romData: romData });
 
         showToast(`Loaded ${file.name} ROM successfully!`);
-    };
-    const onModalConfirm = () => {
-        if (modalCallbackRef.current) {
-            modalCallbackRef.current(true);
-            modalCallbackRef.current = undefined;
-        }
-        setModalVisible(false);
-    };
-    const onModalCancel = () => {
-        if (modalCallbackRef.current) {
-            modalCallbackRef.current(false);
-            modalCallbackRef.current = undefined;
-        }
-        setModalVisible(false);
-    };
-    const onToastCancel = () => {
-        setToastVisible(false);
     };
     const onPauseClick = () => {
         emulator.toggleRunning();
@@ -523,21 +485,9 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
 
     return (
         <div className="app">
+            <ModalManager ref={modalManagerRef} />
+            <ToastManager ref={toastManagerRef} />
             <Overlay text={"Drag to load ROM"} onFile={onFile} />
-            <Modal
-                title={modalTitle}
-                text={modalText}
-                contents={modalContents}
-                visible={modalVisible}
-                onConfirm={onModalConfirm}
-                onCancel={onModalCancel}
-            />
-            <Toast
-                text={toastText}
-                error={toastError}
-                visible={toastVisible}
-                onCancel={onToastCancel}
-            />
             <Footer color={getBackground()}>
                 Built with ❤️ by{" "}
                 <Link href="https://joao.me" target="_blank">
