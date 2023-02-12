@@ -295,7 +295,14 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     );
     const renderDetailsTab = () => (
         <Info>
-            <Pair key="emukit" name={"EmuKit"} value={info.version} />
+            <Pair
+                key="emukit"
+                name={"EmuKit"}
+                value={info.version}
+                valueHref={
+                    "https://github.com/joamag/emukit/blob/master/CHANGELOG.md"
+                }
+            />
             {hasFeature(Feature.Themes) && (
                 <Pair key="theme" name={"Theme"} value={getBackground()} />
             )}

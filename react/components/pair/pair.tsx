@@ -1,4 +1,5 @@
 import React, { FC, ReactNode } from "react";
+import Link from "../link/link";
 
 import "./pair.css";
 
@@ -6,6 +7,8 @@ type PairProps = {
     name: string;
     value?: string;
     valueNode?: ReactNode;
+    valueHref?: string;
+    valueTarget?: string;
     style?: string[];
     onNameClick?: () => void;
     onValueClick?: () => void;
@@ -14,6 +17,8 @@ type PairProps = {
 export const Pair: FC<PairProps> = ({
     name,
     value,
+    valueHref,
+    valueTarget,
     valueNode,
     style = [],
     onNameClick,
@@ -28,7 +33,14 @@ export const Pair: FC<PairProps> = ({
                 {name}
             </dt>
             <dd className={classes()} onClick={_onValueClick}>
-                {valueNode ?? value ?? ""}
+                {valueNode ??
+                    (valueHref && (
+                        <Link href={valueHref} target={valueTarget ?? "_blank"}>
+                            {value}
+                        </Link>
+                    )) ??
+                    value ??
+                    ""}
             </dd>
         </>
     );
