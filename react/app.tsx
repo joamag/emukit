@@ -42,6 +42,8 @@ import {
 
 import "./app.css";
 
+import info from "../package.json";
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const require: any;
 
@@ -293,6 +295,10 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     );
     const renderDetailsTab = () => (
         <Info>
+            <Pair key="emukit" name={"EmuKit"} value={info.version} />
+            {hasFeature(Feature.Themes) && (
+                <Pair key="theme" name={"Theme"} value={getBackground()} />
+            )}
             {hasFeature(Feature.Palettes) && (
                 <Pair key="palette" name={"Palette"} value={paletteName} />
             )}
@@ -696,13 +702,15 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                                 onClick={onDebugClick}
                             />
                         )}
-                        <Button
-                            text={"Theme"}
-                            image={require("../res/marker.svg")}
-                            imageAlt="theme"
-                            style={["simple", "border", "padded"]}
-                            onClick={onThemeClick}
-                        />
+                        {hasFeature(Feature.Themes) && (
+                            <Button
+                                text={"Themes"}
+                                image={require("../res/marker.svg")}
+                                imageAlt="theme"
+                                style={["simple", "border", "padded"]}
+                                onClick={onThemeClick}
+                            />
+                        )}
                         {hasFeature(Feature.Palettes) &&
                             emulator.changePalette && (
                                 <Button

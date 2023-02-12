@@ -48,6 +48,7 @@ export type FrequencySpecs = {
 export enum Feature {
     Help = 1,
     Debug,
+    Themes,
     Palettes,
     Benchmark,
     Keyboard,
