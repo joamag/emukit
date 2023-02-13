@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 *
 
+## [0.6.3] - 2023-01-09
+
+### Added
+
+* Support for version and theme printing
+
 ## [0.6.2] - 2022-12-09
 
 ### Added
