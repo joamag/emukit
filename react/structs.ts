@@ -40,6 +40,16 @@ export type FrequencySpecs = {
     places?: number;
 };
 
+export type Compiler = {
+    name?: string;
+    version?: string;
+};
+
+export type Compilation = {
+    date?: string;
+    time?: string;
+};
+
 /**
  * Enumeration to be used to describe the set of
  * features that a certain emulator supports, this
@@ -196,6 +206,18 @@ export interface Emulator extends ObservableI {
     get frequencySpecs(): FrequencySpecs;
 
     /**
+     * The specifications of the compiler used to build the emulator
+     * should include both name and version of the compiler.
+     */
+    get compiler(): Compiler | null;
+
+    /**
+     * Compilation specs for the library that contains the emulator
+     * including the timestamp of the compilation.
+     */
+    get compilation(): Compilation | null;
+
+    /**
      * The current logic framerate of the running emulator.
      */
     get framerate(): number;
@@ -212,6 +234,10 @@ export interface Emulator extends ObservableI {
      */
     get palette(): string | undefined;
     set palette(value: string | undefined);
+
+    get compilerString(): string | null;
+
+    get compilationString(): string | null;
 
     /**
      * Boot (or reboots) the emulator according to the provided
@@ -340,9 +366,41 @@ export class EmulatorBase extends Observable {
         };
     }
 
+    get compiler(): Compiler | null {
+        return null;
+    }
+
+    get compilation(): Compilation | null {
+        return null;
+    }
+
     get palette(): string | undefined {
         return undefined;
     }
 
     set palette(value: string | undefined) {}
+
+    get compilerString(): string | null {
+        if (!this.compiler) return null;
+        const buffer: string[] = [];
+        if (this.compiler.name) {
+            buffer.push(this.compiler.name);
+        }
+        if (this.compiler.version) {
+            buffer.push(this.compiler.version);
+        }
+        return buffer.join("/");
+    }
+
+    get compilationString(): string | null {
+        if (!this.compilation) return null;
+        const buffer: string[] = [];
+        if (this.compilation.date) {
+            buffer.push(this.compilation.date);
+        }
+        if (this.compilation.time) {
+            buffer.push(this.compilation.time);
+        }
+        return buffer.join(" ");
+    }
 }

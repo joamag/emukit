@@ -304,10 +304,28 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 }
             />
             {hasFeature(Feature.Themes) && (
-                <Pair key="theme" name={"Theme"} value={getBackground()} />
+                <Pair
+                    key="theme"
+                    name={"Theme"}
+                    value={`#${getBackground()}`}
+                />
             )}
             {hasFeature(Feature.Palettes) && (
                 <Pair key="palette" name={"Palette"} value={paletteName} />
+            )}
+            {emulator.compilerString && (
+                <Pair
+                    key="compiler"
+                    name={"Compiler"}
+                    value={emulator.compilerString}
+                />
+            )}
+            {emulator.compilationString && (
+                <Pair
+                    key="compilation"
+                    name={"Compilation"}
+                    value={emulator.compilationString}
+                />
             )}
         </Info>
     );
