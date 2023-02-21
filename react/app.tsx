@@ -79,7 +79,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     );
     const [romInfo, setRomInfo] = useState<RomInfo>({});
     const [framerate, setFramerate] = useState(0);
-    const [paletteName, setPaletteName] = useState(emulator.palette);
+    const [paletteName, setPaletteName] = useState(palette ?? emulator.palette);
     const [gamepads, setGamepads] = useState<Record<number, Gamepad>>({});
     const [keyaction, setKeyaction] = useState<string>();
     const [keyboardVisible, setKeyboardVisible] = useState(
