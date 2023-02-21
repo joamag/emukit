@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Support for `compiler()` and `compilation()` getter methods in the `Emulator` interface
+*
 
 ### Changed
 
@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 *
+
+## [0.6.4] - 2023-02-21
+
+### Added
+
+* Support for `compiler()` and `compilation()` getter methods in the `Emulator` interface
 
 ## [0.6.3] - 2023-01-09
 
