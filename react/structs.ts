@@ -218,6 +218,12 @@ export interface Emulator extends ObservableI {
     get compilation(): Compilation | null;
 
     /**
+     * Engine that has been used in the generation of the WebAssembly
+     * code of the emulator, assumes WASM based emulator.
+     */
+    get wasmEngine(): string | null;
+
+    /**
      * The current logic framerate of the running emulator.
      */
     get framerate(): number;
@@ -371,6 +377,10 @@ export class EmulatorBase extends Observable {
     }
 
     get compilation(): Compilation | null {
+        return null;
+    }
+
+    get wasmEngine(): string | null {
         return null;
     }
 

@@ -327,6 +327,13 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                     value={emulator.compilationString}
                 />
             )}
+            {emulator.wasmEngine && (
+                <Pair
+                    key="wasm-engine"
+                    name={"WASM Engine"}
+                    value={emulator.wasmEngine}
+                />
+            )}
         </Info>
     );
     const renderControllersTab = () =>
