@@ -344,6 +344,13 @@ export class Observable {
 }
 
 export class EmulatorBase extends Observable {
+    static now(): number {
+        if (performance && performance.now) {
+            return performance.now();
+        }
+        return Date.now();
+    }
+
     get icon(): string | undefined {
         return undefined;
     }
