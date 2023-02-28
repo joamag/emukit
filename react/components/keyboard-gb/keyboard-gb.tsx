@@ -11,7 +11,9 @@ const KEYS: Record<string, string> = {
     Enter: "Start",
     " ": "Select",
     a: "A",
-    s: "B"
+    s: "B",
+    A: "A",
+    S: "B"
 };
 
 const KEYS_STANDARD: Record<number, string> = {

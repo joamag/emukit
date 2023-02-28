@@ -18,7 +18,19 @@ const KEYS: Record<string, string> = {
     z: "Z",
     x: "X",
     c: "C",
-    v: "V"
+    v: "V",
+    Q: "Q",
+    W: "W",
+    E: "E",
+    R: "R",
+    A: "A",
+    S: "S",
+    D: "D",
+    F: "F",
+    Z: "Z",
+    X: "X",
+    C: "C",
+    V: "V"
 };
 
 type KeyboardChip8Props = {
