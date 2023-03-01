@@ -557,11 +557,25 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             const internalAudioBuffer = emulator.audioBuffer;
             const { samplingRate, channels } = emulator.audioSpecs;
 
+            const bufferLength = internalAudioBuffer[0].length;
+            if (bufferLength === 0) {
+                return;
+            }
+
             const audioBuffer = audioState.audioContext.createBuffer(
                 channels,
-                internalAudioBuffer.length,
+                bufferLength,
                 samplingRate
             );
+
+            // for each of the channels copies the float 32 array from the
+            // internal (emulator specific) buffers into the audio buffer
+            // channel data buffers
+            for (let channel = 0; channel < channels; channel++) {
+                const channelBuffer = audioBuffer.getChannelData(channel);
+                const internalChannelBuffer = internalAudioBuffer[channel];
+                channelBuffer.set(internalChannelBuffer);
+            }
 
             // makes sure that we're not too far away from the audio
             // and if that's the case drops some of the audio to regain
