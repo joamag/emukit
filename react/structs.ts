@@ -34,6 +34,11 @@ export type HelpPanel = {
     node: ReactNode;
 };
 
+export type AudioSpecs = {
+    samplingRate: number;
+    channels: number;
+};
+
 export type FrequencySpecs = {
     unit?: Frequency;
     delta?: number;
@@ -48,6 +53,18 @@ export type Compiler = {
 export type Compilation = {
     date?: string;
     time?: string;
+};
+
+export type AudioState = {
+    audioContext: AudioContext | null;
+    audioChunks: AudioChunk[];
+    nextPlayTime: number;
+};
+
+export type AudioChunk = {
+    source: AudioBufferSourceNode;
+    playTime: number;
+    duration: number;
 };
 
 /**
@@ -183,6 +200,20 @@ export interface Emulator extends ObservableI {
      * pointer to the heap and not a copy.
      */
     get imageBuffer(): Uint8Array;
+
+    /**
+     * Obtains the specification of the audion stream that is
+     * provided by the emulator (if any).
+     */
+    get audioSpecs(): AudioSpecs | null;
+
+    /**
+     * An array (for each channel) that contains the multiple
+     * float values representing the volume of the channel over
+     * a time series. This value should respect the sampling
+     * rate defined in the `audioSpecs()`.
+     */
+    get audioBuffer(): Float32Array[];
 
     /**
      * Gets information about the ROM that is currently
@@ -377,6 +408,14 @@ export class EmulatorBase extends Observable {
             delta: FREQUENCY_DELTA,
             places: 2
         };
+    }
+
+    get audioSpecs(): AudioSpecs | null {
+        return null;
+    }
+
+    get audioBuffer(): Float32Array[] {
+        return [];
     }
 
     get compiler(): Compiler | null {

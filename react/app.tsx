@@ -31,6 +31,8 @@ import {
     ModalManagerHandle
 } from "./components";
 import {
+    AudioChunk,
+    AudioState,
     Emulator,
     Feature,
     Frequency,
@@ -88,6 +90,11 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const [infoVisible, setInfoVisible] = useState(true);
     const [debugVisible, setDebugVisible] = useState(debug);
 
+    const audioStateRef = useRef<AudioState>({
+        audioContext: null,
+        audioChunks: [],
+        nextPlayTime: 0.0
+    });
     const modalManagerRef = useRef<ModalManagerHandle>(null);
     const toastManagerRef = useRef<ToastManagerHandle>(null);
     const frameRef = useRef<boolean>(false);
@@ -520,9 +527,97 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             await handler(undefined, require("../res/storm.png"), 0.2);
         });
     };
+    const onClick = () => {
+        // in case the emulator does not provide proper audio specs
+        // then the audio should not be enabled for it
+        if (emulator.audioSpecs === null) {
+            return;
+        }
+
+        // in case the audio context has already been build then
+        // there's nothing pending to be done
+        if (audioStateRef.current.audioContext !== null) {
+            return;
+        }
+
+        audioStateRef.current.audioContext = new AudioContext({
+            sampleRate: emulator.audioSpecs.samplingRate
+        });
+
+        emulator.bind("audio", () => {
+            if (emulator.audioSpecs === null) {
+                return;
+            }
+
+            const audioState = audioStateRef.current;
+            if (audioState.audioContext === null) {
+                return;
+            }
+
+            const internalAudioBuffer = emulator.audioBuffer;
+            const { samplingRate, channels } = emulator.audioSpecs;
+
+            const bufferLength = internalAudioBuffer[0].length;
+            if (bufferLength === 0) {
+                return;
+            }
+
+            const audioBuffer = audioState.audioContext.createBuffer(
+                channels,
+                bufferLength,
+                samplingRate
+            );
+
+            // for each of the channels copies the float 32 array from the
+            // internal (emulator specific) buffers into the audio buffer
+            // channel data buffers
+            for (let channel = 0; channel < channels; channel++) {
+                const channelBuffer = audioBuffer.getChannelData(channel);
+                const internalChannelBuffer = internalAudioBuffer[channel];
+                channelBuffer.set(internalChannelBuffer);
+            }
+
+            const source = audioState.audioContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(audioState.audioContext.destination);
+
+            // makes sure that we're not too far away from the audio
+            // and if that's the case drops some of the audio to regain
+            // some sync, this is required because of time hogging
+            const audioCurrentTime = audioState.audioContext.currentTime;
+            if (
+                audioState.nextPlayTime > audioCurrentTime + 0.25 ||
+                audioState.nextPlayTime < audioCurrentTime
+            ) {
+                audioState.audioChunks.forEach((chunk) => {
+                    if (!audioState?.audioContext) return;
+                    chunk.source.disconnect(
+                        audioState.audioContext.destination
+                    );
+                    chunk.source.stop();
+                });
+                audioState.audioChunks = [];
+                audioState.nextPlayTime = audioCurrentTime + 0.1;
+            }
+
+            audioState.nextPlayTime =
+                audioState.nextPlayTime || audioCurrentTime;
+
+            const chunk: AudioChunk = {
+                source: source,
+                playTime: audioState.nextPlayTime,
+                duration: audioBuffer.length / samplingRate
+            };
+
+            source.start(chunk.playTime);
+            audioState.nextPlayTime += chunk.duration;
+
+            audioState.audioChunks.push(chunk);
+        });
+    };
 
     return (
-        <div className="app">
+        <div className="app" onClick={onClick}>
             <ModalManager ref={modalManagerRef} />
             <ToastManager ref={toastManagerRef} />
             <Overlay text={"Drag to load ROM"} onFile={onFile} />
