@@ -9,11 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Support for audio from `Emulator` instances 🎧
+*
 
 ### Changed
 
 *
+
+### Fixed
+
+*
+
+## [0.7.0] - 2023-03-01
+
+* Support for audio from `Emulator` instances 🎧
 
 ### Fixed
 

@@ -1,6 +1,6 @@
 {
     "name": "emukit",
-    "version": "0.6.6",
+    "version": "0.7.0",
     "description": "Emulation Web UI toolkit",
     "repository": {
         "type": "git",
