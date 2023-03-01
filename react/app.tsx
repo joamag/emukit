@@ -577,6 +577,10 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 channelBuffer.set(internalChannelBuffer);
             }
 
+            const source = audioState.audioContext.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(audioState.audioContext.destination);
+
             // makes sure that we're not too far away from the audio
             // and if that's the case drops some of the audio to regain
             // some sync, this is required because of time hogging
@@ -595,10 +599,6 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 audioState.audioChunks = [];
                 audioState.nextPlayTime = audioCurrentTime + 0.1;
             }
-
-            const source = audioState.audioContext.createBufferSource();
-            source.buffer = audioBuffer;
-            source.connect(audioState.audioContext.destination);
 
             audioState.nextPlayTime =
                 audioState.nextPlayTime || audioCurrentTime;
