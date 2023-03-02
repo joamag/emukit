@@ -9,11 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Support for CTRL+P to change palettes
+*
 
 ### Changed
 
 *
+
+### Fixed
+
+*
+
+## [0.7.1] - 2023-03-02
+
+### Added
+
+* Support for CTRL+P to change palettes
 
 ### Fixed
 
