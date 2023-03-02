@@ -75,6 +75,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     onBackground
 }) => {
     const [paused, setPaused] = useState(false);
+    const [muted, setMuted] = useState(false);
     const [fullscreenState, setFullscreenState] = useState(fullscreen);
     const [backgroundIndex, setBackgroundIndex] = useState(
         background ? Math.max(backgrounds.indexOf(background), 0) : 0
@@ -248,6 +249,11 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const getPauseText = () => (paused ? "Resume" : "Pause");
     const getPauseIcon = () =>
         paused ? require("../res/play.svg") : require("../res/pause.svg");
+    const getSoundText = () => (muted ? "Unmute Sound" : "Mute Sound");
+    const getSoundIcon = () =>
+        muted
+            ? require("../res/sound_off.svg")
+            : require("../res/sound_on.svg");
     const getBackground = () => backgrounds[backgroundIndex];
     const renderGeneralTab = () => (
         <Info>
@@ -432,6 +438,19 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     };
     const onResetClick = () => {
         emulator.reset();
+    };
+    const onSoundClick = () => {
+        if (!audioStateRef.current.audioContext) {
+            return;
+        }
+        const audioContext = audioStateRef.current.audioContext;
+        if (muted) {
+            audioContext.resume();
+            setMuted(false);
+        } else {
+            audioContext.suspend();
+            setMuted(true);
+        }
     };
     const onBenchmarkClick = async () => {
         if (!emulator.benchmark) return;
@@ -790,6 +809,14 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                             imageAlt="reset"
                             style={["simple", "border", "padded"]}
                             onClick={onResetClick}
+                        />
+                        <Button
+                            text={getSoundText()}
+                            image={getSoundIcon()}
+                            imageAlt="sound"
+                            enabled={muted}
+                            style={["simple", "border", "padded"]}
+                            onClick={onSoundClick}
                         />
                         {hasFeature(Feature.Benchmark) &&
                             emulator.benchmark && (
