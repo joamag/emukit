@@ -99,14 +99,12 @@ export const KeyboardChip8: FC<KeyboardChip8Props> = ({
                     if (event.key !== "Enter") return;
                     setPressed(true);
                     onKeyDown && onKeyDown(key);
-                    event.stopPropagation();
                     event.preventDefault();
                 }}
                 onKeyUp={(event) => {
                     if (event.key !== "Enter") return;
                     setPressed(false);
                     onKeyUp && onKeyUp(key);
-                    event.stopPropagation();
                     event.preventDefault();
                 }}
                 onBlur={() => {
@@ -116,32 +114,27 @@ export const KeyboardChip8: FC<KeyboardChip8Props> = ({
                 onMouseDown={(event) => {
                     setPressed(true);
                     onKeyDown && onKeyDown(key);
-                    event.stopPropagation();
                     event.preventDefault();
                 }}
                 onMouseUp={(event) => {
                     setPressed(false);
                     onKeyUp && onKeyUp(key);
-                    event.stopPropagation();
                     event.preventDefault();
                 }}
                 onMouseLeave={(event) => {
                     if (!pressed) return;
                     setPressed(false);
                     onKeyUp && onKeyUp(key);
-                    event.stopPropagation();
                     event.preventDefault();
                 }}
                 onTouchStart={(event) => {
                     setPressed(true);
                     onKeyDown && onKeyDown(key);
-                    event.stopPropagation();
                     event.preventDefault();
                 }}
                 onTouchEnd={(event) => {
                     setPressed(false);
                     onKeyUp && onKeyUp(key);
-                    event.stopPropagation();
                     event.preventDefault();
                 }}
             >

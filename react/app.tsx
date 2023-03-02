@@ -133,6 +133,12 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 setKeyboardVisible(!keyboardVisible);
                 setKeyaction(undefined);
                 break;
+            case "Palette":
+                if (emulator.changePalette) {
+                    setPaletteName(emulator.changePalette());
+                }
+                setKeyaction(undefined);
+                break;
             case "Accelerate":
                 emulator.frequency *= 8;
                 break;
@@ -186,6 +192,11 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                         break;
                     case "d":
                         setKeyaction("Accelerate");
+                        event.stopPropagation();
+                        event.preventDefault();
+                        break;
+                    case "p":
+                        setKeyaction("Palette");
                         event.stopPropagation();
                         event.preventDefault();
                         break;
@@ -527,7 +538,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             await handler(undefined, require("../res/storm.png"), 0.2);
         });
     };
-    const onClick = () => {
+    const onAudioReady = () => {
         // in case the emulator does not provide proper audio specs
         // then the audio should not be enabled for it
         if (emulator.audioSpecs === null) {
@@ -540,9 +551,14 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             return;
         }
 
-        audioStateRef.current.audioContext = new AudioContext({
+        // creates the audio context (should be created on a click
+        // event for user interaction) and then immediately resumes
+        // the audio for it so that it play the sound in buffer
+        const audioContext = new AudioContext({
             sampleRate: emulator.audioSpecs.samplingRate
         });
+        audioContext.resume();
+        audioStateRef.current.audioContext = audioContext;
 
         emulator.bind("audio", () => {
             if (emulator.audioSpecs === null) {
@@ -617,7 +633,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     };
 
     return (
-        <div className="app" onClick={onClick}>
+        <div className="app" onClick={onAudioReady} onTouchStart={onAudioReady}>
             <ModalManager ref={modalManagerRef} />
             <ToastManager ref={toastManagerRef} />
             <Overlay text={"Drag to load ROM"} onFile={onFile} />

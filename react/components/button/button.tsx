@@ -46,11 +46,9 @@ export const Button: FC<ButtonProps> = ({
         event.target.value = "";
     };
     const onMouseDown = (event: React.MouseEvent) => {
-        event.stopPropagation();
         event.preventDefault();
     };
     const onMouseUp = (event: React.MouseEvent) => {
-        event.stopPropagation();
         event.preventDefault();
     };
     const onKeyDown = (event: React.KeyboardEvent) => {
