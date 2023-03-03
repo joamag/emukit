@@ -305,6 +305,18 @@ export interface Emulator extends ObservableI {
 
     keyLift(key: string): void;
 
+    pauseVideo?(): void;
+
+    resumeVideo?(): void;
+
+    getVideoState?(): boolean;
+
+    pauseAudio?(): void;
+
+    resumeAudio?(): void;
+
+    getAudioState?(): boolean;
+
     /**
      * Obtains the pixel buffer for the VRAM tile at the given
      * index.

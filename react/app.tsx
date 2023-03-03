@@ -446,9 +446,11 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         const audioContext = audioStateRef.current.audioContext;
         if (muted) {
             audioContext.resume();
+            emulator.resumeAudio?.();
             setMuted(false);
         } else {
             audioContext.suspend();
+            emulator.pauseAudio?.();
             setMuted(true);
         }
     };
