@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Support for audio enable and disable
+*
 
 ### Changed
 
@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 *
+
+## [0.7.2] - 2023-03-04
+
+### Added
+
+* Support for audio enable and disable
 
 ## [0.7.1] - 2023-03-02
 
