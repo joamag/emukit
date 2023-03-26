@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * Crude support for audio debug in GB
+* Greatly improved quality of the `Canvas` element in high density displays
 
 ### Changed
 

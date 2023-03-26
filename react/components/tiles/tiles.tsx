@@ -74,7 +74,8 @@ const drawTile = (
     const line = Math.floor(index / 16);
     const column = index % 16;
     let offset =
-        (line * structure.canvas.width * 8 + column * 8) * PixelFormat.RGBA;
+        (line * structure.canvasOffScreen.width * 8 + column * 8) *
+        PixelFormat.RGBA;
     let counter = 0;
     for (let i = 0; i < pixels.length; i += format) {
         const color =
@@ -87,12 +88,13 @@ const drawTile = (
         counter++;
         if (counter === 8) {
             counter = 0;
-            offset += (structure.canvas.width - 7) * PixelFormat.RGBA;
+            offset += (structure.canvasOffScreen.width - 7) * PixelFormat.RGBA;
         } else {
             offset += PixelFormat.RGBA;
         }
     }
-    structure.canvasContext.putImageData(structure.canvasImage, 0, 0);
+    structure.canvasOffScreenContext.putImageData(structure.canvasImage, 0, 0);
+    structure.canvasContext.drawImage(structure.canvasOffScreen, 0, 0);
 };
 
 export default Tiles;

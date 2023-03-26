@@ -68,8 +68,14 @@ export const AudioGB: FC<AudioGBProps> = ({
                     const offset = (line * 128 + index) * PixelFormat.RGBA;
                     structure.canvasBuffer.setUint32(offset, color);
                 });
-                structure.canvasContext.putImageData(
+                structure.canvasOffScreenContext.putImageData(
                     structure.canvasImage,
+                    0,
+                    0
+                );
+                structure.canvasContext.clearRect(0, 0, 128, 32);
+                structure.canvasContext.drawImage(
+                    structure.canvasOffScreen,
                     0,
                     0
                 );
