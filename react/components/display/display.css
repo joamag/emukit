@@ -93,7 +93,7 @@
 }
 
 .display > .display-frame > .display-canvas {
-    image-rendering: crisp-edges;
+    image-rendering: pixelated;
     max-width: 100%;
     outline: none;
     -o-outline: none;
