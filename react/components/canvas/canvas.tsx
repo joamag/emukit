@@ -17,6 +17,7 @@ type CanvasProps = {
     scaledWidth?: number | string;
     pixelRatio?: number;
     scale?: number;
+    imageRendering?: "auto" | "crisp-edges" | "pixelated";
     style?: string[];
     onCanvas?: (structure: CanvasStructure) => void;
 };
@@ -27,6 +28,7 @@ export const Canvas: FC<CanvasProps> = ({
     scaledWidth,
     pixelRatio = window.devicePixelRatio,
     scale = 1,
+    imageRendering = "pixelated",
     style = [],
     onCanvas
 }) => {
@@ -47,7 +49,10 @@ export const Canvas: FC<CanvasProps> = ({
         <canvas
             ref={canvasRef}
             className={classes()}
-            style={{ width: scaledWidth ?? width * scale }}
+            style={{
+                width: scaledWidth ?? width * scale,
+                imageRendering: imageRendering
+            }}
             width={width * scale * pixelRatio}
             height={height * scale * pixelRatio}
         />
