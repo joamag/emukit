@@ -1,3 +1,4 @@
+export * from "./audio-gb/audio-gb";
 export * from "./button/button";
 export * from "./button-container/button-container";
 export * from "./button-increment/button-increment";

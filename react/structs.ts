@@ -266,6 +266,12 @@ export interface Emulator extends ObservableI {
     get registers(): Record<string, string | number>;
 
     /**
+     * A dictionary that associated the multiple audio channels
+     * with their current volume as a number.
+     */
+    get audioOutput(): Record<string, number>;
+
+    /**
      * The palette as a string name that is currently
      * set in the emulator for display.
      */

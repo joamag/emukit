@@ -2,6 +2,7 @@ import React, { FC, ReactNode, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 
 import {
+    AudioGB,
     Button,
     ButtonContainer,
     ButtonIncrement,
@@ -9,13 +10,15 @@ import {
     ClearHandler,
     Display,
     DrawHandler,
-    Gamepad,
     Footer,
+    Gamepad,
     Help,
     Info,
     KeyboardChip8,
     KeyboardGB,
     Link,
+    ModalManager,
+    ModalManagerHandle,
     Overlay,
     Pair,
     PanelSplit,
@@ -26,9 +29,7 @@ import {
     Tiles,
     Title,
     ToastManager,
-    ModalManager,
-    ToastManagerHandle,
-    ModalManagerHandle
+    ToastManagerHandle
 } from "./components";
 import {
     AudioChunk,
@@ -36,8 +37,8 @@ import {
     Emulator,
     Feature,
     Frequency,
-    frequencyRatios,
     FREQUENCY_DELTA,
+    frequencyRatios,
     PixelFormat,
     RomInfo
 } from "./structs";
@@ -782,6 +783,17 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                             <h3>Registers</h3>
                             <RegistersGB
                                 getRegisters={() => emulator.registers}
+                            />
+                        </div>
+                        <div
+                            style={{
+                                display: "inline-block",
+                                verticalAlign: "top"
+                            }}
+                        >
+                            <h3>Audio</h3>
+                            <AudioGB
+                                getAudioOutput={() => emulator.audioOutput}
                             />
                         </div>
                     </Section>
