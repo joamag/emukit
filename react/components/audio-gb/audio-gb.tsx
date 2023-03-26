@@ -8,6 +8,7 @@ type AudioGBProps = {
     getAudioOutput: () => Record<string, number>;
     interval?: number;
     drawInterval?: number;
+    color?: number;
     style?: string[];
 };
 
@@ -15,6 +16,7 @@ export const AudioGB: FC<AudioGBProps> = ({
     getAudioOutput,
     interval = 1,
     drawInterval = 30,
+    color = 0x50cb93ff,
     style = []
 }) => {
     const classes = () => ["audio-gb", ...style].join(" ");
@@ -64,7 +66,7 @@ export const AudioGB: FC<AudioGBProps> = ({
                     const valueN = Math.min(value, 31);
                     const line = 31 - valueN;
                     const offset = (line * 128 + index) * PixelFormat.RGBA;
-                    structure.canvasBuffer.setUint32(offset, 0xffffffff);
+                    structure.canvasBuffer.setUint32(offset, color);
                 });
                 structure.canvasContext.putImageData(
                     structure.canvasImage,
