@@ -788,10 +788,11 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                         <div
                             style={{
                                 display: "inline-block",
-                                verticalAlign: "top"
+                                verticalAlign: "top",
+                                marginTop: 22
                             }}
                         >
-                            <h3>Audio</h3>
+                            <h3>Audio Waveform</h3>
                             <AudioGB
                                 getAudioOutput={() => emulator.audioOutput}
                             />
