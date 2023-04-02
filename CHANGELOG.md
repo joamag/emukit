@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-* Issue with dragging of files in Safari
+* Issue with dragging of ROM files in Safari
 
 ## [0.8.0] - 2023-04-02
 
