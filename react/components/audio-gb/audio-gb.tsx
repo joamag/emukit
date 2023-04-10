@@ -84,7 +84,7 @@ export const AudioGB: FC<AudioGBProps> = ({
             setRendered(true);
 
                 
-            function update(): void {
+            /*function update(): void {
                 const freq = 0.001;
                 const amp = 0.5;
                 const noise = 0.1;
@@ -94,7 +94,7 @@ export const AudioGB: FC<AudioGBProps> = ({
                   const yNoise = Math.random() - 0.5;
                   line.setY(i, ySin * amp + yNoise * noise);
                 }
-              }
+              }*/
 
             const drawWave = () => {
                 const values = audioOutput[key];
@@ -102,7 +102,13 @@ export const AudioGB: FC<AudioGBProps> = ({
                     return;
                 }
 
-                update();
+                values.forEach((value, index) => {
+                    const valueN = Math.min(value, 31);
+                    const valueNRev = 31 - valueN;
+                    line.setY(index * 2, valueN / 32);
+                });
+
+                //update();
                 wglp.update();
 
                 /*structure.canvasImage.data.fill(0);
