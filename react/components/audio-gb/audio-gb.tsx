@@ -1,4 +1,5 @@
 import React, { FC, useEffect, useRef, useState } from "react";
+import { WebglPlot, WebglLine, ColorRGBA } from "webgl-plot";
 import { PixelFormat } from "../../structs";
 import Canvas, { CanvasStructure } from "../canvas/canvas";
 
@@ -25,6 +26,7 @@ export const AudioGB: FC<AudioGBProps> = ({
     );
     const intervalsRef = useRef<number>();
     const intervalsExtraRef = useRef<number>();
+    
     useEffect(() => {
         const updateAudioOutput = () => {
             const _audioOutput = getAudioOutput();
@@ -54,14 +56,56 @@ export const AudioGB: FC<AudioGBProps> = ({
         key: string,
         styles: string[] = []
     ) => {
+        const canvasRef = useRef<HTMLCanvasElement>(null);
+        const [rendered, setRendered] = useState<boolean>(false);
         const classes = ["audio-wave", ...styles].join(" ");
-        const onCanvas = (structure: CanvasStructure) => {
+        const build = () => {
+            if (!canvasRef.current) return;
+
+            if (rendered) { return; }
+
+            const devicePixelRatio = window.devicePixelRatio || 1;
+            canvasRef.current.width = canvasRef.current.clientWidth * devicePixelRatio;
+            canvasRef.current.height = canvasRef.current.clientHeight * devicePixelRatio;
+
+            const numX = canvasRef.current.width;
+            const color = new ColorRGBA(
+                Math.random(),
+                Math.random(),
+                Math.random(),
+                1
+            );
+            const line = new WebglLine(color, numX);
+            const wglp = new WebglPlot(canvasRef.current);
+
+            line.arrangeX();
+            wglp.addLine(line);
+
+            setRendered(true);
+
+                
+            function update(): void {
+                const freq = 0.001;
+                const amp = 0.5;
+                const noise = 0.1;
+              
+                for (let i = 0; i < line.numPoints; i++) {
+                  const ySin = Math.sin(Math.PI * i * freq * Math.PI * 2);
+                  const yNoise = Math.random() - 0.5;
+                  line.setY(i, ySin * amp + yNoise * noise);
+                }
+              }
+
             const drawWave = () => {
                 const values = audioOutput[key];
                 if (!values) {
                     return;
                 }
-                structure.canvasImage.data.fill(0);
+
+                update();
+                wglp.update();
+
+                /*structure.canvasImage.data.fill(0);
                 values.forEach((value, index) => {
                     const valueN = Math.min(value, 31);
                     const line = 31 - valueN;
@@ -78,7 +122,7 @@ export const AudioGB: FC<AudioGBProps> = ({
                     structure.canvasOffScreen,
                     0,
                     0
-                );
+                );*/
             };
             drawWave();
             intervalsExtraRef.current = setInterval(
@@ -86,10 +130,11 @@ export const AudioGB: FC<AudioGBProps> = ({
                 drawInterval
             );
         };
+        setTimeout(() => build(), 1000);
         return (
             <div className={classes}>
                 <h4>{name}</h4>
-                <Canvas width={128} height={32} onCanvas={onCanvas} />
+                <canvas ref={canvasRef} width={128} height={32} />
             </div>
         );
     };
