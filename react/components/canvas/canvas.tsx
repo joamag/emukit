@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useRef } from "react";
+import React, { FC, RefObject, useEffect, useRef } from "react";
 
 import "./canvas.css";
 
@@ -19,6 +19,8 @@ type CanvasProps = {
     scale?: number;
     smoothing?: boolean;
     imageRendering?: "auto" | "crisp-edges" | "pixelated";
+    init?: boolean;
+    canvasRef?: RefObject<HTMLCanvasElement>;
     style?: string[];
     onCanvas?: (structure: CanvasStructure) => void;
 };
@@ -31,13 +33,14 @@ export const Canvas: FC<CanvasProps> = ({
     scale = 1,
     smoothing = false,
     imageRendering = "pixelated",
+    init = true,
+    canvasRef = useRef<HTMLCanvasElement>(null),
     style = [],
     onCanvas
 }) => {
     const classes = () => ["canvas", ...style].join(" ");
-    const canvasRef = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
-        if (canvasRef.current) {
+        if (canvasRef.current && init) {
             const structure = initCanvas(
                 width,
                 height,
