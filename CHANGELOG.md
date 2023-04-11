@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Flexible support for the debug panels using the `debug()` method
+*
 
 ### Changed
 
@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 *
+
+## [0.8.3] - 2023-04-11
+
+### Added
+
+* Flexible support for the debug panels using the `debug()` method
 
 ## [0.8.2] - 2023-04-11
 
