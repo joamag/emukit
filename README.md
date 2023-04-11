@@ -2,6 +2,13 @@
 
 Emulation Web UI toolkit written in Typescript with the help of React.js 🕹️.
 
+## Features
+
+* Fast
+* Minimalist design
+* Flexible and customizable
+* Interface driven
+
 ## Troubleshooting
 
 ### I'm getting a React error when using local package link `yarn link emukit`
