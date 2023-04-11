@@ -37,7 +37,7 @@ export const AudioGB: FC<AudioGBProps> = ({
         const updateAudioOutput = () => {
             const _audioOutput = getAudioOutput();
             for (const [key, value] of Object.entries(_audioOutput)) {
-                const values = audioOutput[key] ?? [];
+                const values = audioOutput[key] ?? new Array(range).fill(0);
                 values.push(value);
                 if (values.length > range) {
                     values.shift();
@@ -72,7 +72,7 @@ export const AudioGB: FC<AudioGBProps> = ({
                 structure.canvasImage.data.fill(0);
                 values.forEach((value, index) => {
                     const valueN = Math.min(value, rangeVolume - 1);
-                    const line = 31 - valueN;
+                    const line = rangeVolume - 1 - valueN;
                     const offset = (line * range + index) * PixelFormat.RGBA;
                     structure.canvasBuffer.setUint32(offset, color);
                 });
