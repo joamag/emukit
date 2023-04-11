@@ -1,7 +1,6 @@
 import React, { FC, useEffect, useRef, useState } from "react";
 import { WebglPlot, WebglLine, ColorRGBA } from "webgl-plot";
-import { PixelFormat } from "../../structs";
-import Canvas, { CanvasStructure } from "../canvas/canvas";
+import Canvas from "../canvas/canvas";
 
 import "./audio-gb.css";
 
@@ -10,14 +9,18 @@ type AudioGBProps = {
     interval?: number;
     drawInterval?: number;
     color?: number;
+    range?: number;
+    rangeVolume?: number;
     style?: string[];
 };
 
 export const AudioGB: FC<AudioGBProps> = ({
     getAudioOutput,
     interval = 1,
-    drawInterval = 30,
+    drawInterval = 10,
     color = 0x50cb93ff,
+    range = 128,
+    rangeVolume = 32,
     style = []
 }) => {
     const classes = () => ["audio-gb", ...style].join(" ");
@@ -26,14 +29,14 @@ export const AudioGB: FC<AudioGBProps> = ({
     );
     const intervalsRef = useRef<number>();
     const intervalsExtraRef = useRef<number>();
-    
+
     useEffect(() => {
         const updateAudioOutput = () => {
             const _audioOutput = getAudioOutput();
             for (const [key, value] of Object.entries(_audioOutput)) {
                 const values = audioOutput[key] ?? [];
                 values.push(value);
-                if (values.length > 128) {
+                if (values.length > range) {
                     values.shift();
                 }
                 audioOutput[key] = values;
@@ -57,44 +60,27 @@ export const AudioGB: FC<AudioGBProps> = ({
         styles: string[] = []
     ) => {
         const canvasRef = useRef<HTMLCanvasElement>(null);
-        const [rendered, setRendered] = useState<boolean>(false);
         const classes = ["audio-wave", ...styles].join(" ");
-        const build = () => {
+        useEffect(() => {
             if (!canvasRef.current) return;
 
-            if (rendered) { return; }
-
+            // converts the canvas to the expected size according
+            // to the device pixel ratio value
             const devicePixelRatio = window.devicePixelRatio || 1;
-            canvasRef.current.width = canvasRef.current.clientWidth * devicePixelRatio;
-            canvasRef.current.height = canvasRef.current.clientHeight * devicePixelRatio;
+            canvasRef.current.width =
+                canvasRef.current.clientWidth * devicePixelRatio;
+            canvasRef.current.height =
+                canvasRef.current.clientHeight * devicePixelRatio;
 
-            const numX = canvasRef.current.width;
-            const color = new ColorRGBA(
-                Math.random(),
-                Math.random(),
-                Math.random(),
-                1
-            );
-            const line = new WebglLine(color, numX);
-            const wglp = new WebglPlot(canvasRef.current);
+            // creates the WGL Plot object with the canvas element
+            // that is associated with the current audio wave
+            const wglPlot = new WebglPlot(canvasRef.current);
+
+            const color = new ColorRGBA(1, 1, 1, 1);
+            const line = new WebglLine(color, range);
 
             line.arrangeX();
-            wglp.addLine(line);
-
-            setRendered(true);
-
-                
-            /*function update(): void {
-                const freq = 0.001;
-                const amp = 0.5;
-                const noise = 0.1;
-              
-                for (let i = 0; i < line.numPoints; i++) {
-                  const ySin = Math.sin(Math.PI * i * freq * Math.PI * 2);
-                  const yNoise = Math.random() - 0.5;
-                  line.setY(i, ySin * amp + yNoise * noise);
-                }
-              }*/
+            wglPlot.addLine(line);
 
             const drawWave = () => {
                 const values = audioOutput[key];
@@ -103,44 +89,27 @@ export const AudioGB: FC<AudioGBProps> = ({
                 }
 
                 values.forEach((value, index) => {
-                    const valueN = Math.min(value, 31);
-                    const valueNRev = 31 - valueN;
-                    line.setY(index * 2, valueN / 32);
+                    const valueN = Math.min(value, rangeVolume - 1);
+                    line.setY(index, valueN / rangeVolume);
                 });
 
-                //update();
-                wglp.update();
-
-                /*structure.canvasImage.data.fill(0);
-                values.forEach((value, index) => {
-                    const valueN = Math.min(value, 31);
-                    const line = 31 - valueN;
-                    const offset = (line * 128 + index) * PixelFormat.RGBA;
-                    structure.canvasBuffer.setUint32(offset, color);
-                });
-                structure.canvasOffScreenContext.putImageData(
-                    structure.canvasImage,
-                    0,
-                    0
-                );
-                structure.canvasContext.clearRect(0, 0, 128, 32);
-                structure.canvasContext.drawImage(
-                    structure.canvasOffScreen,
-                    0,
-                    0
-                );*/
+                wglPlot.update();
             };
             drawWave();
             intervalsExtraRef.current = setInterval(
                 () => drawWave(),
                 drawInterval
             );
-        };
-        setTimeout(() => build(), 1000);
+        }, [canvasRef]);
         return (
             <div className={classes}>
                 <h4>{name}</h4>
-                <canvas ref={canvasRef} width={128} height={32} />
+                <Canvas
+                    canvasRef={canvasRef}
+                    width={range}
+                    height={rangeVolume}
+                    init={false}
+                />
             </div>
         );
     };
