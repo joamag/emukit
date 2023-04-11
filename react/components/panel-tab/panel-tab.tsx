@@ -7,6 +7,7 @@ type PanelTabProps = {
     tabNames: string[];
     tabIndex?: number;
     selectors?: boolean;
+    flex?: boolean;
     style?: string[];
 };
 
@@ -15,9 +16,10 @@ export const PanelTab: FC<PanelTabProps> = ({
     tabNames,
     tabIndex = 0,
     selectors = true,
+    flex = false,
     style = []
 }) => {
-    const classes = () => ["panel-tab", ...style].join(" ");
+    const classes = () => ["panel-tab", flex ? "flex" : "", ...style].join(" ");
     const [tabIndexState, setTabIndexState] = useState(tabIndex);
     return (
         <div className={classes()}>

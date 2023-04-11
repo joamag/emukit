@@ -34,6 +34,11 @@ export type HelpPanel = {
     node: ReactNode;
 };
 
+export type DebugPanel = {
+    name: string;
+    node: ReactNode;
+};
+
 export type AudioSpecs = {
     samplingRate: number;
     channels: number;
@@ -162,6 +167,12 @@ export interface Emulator extends ObservableI {
      * support the end-user as part of the help process.
      */
     get help(): HelpPanel[];
+
+    /**
+     * The multiple panels that are going to be presented to
+     * support the developer in the debug process.
+     */
+    get debug(): HelpPanel[];
 
     /**
      * The complete set of engine names that can be used
@@ -417,6 +428,10 @@ export class EmulatorBase extends Observable {
     }
 
     get help(): HelpPanel[] {
+        return [];
+    }
+
+    get debug(): DebugPanel[] {
         return [];
     }
 

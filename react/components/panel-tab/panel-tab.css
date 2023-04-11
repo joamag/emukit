@@ -58,7 +58,7 @@
     -webkit-opacity: 1.0;
 }
 
-.panel-tab > .tab-container {
+.panel-tab > .tab-container.flex {
     display: flex;
     flex-direction: column;
     overflow: auto;

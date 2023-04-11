@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-*
+* Flexible support for the debug panels using the `debug()` method
 
 ### Changed
 

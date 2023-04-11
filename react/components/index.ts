@@ -4,6 +4,7 @@ export * from "./button-container/button-container";
 export * from "./button-increment/button-increment";
 export * from "./button-switch/button-switch";
 export * from "./canvas/canvas";
+export * from "./debug/debug";
 export * from "./display/display";
 export * from "./footer/footer";
 export * from "./help/help";

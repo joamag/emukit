@@ -13,7 +13,7 @@ export const Help: FC<HelpProps> = ({ panels, names, style = [] }) => {
     const classes = () => ["help", ...style].join(" ");
     return (
         <div className={classes()}>
-            <PanelTab tabs={panels} tabNames={names} />
+            <PanelTab tabs={panels} tabNames={names} flex={true} />
         </div>
     );
 };

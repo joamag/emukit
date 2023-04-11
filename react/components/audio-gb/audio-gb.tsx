@@ -14,6 +14,7 @@ type AudioGBProps = {
     rangeVolume?: number;
     engine?: "webgl" | "canvas";
     style?: string[];
+    renderWave?: (name: string, key: string, styles?: string[]) => JSX.Element;
 };
 
 export const AudioGB: FC<AudioGBProps> = ({
@@ -24,7 +25,8 @@ export const AudioGB: FC<AudioGBProps> = ({
     range = 128,
     rangeVolume = 32,
     engine = "webgl",
-    style = []
+    style = [],
+    renderWave
 }) => {
     const classes = () => ["audio-gb", ...style].join(" ");
     const [audioOutput, setAudioOutput] = useState<Record<string, number[]>>(
@@ -164,8 +166,9 @@ export const AudioGB: FC<AudioGBProps> = ({
             </div>
         );
     };
-    const renderMethod =
+    let renderMethod =
         engine === "webgl" ? renderAudioWaveWgl : renderAudioWave;
+    renderMethod = renderWave ?? renderMethod;
     return (
         <div className={classes()}>
             <div className="section">

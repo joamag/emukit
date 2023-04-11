@@ -2,12 +2,12 @@ import React, { FC, ReactNode, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 
 import {
-    AudioGB,
     Button,
     ButtonContainer,
     ButtonIncrement,
     ButtonSwitch,
     ClearHandler,
+    Debug,
     Display,
     DrawHandler,
     Footer,
@@ -24,9 +24,7 @@ import {
     PanelSplit,
     PanelTab,
     Paragraph,
-    RegistersGB,
     Section,
-    Tiles,
     Title,
     ToastManager,
     ToastManagerHandle
@@ -752,52 +750,10 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 </Section>
                 {debugVisible && (
                     <Section>
-                        {emulator.getTile && (
-                            <div
-                                style={{
-                                    display: "inline-block",
-                                    verticalAlign: "top",
-                                    marginRight: 32,
-                                    width: 256
-                                }}
-                            >
-                                <h3>VRAM Tiles</h3>
-                                <Tiles
-                                    getTile={(index) =>
-                                        emulator.getTile
-                                            ? emulator.getTile(index)
-                                            : new Uint8Array()
-                                    }
-                                    tileCount={384}
-                                    width={"100%"}
-                                    contentBox={false}
-                                />
-                            </div>
-                        )}
-                        <div
-                            style={{
-                                display: "inline-block",
-                                verticalAlign: "top"
-                            }}
-                        >
-                            <h3>Registers</h3>
-                            <RegistersGB
-                                getRegisters={() => emulator.registers}
-                            />
-                        </div>
-                        <div
-                            style={{
-                                display: "inline-block",
-                                verticalAlign: "top",
-                                marginTop: 22
-                            }}
-                        >
-                            <h3>Audio Waveform</h3>
-                            <AudioGB
-                                getAudioOutput={() => emulator.audioOutput}
-                                engine="webgl"
-                            />
-                        </div>
+                        <Debug
+                            panels={emulator.debug.map((h) => h.node)}
+                            names={emulator.debug.map((h) => h.name)}
+                        />
                     </Section>
                 )}
                 {infoVisible && (
