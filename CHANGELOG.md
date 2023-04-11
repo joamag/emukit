@@ -9,11 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Support for WebGL plotting of charts (much faster)
+*
 
 ### Changed
 
 *
+
+### Fixed
+
+*
+
+## [0.8.1] - 2023-04-11
+
+### Added
+
+* Support for WebGL plotting of charts (much faster)
 
 ### Fixed
 
