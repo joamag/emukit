@@ -795,6 +795,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                             <h3>Audio Waveform</h3>
                             <AudioGB
                                 getAudioOutput={() => emulator.audioOutput}
+                                engine="webgl"
                             />
                         </div>
                     </Section>
