@@ -30,7 +30,6 @@
         "prettier": "^2.8.7",
         "react": "^18.2.0",
         "react-dom": "^18.2.0",
-        "typescript": "^5.0.4",
-        "webgl-plot": "^0.7.0"
+        "typescript": "^5.0.4"
     }
 }

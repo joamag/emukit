@@ -1,4 +1,3 @@
-export * from "./audio-gb/audio-gb";
 export * from "./button/button";
 export * from "./button-container/button-container";
 export * from "./button-increment/button-increment";
@@ -19,9 +18,7 @@ export * from "./pair/pair";
 export * from "./panel-split/panel-split";
 export * from "./panel-tab/panel-tab";
 export * from "./paragraph/paragraph";
-export * from "./registers-gb/registers-gb";
 export * from "./section/section";
-export * from "./tiles/tiles";
 export * from "./title/title";
 export * from "./toast/toast";
 export * from "./toast-manager/toast-manager";
