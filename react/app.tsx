@@ -99,6 +99,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const toastManagerRef = useRef<ToastManagerHandle>(null);
     const frameRef = useRef<boolean>(false);
     const errorRef = useRef<boolean>(false);
+    const titleRef = useRef<string>(document.title);
 
     const frequencyRatio =
         frequencyRatios[emulator.frequencySpecs.unit || Frequency.Hz];
@@ -109,6 +110,13 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         onBackground && onBackground(background);
         emulator.onBackground && emulator.onBackground(background);
     }, [backgroundIndex]);
+    useEffect(() => {
+        if (romInfo.name) {
+            document.title = `${titleRef.current} - ${romInfo.name}`;
+        } else {
+            document.title = titleRef.current;
+        }
+    }, [romInfo]);
     useEffect(() => {
         switch (keyaction) {
             case "Plus":
