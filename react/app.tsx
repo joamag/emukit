@@ -89,6 +89,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     );
     const [infoVisible, setInfoVisible] = useState(true);
     const [debugVisible, setDebugVisible] = useState(debug);
+    const [visibleSections, setVisibleSections] = useState<string[]>([]);
 
     const audioStateRef = useRef<AudioState>({
         audioContext: null,
@@ -240,6 +241,15 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         document.addEventListener("keyup", onKeyUp);
         emulator.bind("booted", onBooted);
         emulator.bind("message", onMessage);
+
+        // updates the emulator with the handles that can be used to control
+        // some of the UI functionality directly from the emulator instance
+        emulator.handlers = {
+            showModal: showModal,
+            showHelp: showHelp,
+            showToast: showToast
+        };
+
         return () => {
             document.removeEventListener("fullscreenchange", onFullChange);
             document.removeEventListener(
@@ -501,6 +511,14 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         if (!emulator.changePalette) return;
         const palette = emulator.changePalette();
         setPaletteName(palette);
+    };
+    const onSectionClick = (name: string) => {
+        const isVisible = visibleSections.includes(name);
+        if (isVisible) {
+            setVisibleSections(visibleSections.filter((s) => s !== name));
+        } else {
+            setVisibleSections([...visibleSections, name]);
+        }
     };
     const onUploadFile = async (file: File) => {
         const arrayBuffer = await file.arrayBuffer();
@@ -773,6 +791,12 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                         />
                     </Section>
                 )}
+                {emulator.sections.map(
+                    (section) =>
+                        visibleSections.includes(section.name) && (
+                            <Section key={section.name}>{section.node}</Section>
+                        )
+                )}
                 <Section>
                     <ButtonContainer>
                         <Button
@@ -882,6 +906,15 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                             style={["simple", "border", "padded"]}
                             onFile={onUploadFile}
                         />
+                        {emulator.sections.map((section) => (
+                            <Button
+                                key={section.name}
+                                text={section.name}
+                                image={section.icon}
+                                enabled={visibleSections.includes(section.name)}
+                                onClick={() => onSectionClick(section.name)}
+                            />
+                        ))}
                     </ButtonContainer>
                 </Section>
             </PanelSplit>

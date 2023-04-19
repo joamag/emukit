@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * Automatic title change according to ROM name
+* Support for emulator sections
 
 ### Changed
 

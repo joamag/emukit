@@ -29,6 +29,12 @@ export type Size = {
     scale?: number;
 };
 
+export type SectionInfo = {
+    name: string;
+    icon?: string;
+    node: ReactNode;
+};
+
 export type HelpPanel = {
     name: string;
     node: ReactNode;
@@ -110,6 +116,12 @@ export const frequencyRatios = {
     MHz: 1000 * 1000
 };
 
+export type Handlers = {
+    showModal?: (title?:string, text?: string, contents?: ReactNode) => Promise<boolean>;
+    showHelp?: (title?: string) => Promise<void>;
+    showToast?: (text: string, error?: boolean, timeout?: number) => Promise<void | undefined>;
+};
+
 export interface ObservableI {
     bind(event: string, callback: Callback<this>): void;
     unbind(event: string, callback: Callback<this>): void;
@@ -163,6 +175,13 @@ export interface Emulator extends ObservableI {
     get features(): Feature[];
 
     /**
+     * The multiple optional sections that may be provided
+     * by the emulator for domain bound purposes, each of
+     * this sections will have an associated button
+     */
+    get sections(): SectionInfo[];
+
+    /**
      * The multiple panels that are going to be presented to
      * support the end-user as part of the help process.
      */
@@ -172,7 +191,7 @@ export interface Emulator extends ObservableI {
      * The multiple panels that are going to be presented to
      * support the developer in the debug process.
      */
-    get debug(): HelpPanel[];
+    get debug(): DebugPanel[];
 
     /**
      * The complete set of engine names that can be used
@@ -294,6 +313,14 @@ export interface Emulator extends ObservableI {
     get compilationString(): string | null;
 
     /**
+     * Structure containing the top level UI handler functions.
+     * These functions may be used to control global wide UI
+     * elements such as the emulator's title, toasts, modals, etc.
+     */
+    get handlers(): Handlers;
+    set handlers(value: Handlers);
+
+    /**
      * Boot (or reboots) the emulator according to the provided
      * set of options.
      *
@@ -404,6 +431,8 @@ export class Observable {
 }
 
 export class EmulatorBase extends Observable {
+    private _handlers: Handlers = {};
+
     static now(): number {
         if (performance && performance.now) {
             return performance.now();
@@ -424,6 +453,10 @@ export class EmulatorBase extends Observable {
     }
 
     get features(): Feature[] {
+        return [];
+    }
+
+    get sections(): SectionInfo[] {
         return [];
     }
 
@@ -491,5 +524,13 @@ export class EmulatorBase extends Observable {
             buffer.push(this.compilation.time);
         }
         return buffer.join(" ");
+    }
+
+    get handlers(): Handlers {
+        return this._handlers;
+    }
+
+    set handlers(value: Handlers) {
+        this._handlers = value;
     }
 }
