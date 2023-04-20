@@ -117,9 +117,17 @@ export const frequencyRatios = {
 };
 
 export type Handlers = {
-    showModal?: (title?:string, text?: string, contents?: ReactNode) => Promise<boolean>;
+    showModal?: (
+        title?: string,
+        text?: string,
+        contents?: ReactNode
+    ) => Promise<boolean>;
     showHelp?: (title?: string) => Promise<void>;
-    showToast?: (text: string, error?: boolean, timeout?: number) => Promise<void | undefined>;
+    showToast?: (
+        text: string,
+        error?: boolean,
+        timeout?: number
+    ) => Promise<void | undefined>;
 };
 
 export interface ObservableI {
