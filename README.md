@@ -20,7 +20,7 @@ Try adding the following code to your project's `package.json` file:
 ```json
 "alias": {
     "react": "<your-emulator-path>/node_modules/react",
-    "react-dom": "<your-emulator-path>/node_modules//react-dom"
+    "react-dom": "<your-emulator-path>/node_modules/react-dom"
 }
 ```
 
