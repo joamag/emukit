@@ -3,6 +3,8 @@ import Button from "../button/button";
 
 type ButtonSwitchProps = {
     options: string[];
+    value?: string;
+    uppercase?: boolean;
     size?: string;
     style?: string[];
     onClick?: () => void;
@@ -11,13 +13,17 @@ type ButtonSwitchProps = {
 
 export const ButtonSwitch: FC<ButtonSwitchProps> = ({
     options,
+    value,
+    uppercase = false,
     size = "small",
     style = ["simple", "border"],
     onClick,
     onChange
 }) => {
-    const [index, setIndex] = useState(0);
-    const text = () => options[index];
+    const initial = value === undefined ? 0 : options.indexOf(value);
+    const [index, setIndex] = useState(initial);
+    const text = () =>
+        uppercase ? options[index].toUpperCase() : options[index];
     const _onClick = () => {
         const indexNew = (index + 1) % options.length;
         const option = options[indexNew];

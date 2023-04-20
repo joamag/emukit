@@ -279,7 +279,9 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 name={"Engine"}
                 valueNode={
                     <ButtonSwitch
-                        options={emulator.engines.map((e) => e.toUpperCase())}
+                        options={emulator.engines}
+                        value={emulator.engine || emulator.engines[0]}
+                        uppercase={true}
                         size={"large"}
                         style={["simple"]}
                         onChange={onEngineChange}
@@ -527,7 +529,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         showToast(`Loaded ${file.name} ROM successfully!`);
     };
     const onEngineChange = (engine: string) => {
-        emulator.boot({ engine: engine.toLowerCase() });
+        emulator.boot({ engine: engine });
         showToast(
             `${emulator.device.text} running on engine "${engine}" from now on!`
         );
