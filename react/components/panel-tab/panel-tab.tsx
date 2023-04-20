@@ -42,7 +42,19 @@ export const PanelTab: FC<PanelTabProps> = ({
                     })}
                 </div>
             )}
-            <div className="tab-container">{tabs[tabIndexState]}</div>
+            <div className="tab-containers">
+                {tabs.map((tab, tabIndex) => {
+                    const classes = [
+                        "tab-container",
+                        tabIndex === tabIndexState ? "selected" : ""
+                    ].join(" ");
+                    return (
+                        <div key={tabIndex} className={classes}>
+                            {tabs[tabIndex]}
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 };
