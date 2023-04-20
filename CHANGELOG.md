@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* `PanelTab` component with contents selected dynamically using `display: none` approach
+*
 
 ### Changed
 
@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 *
+
+## [0.8.5] - 2023-04-20
+
+### Added
+
+* `PanelTab` component with contents selected dynamically using `display: none` approach
 
 ## [0.8.4] - 2023-04-20
 
