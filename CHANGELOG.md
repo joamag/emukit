@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Improved `ButtonSwitch` component with `uppercase` prop and support for initial `value`
+*
 
 ### Changed
 
@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 *
+
+## [0.8.6] - 2023-04-20
+
+### Added
+
+* Improved `ButtonSwitch` component with `uppercase` prop and support for initial `value`
 
 ## [0.8.5] - 2023-04-20
 
