@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-*
+* Fast speed issue when Control key as released before D key
 
 ## [0.8.6] - 2023-04-20
 

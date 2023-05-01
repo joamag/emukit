@@ -75,6 +75,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
 }) => {
     const [paused, setPaused] = useState(false);
     const [muted, setMuted] = useState(false);
+    const [fast, setFast] = useState(false);
     const [fullscreenState, setFullscreenState] = useState(fullscreen);
     const [backgroundIndex, setBackgroundIndex] = useState(
         background ? Math.max(backgrounds.indexOf(background), 0) : 0
@@ -149,10 +150,16 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 setKeyaction(undefined);
                 break;
             case "Accelerate":
-                emulator.frequency *= 8;
+                if (!fast) {
+                    emulator.frequency *= 8;
+                    setFast(true);
+                }
                 break;
             case "Slowdown":
-                emulator.frequency /= 8;
+                if (fast) {
+                    emulator.frequency /= 8;
+                    setFast(false);
+                }
                 break;
         }
     }, [keyaction]);
@@ -219,6 +226,12 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                         setKeyaction("Slowdown");
                         event.stopPropagation();
                         event.preventDefault();
+                        break;
+                }
+            } else {
+                switch (event.key) {
+                    case "Control":
+                        setKeyaction("Slowdown");
                         break;
                 }
             }
