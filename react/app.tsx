@@ -573,14 +573,14 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         if (connected) {
             if (isValid) {
                 gamepads[gamepad.index] = gamepad;
-                setGamepads(gamepads);
+                setGamepads({ ...gamepads });
                 showToast(`🕹️ Gamepad #${index} connect ${id}`);
             } else {
                 showToast(`😥 Unsupported gamepad connect ${id}`, true);
             }
         } else if (isValid) {
             delete gamepads[index];
-            setGamepads(gamepads);
+            setGamepads({ ...gamepads });
             showToast(`🕹️ Gamepad #${index} disconnected ${id}`, true);
         }
     };
