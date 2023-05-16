@@ -49,7 +49,7 @@
 }
 
 .button.simple.enabled {
-    background-color: #50cb93;
+    background-color: #58b09c;
 }
 
 .button.simple.file {
@@ -58,7 +58,7 @@
 
 .button.simple:focus,
 .button.simple:hover {
-    background-color: #50cb93;
+    background-color: #58b09c;
 }
 
 .button.simple.red:focus,
@@ -67,7 +67,7 @@
 }
 
 .button.simple:active {
-    background-color: #2a9d8f;
+    background-color: #3e948a;
 }
 
 .button.simple.red:active {

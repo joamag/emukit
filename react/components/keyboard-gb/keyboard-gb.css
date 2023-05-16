@@ -95,7 +95,7 @@
 }
 
 .keyboard-gb .key.pressed {
-    background-color: #50cb93;
+    background-color: #58b09c;
 }
 
 .keyboard-gb > .dpad {
@@ -125,7 +125,7 @@
 }
 
 .keyboard-gb > .dpad .key.pressed {
-    background-color: #50cb93;
+    background-color: #58b09c;
 }
 
 .keyboard-gb > .dpad .key.up {
