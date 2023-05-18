@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+*
+
+### Fixed
+
+*
+
+## [0.8.7] - 2023-05-18
+
+### Changed
+
 * Colors and style of multiple components
 
 ### Fixed
