@@ -476,6 +476,10 @@ export class EmulatorBase extends Observable {
         return [];
     }
 
+    get pixelFormat(): PixelFormat {
+        return PixelFormat.RGB;
+    }
+
     get frequencySpecs(): FrequencySpecs {
         return {
             unit: Frequency.MHz,
