@@ -41,3 +41,9 @@ See https://reactjs.org/link/invalid-hook-call for tips about how to debug and f
 ## License
 
 EmuKit is currently licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/).
+
+## Build Automation
+
+[![Build Status](https://github.com/joamag/emukit/workflows/Main%20Workflow/badge.svg)](https://github.com/joamag/emukit/actions)
+[![npm Status](https://img.shields.io/npm/v/emukit.svg)](https://www.npmjs.com/package/emukit)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://www.apache.org/licenses/)
