@@ -2,12 +2,15 @@
 
 Emulation Web UI toolkit written in Typescript with the help of React.js 🕹️.
 
+*"Building emulator UIs is hard, and boring too. EmuKit is here to help you with that."* 🤖
+
 ## Features
 
-* Fast
+* Fast and responsive interface
+* Mobile friendly
 * Minimalist design
 * Flexible and customizable
-* Interface driven
+* Interface driven integration model
 
 ## Troubleshooting
 
