@@ -71,8 +71,4 @@ export class SimpleEmulator extends EmulatorBase implements Emulator {
     keyLift(key: string): void {
         throw new Error("Method not implemented.");
     }
-    getTile?: ((index: number) => Uint8Array) | undefined;
-    changePalette?: (() => string) | undefined;
-    benchmark?: ((count?: number | undefined) => BenchmarkResult) | undefined;
-    onBackground?: ((background: string) => void) | undefined;
 }
