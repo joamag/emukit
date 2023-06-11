@@ -7,5 +7,11 @@
     color: #ffffff;
     font-family: VT323, Roboto, Open Sans, Arial, Helvetica, sans-serif;
     font-size: 24px;
+    outline: none;
+    -o-outline: none;
+    -ms-outline: none;
+    -moz-outline: none;
+    -khtml-outline: none;
+    -webkit-outline: none;
     width: 100%;
 }
