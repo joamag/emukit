@@ -19,6 +19,7 @@ export * from "./panel-split/panel-split";
 export * from "./panel-tab/panel-tab";
 export * from "./paragraph/paragraph";
 export * from "./section/section";
+export * from "./text-input/text-input";
 export * from "./title/title";
 export * from "./toast/toast";
 export * from "./toast-manager/toast-manager";
