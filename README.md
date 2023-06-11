@@ -22,7 +22,8 @@ Try adding the following code to your project's `package.json` file:
 
 ```json
 "alias": {
-    "react": "<your-emukit-relative-path>/node_modules/react"
+    "react": "<your-emukit-relative-path>/node_modules/react",
+    "react-dom": "<your-emukit-relative-path>/node_modules/react-dom"
 }
 ```
 
