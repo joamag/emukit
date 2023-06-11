@@ -16,7 +16,7 @@
     -moz-outline: none;
     -khtml-outline: none;
     -webkit-outline: none;
-    padding: 8px 12px 8px 12px;
+    padding: 10px 14px 10px 14px;
     transition: background-color 0.35s cubic-bezier(0.075, 0.82, 0.165, 1);
     -o-transition: background-color 0.35s cubic-bezier(0.075, 0.82, 0.165, 1);
     -ms-transition: background-color 0.35s cubic-bezier(0.075, 0.82, 0.165, 1);
@@ -24,6 +24,20 @@
     -khtml-transition: background-color 0.35s cubic-bezier(0.075, 0.82, 0.165, 1);
     -webkit-transition: background-color 0.35s cubic-bezier(0.075, 0.82, 0.165, 1);
     width: 100%;
+}
+
+.text-input.medium {
+    font-size: 20px;
+    padding: 8px 12px 8px 12px;
+}
+
+.text-input.small {
+    font-size: 16px;
+    padding: 6px 10px 6px 10px;
+}
+
+.text-input::placeholder {
+    color: rgba(255, 255, 255, 0.75);
 }
 
 .text-input:hover {
@@ -39,8 +53,4 @@
     -moz-transition: none;
     -khtml-transition: none;
     -webkit-transition: none;
-}
-
-.text-input::placeholder {
-    color: rgba(255, 255, 255, 0.75);
 }
