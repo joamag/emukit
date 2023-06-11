@@ -1,9 +1,12 @@
 .text-input {
-    background: transparent;
-    border-bottom: 2px dashed #ffffff;
-    border-left: none;
-    border-right: none;
-    border-top: none;
+    background-color: rgba(200, 200, 200, 0.2);
+    border: 2px solid transparent;
+    border-radius: 6px 6px 6px 6px;
+    -o-border-radius: 6px 6px 6px 6px;
+    -ms-border-radius: 6px 6px 6px 6px;
+    -moz-border-radius: 6px 6px 6px 6px;
+    -khtml-border-radius: 6px 6px 6px 6px;
+    -webkit-border-radius: 6px 6px 6px 6px;
     color: #ffffff;
     font-family: VT323, Roboto, Open Sans, Arial, Helvetica, sans-serif;
     font-size: 24px;
@@ -13,5 +16,31 @@
     -moz-outline: none;
     -khtml-outline: none;
     -webkit-outline: none;
+    padding: 8px 12px 8px 12px;
+    transition: background-color 0.35s cubic-bezier(0.075, 0.82, 0.165, 1);
+    -o-transition: background-color 0.35s cubic-bezier(0.075, 0.82, 0.165, 1);
+    -ms-transition: background-color 0.35s cubic-bezier(0.075, 0.82, 0.165, 1);
+    -moz-transition: background-color 0.35s cubic-bezier(0.075, 0.82, 0.165, 1);
+    -khtml-transition: background-color 0.35s cubic-bezier(0.075, 0.82, 0.165, 1);
+    -webkit-transition: background-color 0.35s cubic-bezier(0.075, 0.82, 0.165, 1);
     width: 100%;
+}
+
+.text-input:hover {
+    background-color: rgba(200, 200, 200, 0.4);
+}
+
+.text-input:focus {
+    background-color: rgba(200, 200, 200, 0.2);
+    border-color: #ffffff;
+    transition: none;
+    -o-transition: none;
+    -ms-transition: none;
+    -moz-transition: none;
+    -khtml-transition: none;
+    -webkit-transition: none;
+}
+
+.text-input::placeholder {
+    color: rgba(255, 255, 255, 0.75);
 }
