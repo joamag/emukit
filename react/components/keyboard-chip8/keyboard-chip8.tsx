@@ -36,6 +36,7 @@ const KEYS: Record<string, string> = {
 type KeyboardChip8Props = {
     focusable?: boolean;
     physical?: boolean;
+    vibrate?: number;
     style?: string[];
     onKeyDown?: (key: string) => void;
     onKeyUp?: (key: string) => void;
@@ -44,6 +45,7 @@ type KeyboardChip8Props = {
 export const KeyboardChip8: FC<KeyboardChip8Props> = ({
     focusable = true,
     physical = true,
+    vibrate = 75,
     style = [],
     onKeyDown,
     onKeyUp
@@ -129,6 +131,7 @@ export const KeyboardChip8: FC<KeyboardChip8Props> = ({
                 }}
                 onTouchStart={(event) => {
                     setPressed(true);
+                    vibrate && window?.navigator?.vibrate?.(vibrate);
                     onKeyDown && onKeyDown(key);
                     event.preventDefault();
                 }}

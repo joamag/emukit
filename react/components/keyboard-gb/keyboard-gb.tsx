@@ -57,6 +57,7 @@ type KeyboardGBProps = {
     focusable?: boolean;
     fullscreen?: boolean;
     physical?: boolean;
+    vibrate?: number;
     selectedKeys?: string[];
     style?: string[];
     onKeyDown?: (key: string) => void;
@@ -78,6 +79,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
     focusable = true,
     fullscreen = false,
     physical = true,
+    vibrate = 75,
     selectedKeys = [],
     style = [],
     onKeyDown,
@@ -274,6 +276,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
                 }}
                 onTouchStart={(event) => {
                     setPressed(true);
+                    vibrate && window?.navigator?.vibrate?.(vibrate);
                     onKeyDown && onKeyDown(keyName ?? key);
                     event.preventDefault();
                 }}
