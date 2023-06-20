@@ -15,17 +15,17 @@
     },
     "source": "index.ts",
     "peerDependencies": {
-        "@types/react": "^18.2.9",
-        "@types/react-dom": "^18.2.4",
+        "@types/react": "^18.2.13",
+        "@types/react-dom": "^18.2.6",
         "react": "^18.2.0",
         "react-dom": "^18.2.0"
     },
     "devDependencies": {
-        "@types/react": "^18.2.9",
-        "@types/react-dom": "^18.2.4",
-        "@typescript-eslint/eslint-plugin": "^5.59.9",
+        "@types/react": "^18.2.13",
+        "@types/react-dom": "^18.2.6",
+        "@typescript-eslint/eslint-plugin": "^5.60.0",
         "@typescript-eslint/parser": "^5.59.9",
-        "eslint": "^8.38.0",
+        "eslint": "^8.43.0",
         "mocha": "^10.2.0",
         "prettier": "^2.8.8",
         "react": "^18.2.0",
