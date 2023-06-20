@@ -54,6 +54,7 @@ type EmulatorAppProps = {
     debug?: boolean;
     keyboard?: boolean;
     palette?: string;
+    nativeFullscreen?: boolean;
     background?: string;
     backgrounds?: string[];
     onBackground?: (background: string) => void;
@@ -69,6 +70,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     debug = false,
     keyboard = false,
     palette,
+    nativeFullscreen = true,
     background,
     backgrounds = ["264653"],
     onBackground
@@ -719,6 +721,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                                 logicHeight: emulator.dimensions.height
                             }}
                             fullscreen={fullscreenState}
+                            nativeFullscreen={nativeFullscreen}
                             onDrawHandler={onDrawHandler}
                             onClearHandler={onClearHandler}
                             onMinimize={onMinimize}
