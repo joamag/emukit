@@ -27,6 +27,15 @@ Try adding the following code to your project's `package.json` file:
 }
 ```
 
+Example:
+
+```json
+"alias": {
+    "react": "./node_modules/emukit/node_modules/react",
+    "react-dom": "./node_modules/emukit/node_modules/react-dom"
+}
+```
+
 In some operative systems (ex: Mac OS) absolute oath prefixes should be avoided and relative paths should be used instead.
 
 ⚠️ The following message may appear in you browser's console when this error occurs:
