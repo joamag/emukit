@@ -304,7 +304,7 @@ export interface Emulator extends ObservableI {
     get registers(): Record<string, string | number>;
 
     /**
-     * A dictionary that associated the multiple audio channels
+     * A dictionary that associates the multiple audio channels
      * with their current volume as a number.
      */
     get audioOutput(): Record<string, number>;
@@ -502,6 +502,10 @@ export class EmulatorBase extends Observable {
 
     get wasmEngine(): string | null {
         return null;
+    }
+
+    get audioOutput(): Record<string, number> {
+        return {};
     }
 
     get palette(): string | undefined {
