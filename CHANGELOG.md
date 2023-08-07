@@ -9,15 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+*
+
+### Changed
+
+*
+
+### Fixed
+
+*
+
+## [0.8.9] - 2023-08-7
+
+### Added
+
 * Default implementation for `audioOutput()` in `Emulator` interface
 
 ### Changed
 
 * Made background color on fullscreen #000000
-
-### Fixed
-
-*
 
 ## [0.8.8] - 2023-06-20
 
