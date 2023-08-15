@@ -1,5 +1,5 @@
 import React, { FC } from "react";
-import Pair from "../pair/pair";
+import Pair, { PairStyle } from "../pair/pair";
 import Link from "../link/link";
 import { rgbToDataUrl } from "../../util";
 
@@ -9,7 +9,7 @@ type PairStateProps = {
     index: number;
     thumbnail?: Uint8Array;
     thumbnailSize?: [number, number];
-    style?: string[];
+    style?: PairStyle[];
     onLoadClick?: () => void;
     onDeleteClick?: () => void;
 };
@@ -54,7 +54,7 @@ export const PairState: FC<PairStateProps> = ({
                         <></>
                     )
                 }
-                style={pairStyle}
+                style={pairStyle as PairStyle[]}
                 onValueClick={onLoadClick}
             />
         </>

@@ -3,6 +3,8 @@ import Link from "../link/link";
 
 import "./pair.css";
 
+export type PairStyle = "name-click" | "value-click";
+
 type PairProps = {
     name?: string;
     value?: string;
@@ -12,7 +14,7 @@ type PairProps = {
     valueHref?: string;
     nameTarget?: string;
     valueTarget?: string;
-    style?: string[];
+    style?: PairStyle[];
     onNameClick?: () => void;
     onValueClick?: () => void;
 };
