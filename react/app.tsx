@@ -1,4 +1,11 @@
-import React, { FC, ReactNode, useEffect, useRef, useState } from "react";
+import React, {
+    FC,
+    Fragment,
+    ReactNode,
+    useEffect,
+    useRef,
+    useState
+} from "react";
 import ReactDOM from "react-dom/client";
 
 import {
@@ -432,9 +439,8 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 <Info style={["large"]}>
                     {Object.keys(saveStates).length > 0 ? (
                         Object.entries(saveStates).map(([index, saveSate]) => (
-                            <>
+                            <Fragment key={`#${index}`}>
                                 <PairState
-                                    key={`#${index}`}
                                     index={saveSate.index}
                                     thumbnail={saveSate.thumbnail}
                                     thumbnailSize={[
@@ -454,7 +460,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                                     thickness={1}
                                     color="transparent"
                                 />
-                            </>
+                            </Fragment>
                         ))
                     ) : (
                         <Paragraph style={["no-margin-top"]}>
