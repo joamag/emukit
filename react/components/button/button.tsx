@@ -14,6 +14,8 @@ export type ButtonStyle =
     | "large"
     | "red";
 
+export type ButtonSize = "small" | "medium" | "large";
+
 type ButtonProps = {
     text: string;
     image?: string;
@@ -22,7 +24,7 @@ type ButtonProps = {
     focusable?: boolean;
     file?: boolean;
     accept?: string;
-    size?: "small" | "medium" | "large";
+    size?: ButtonSize;
     style?: ButtonStyle[];
     onClick?: () => void;
     onFile?: (file: File) => void;
