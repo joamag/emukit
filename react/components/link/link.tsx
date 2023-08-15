@@ -8,6 +8,7 @@ type LinkProps = {
     href?: string;
     target?: string;
     style?: string[];
+    onClick?: () => void;
 };
 
 export const Link: FC<LinkProps> = ({
@@ -15,11 +16,12 @@ export const Link: FC<LinkProps> = ({
     text,
     href,
     target,
-    style = []
+    style = [],
+    onClick
 }) => {
-    const classes = () => ["link", ...style].join(" ");
+    const classes = () => ["link", onClick ? "click" : "", ...style].join(" ");
     return (
-        <a className={classes()} href={href} target={target}>
+        <a className={classes()} href={href} target={target} onClick={onClick}>
             {children ?? text}
         </a>
     );

@@ -4,10 +4,13 @@ import Link from "../link/link";
 import "./pair.css";
 
 type PairProps = {
-    name: string;
+    name?: string;
     value?: string;
+    nameNode?: ReactNode;
     valueNode?: ReactNode;
+    nameHref?: string;
     valueHref?: string;
+    nameTarget?: string;
     valueTarget?: string;
     style?: string[];
     onNameClick?: () => void;
@@ -17,20 +20,36 @@ type PairProps = {
 export const Pair: FC<PairProps> = ({
     name,
     value,
-    valueHref,
-    valueTarget,
+    nameNode,
     valueNode,
+    nameHref,
+    valueHref,
+    nameTarget,
+    valueTarget,
     style = [],
     onNameClick,
     onValueClick
 }) => {
-    const classes = () => ["pair", ...style].join(" ");
+    const classes = () =>
+        [
+            "pair",
+            onNameClick ? "name-click" : "",
+            onValueClick ? "value-click" : "",
+            ...style
+        ].join(" ");
     const _onNameClick = () => (onNameClick ? onNameClick() : undefined);
     const _onValueClick = () => (onValueClick ? onValueClick() : undefined);
     return (
         <>
             <dt className={classes()} onClick={_onNameClick}>
-                {name}
+                {nameNode ??
+                    (nameHref && (
+                        <Link href={nameHref} target={nameTarget ?? "_blank"}>
+                            {name}
+                        </Link>
+                    )) ??
+                    name ??
+                    ""}
             </dt>
             <dd className={classes()} onClick={_onValueClick}>
                 {valueNode ??

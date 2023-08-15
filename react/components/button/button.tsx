@@ -10,7 +10,7 @@ type ButtonProps = {
     focusable?: boolean;
     file?: boolean;
     accept?: string;
-    size?: string;
+    size?: "small" | "medium" | "large";
     style?: string[];
     onClick?: () => void;
     onFile?: (file: File) => void;

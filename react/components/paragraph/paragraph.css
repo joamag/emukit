@@ -3,3 +3,7 @@
     line-height: 24px;
     margin: 12px 0px 12px 0px;
 }
+
+.paragraph.no-margin-top {
+    margin-top: 0px;
+}

@@ -21,10 +21,12 @@ import {
     ModalManagerHandle,
     Overlay,
     Pair,
+    PairState,
     PanelSplit,
     PanelTab,
     Paragraph,
     Section,
+    Separator,
     Title,
     ToastManager,
     ToastManagerHandle
@@ -38,7 +40,8 @@ import {
     FREQUENCY_DELTA,
     frequencyRatios,
     PixelFormat,
-    RomInfo
+    RomInfo,
+    SaveState
 } from "./structs";
 
 import "./app.css";
@@ -85,6 +88,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const [romInfo, setRomInfo] = useState<RomInfo>({});
     const [framerate, setFramerate] = useState(0);
     const [paletteName, setPaletteName] = useState(palette ?? emulator.palette);
+    const [saveStates, setSaveStates] = useState<Record<number, SaveState>>({});
     const [gamepads, setGamepads] = useState<Record<number, Gamepad>>({});
     const [keyaction, setKeyaction] = useState<string>();
     const [keyboardVisible, setKeyboardVisible] = useState(
@@ -239,7 +243,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             }
         };
         const onBooted = () => {
-            setRomInfo(emulator.romInfo);
+            refreshRom();
             setPaused(false);
         };
         const onMessage = (emulator: Emulator, _params: unknown = {}) => {
@@ -277,6 +281,34 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             emulator.unbind("message", onMessage);
         };
     }, []);
+
+    /**
+     * Refreshes the current ROM information by querying the emulator
+     * about the multiple changes resulting from a new ROM loading.
+     */
+    const refreshRom = () => {
+        setRomInfo(emulator.romInfo);
+        refreshSaveStates();
+    };
+
+    /**
+     * Refreshes the current save states information by querying the emulator
+     * for the current list of save states and then updating the state with
+     * the new information.
+     * This should trigger a visual refresh.
+     */
+    const refreshSaveStates = () => {
+        const saveStates = Object.fromEntries(
+            emulator.listStates?.().map((s) => [
+                s,
+                {
+                    index: s,
+                    thumbnail: emulator.thumbnailState?.(s)
+                } as SaveState
+            ]) ?? []
+        );
+        setSaveStates(saveStates);
+    };
 
     const getPauseText = () => (paused ? "Resume" : "Pause");
     const getPauseIcon = () =>
@@ -394,6 +426,50 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             )}
         </Info>
     );
+    const renderSaveStatesTab = () =>
+        hasSaveStatesTab() ? (
+            <>
+                <Info style={["large"]}>
+                    {Object.keys(saveStates).length > 0 ? (
+                        Object.entries(saveStates).map(([index, saveSate]) => (
+                            <>
+                                <PairState
+                                    key={`#${index}`}
+                                    index={saveSate.index}
+                                    thumbnail={saveSate.thumbnail}
+                                    thumbnailSize={[
+                                        emulator.dimensions.width,
+                                        emulator.dimensions.height
+                                    ]}
+                                    onLoadClick={() =>
+                                        onLoadStateClick(saveSate.index)
+                                    }
+                                    onDeleteClick={() =>
+                                        onDeleteStateClick(saveSate.index)
+                                    }
+                                />
+                                <Separator
+                                    marginTop={12}
+                                    marginBottom={12}
+                                    thickness={1}
+                                    color="transparent"
+                                />
+                            </>
+                        ))
+                    ) : (
+                        <Paragraph style={["no-margin-top"]}>
+                            There're currently no saved states for this ROM!
+                            <br />
+                            Press Save State to capture the current ROM state
+                            into local storage.
+                        </Paragraph>
+                    )}
+                </Info>
+                <div>
+                    <Button text={"Save State"} onClick={onSaveStateClick} />
+                </div>
+            </>
+        ) : null;
     const renderControllersTab = () =>
         hasControllersTab() ? (
             <Info style={["small"]}>
@@ -406,11 +482,13 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 ))}
             </Info>
         ) : null;
+    const hasSaveStatesTab = () => hasFeature(Feature.SaveState);
     const hasControllersTab = () => Object.keys(gamepads).length > 0;
     const getTabs = () => {
         const tabs = [];
         tabs.push(renderGeneralTab());
         tabs.push(renderDetailsTab());
+        hasSaveStatesTab() && tabs.push(renderSaveStatesTab());
         hasControllersTab() && tabs.push(renderControllersTab());
         return tabs;
     };
@@ -418,6 +496,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         const tabNames = [];
         tabNames.push("General");
         tabNames.push("Details");
+        hasSaveStatesTab() && tabNames.push("Save States");
         hasControllersTab() && tabNames.push("Controllers");
         return tabNames;
     };
@@ -536,6 +615,29 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         } else {
             setVisibleSections([...visibleSections, name]);
         }
+    };
+    const onSaveStateClick = () => {
+        for (let index = 0; index < 10; index++) {
+            if (saveStates[index] === undefined) {
+                emulator.saveState?.(index);
+                refreshSaveStates();
+                break;
+            }
+        }
+    };
+    const onLoadStateClick = (index: number) => {
+        emulator.loadState?.(index);
+        showToast(`Loaded save state #${index} successfully!`);
+    };
+    const onDeleteStateClick = async (index: number) => {
+        const result = await showModal(
+            "Confirm",
+            `Are you sure you want to delete save state #${index}?\nThis operation is not reversible!`
+        );
+        if (!result) return;
+        emulator.deleteState?.(index);
+        refreshSaveStates();
+        showToast(`Deleted save state #${index} successfully!`);
     };
     const onUploadFile = async (file: File) => {
         const arrayBuffer = await file.arrayBuffer();

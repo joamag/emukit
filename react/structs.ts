@@ -79,6 +79,16 @@ export type AudioChunk = {
 };
 
 /**
+ * Represents the state of the emulator at a certain
+ * point in time, this state should be able to be
+ * loaded later.
+ */
+export type SaveState = {
+    index: number;
+    thumbnail?: Uint8Array;
+};
+
+/**
  * Enumeration to be used to describe the set of
  * features that a certain emulator supports, this
  * is going to condition its runtime execution.
@@ -92,7 +102,8 @@ export enum Feature {
     Keyboard,
     KeyboardChip8,
     KeyboardGB,
-    RomTypeInfo
+    RomTypeInfo,
+    SaveState
 }
 
 export enum Frequency {
@@ -356,6 +367,48 @@ export interface Emulator extends ObservableI {
     keyPress(key: string): void;
 
     keyLift(key: string): void;
+
+    /**
+     * Saves the current state of the emulator in the given
+     * index, this state should be able to be loaded later.
+     *
+     * @param index The index of the state to be saved.
+     */
+    saveState?(index: number): void;
+
+    /**
+     * Loads the state of the emulator from the given index,
+     * Should throw an error in case it's not possible to
+     * load the state from the given index.
+     *
+     * @param index The index of the state to be loaded.
+     */
+    loadState?(index: number): void;
+
+    /**
+     * Deletes the state of the emulator for the given index.
+     * This operation should release any associated resources.
+     *
+     * @param index The index of the state to be delete.
+     */
+    deleteState?(index: number): void;
+
+    /**
+     * Obtains the thumbnail of the state at the given index.
+     *
+     * @param index The index of the state to be obtained.
+     * @returns The thumbnail of the state at the given index.
+     */
+    thumbnailState?(index: number): Uint8Array;
+
+    /**
+     * List the complete set of states available in the
+     * emulator, this list should be ordered by the lowest
+     * index to the highest one.
+     *
+     * @returns The list of states available in the emulator.
+     */
+    listStates?(): number[];
 
     pauseVideo?(): void;
 

@@ -1,0 +1,39 @@
+dt.pair-state {
+    margin-top: 0px;
+}
+
+dd.pair-state {
+    margin-top: 0px;
+}
+
+dd.pair-state {
+    font-size: 0px;
+}
+
+.pair-state .pair-state-datetime {
+    font-size: 16px;
+    margin-top: 6px;
+    color: #f0f0f0;
+}
+
+.pair-state .pair-state-buttons {
+    margin-top: 26px;
+    font-size: 17px;
+}
+
+.pair-state .pair-state-buttons > .link {
+    margin-right: 12px;
+}
+
+.pair-state .pair-state-buttons > .link:last-child {
+    margin-right: 0px;
+}
+
+.pair-state .pair-state-thumbnail {
+    width: 100px;
+    border-radius: 6px;
+    image-rendering: pixelated;
+    border: 1px solid #ffffff;
+    padding: 5px 5px 5px 5px;
+    background: #000000;
+}
