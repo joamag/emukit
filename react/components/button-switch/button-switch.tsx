@@ -1,12 +1,12 @@
 import React, { FC, useState } from "react";
-import Button from "../button/button";
+import Button, { ButtonStyle } from "../button/button";
 
 type ButtonSwitchProps = {
     options: string[];
     value?: string;
     uppercase?: boolean;
-    size?: string;
-    style?: string[];
+    size?: "small" | "medium" | "large";
+    style?: ButtonStyle[];
     onClick?: () => void;
     onChange?: (value: string, index: number) => void;
 };

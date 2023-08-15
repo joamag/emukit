@@ -2,6 +2,18 @@ import React, { ChangeEvent, FC, useRef } from "react";
 
 import "./button.css";
 
+export type ButtonStyle =
+    | "simple"
+    | "border"
+    | "rounded"
+    | "no-text"
+    | "padded"
+    | "padded-large"
+    | "small"
+    | "medium"
+    | "large"
+    | "red";
+
 type ButtonProps = {
     text: string;
     image?: string;
@@ -11,7 +23,7 @@ type ButtonProps = {
     file?: boolean;
     accept?: string;
     size?: "small" | "medium" | "large";
-    style?: string[];
+    style?: ButtonStyle[];
     onClick?: () => void;
     onFile?: (file: File) => void;
 };
