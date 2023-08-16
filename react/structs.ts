@@ -85,6 +85,9 @@ export type AudioChunk = {
  */
 export type SaveState = {
     index: number;
+    timestamp?: number;
+    agent?: string;
+    model?: string;
     thumbnail?: Uint8Array;
 };
 
@@ -394,12 +397,16 @@ export interface Emulator extends ObservableI {
     deleteState?(index: number): void;
 
     /**
-     * Obtains the thumbnail of the state at the given index.
+     * Obtains the state of the emulator at the given index.
+     * This state information should be handled carefully as
+     * it may contain a large payload (eg: image buffer).
      *
      * @param index The index of the state to be obtained.
-     * @returns The thumbnail of the state at the given index.
+     * @returns The state of the emulator at the given index,
+     * or null in case no state is available.
+     * @see {@link SaveState}
      */
-    thumbnailState?(index: number): Uint8Array;
+    getState?(index: number): SaveState | null;
 
     /**
      * List the complete set of states available in the

@@ -306,13 +306,9 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
      */
     const refreshSaveStates = () => {
         const saveStates = Object.fromEntries(
-            emulator.listStates?.().map((s) => [
-                s,
-                {
-                    index: s,
-                    thumbnail: emulator.thumbnailState?.(s)
-                } as SaveState
-            ]) ?? []
+            emulator
+                .listStates?.()
+                .map((s) => [s, emulator.getState?.(s) as SaveState]) ?? []
         );
         setSaveStates(saveStates);
     };
@@ -447,6 +443,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                                         emulator.dimensions.width,
                                         emulator.dimensions.height
                                     ]}
+                                    saveState={saveSate}
                                     onLoadClick={() =>
                                         onLoadStateClick(saveSate.index)
                                     }
