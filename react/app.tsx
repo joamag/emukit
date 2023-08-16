@@ -461,7 +461,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                         ))
                     ) : (
                         <Paragraph style={["no-margin-top"]}>
-                            There're currently no saved states for this ROM!
+                            There're currently no save states for this ROM!
                             <br />
                             Press Save State to capture the current machine
                             state into local storage.
