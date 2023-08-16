@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-*
+* Support for save states - [#7](https://github.com/joamag/emukit/issues/7)
 
 ### Changed
 
