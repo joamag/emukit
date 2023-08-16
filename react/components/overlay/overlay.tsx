@@ -5,9 +5,11 @@ import "./overlay.css";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const require: any;
 
+export type OverlayStyle = "";
+
 type OverlayProps = {
     text?: string;
-    style?: string[];
+    style?: OverlayStyle[];
     onFile?: (file: File) => void;
 };
 

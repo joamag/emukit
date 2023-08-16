@@ -13,3 +13,7 @@
 .link:hover {
     border-bottom: 2px solid #ffffff;
 }
+
+.link.click {
+    cursor: pointer;
+}

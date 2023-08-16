@@ -2,11 +2,13 @@ import React, { FC } from "react";
 
 import "./toast.css";
 
+export type ToastStyle = "";
+
 type ToastProps = {
     text?: string;
     error?: boolean;
     visible?: boolean;
-    style?: string[];
+    style?: ToastStyle[];
     onCancel?: () => void;
 };
 

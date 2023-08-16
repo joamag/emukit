@@ -11,6 +11,7 @@ Emulation Web UI toolkit written in Typescript with the help of React.js 🕹️
 * Minimalist design
 * Flexible and customizable
 * Interface driven integration model
+* Friendly save state support
 
 ## Troubleshooting
 

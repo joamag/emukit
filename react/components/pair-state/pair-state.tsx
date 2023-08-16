@@ -1,0 +1,77 @@
+import React, { FC } from "react";
+import Pair, { PairStyle } from "../pair/pair";
+import Link from "../link/link";
+import { rgbToDataUrl } from "../../util";
+import { SaveState } from "../../structs";
+
+import "./pair-state.css";
+
+type PairStateProps = {
+    index: number;
+    thumbnail?: Uint8Array;
+    thumbnailSize?: [number, number];
+    saveState?: SaveState;
+    style?: PairStyle[];
+    onLoadClick?: () => void;
+    onDeleteClick?: () => void;
+};
+
+export const PairState: FC<PairStateProps> = ({
+    index,
+    thumbnail,
+    thumbnailSize,
+    saveState,
+    style = [],
+    onLoadClick,
+    onDeleteClick
+}) => {
+    const pairStyle = ["pair-state", ...style];
+    return (
+        <>
+            <Pair
+                key={`#${index}`}
+                name={`Save State #${index}`}
+                nameNode={
+                    <>
+                        <div>Save State #{index}</div>
+                        <div className="pair-state-datetime">
+                            {saveState && saveState.timestamp !== undefined
+                                ? new Date(
+                                      saveState.timestamp * 1000
+                                  ).toLocaleString(undefined, {
+                                      day: "2-digit",
+                                      month: "2-digit",
+                                      year: "numeric",
+                                      hour: "2-digit",
+                                      minute: "2-digit"
+                                  })
+                                : ""}
+                        </div>
+                        <div className="pair-state-buttons">
+                            <Link text={"Load"} onClick={onLoadClick} />
+                            <Link text={"Delete"} onClick={onDeleteClick} />
+                        </div>
+                    </>
+                }
+                valueNode={
+                    thumbnail ? (
+                        <img
+                            className="pair-state-thumbnail"
+                            src={rgbToDataUrl(
+                                thumbnail,
+                                thumbnailSize?.[0] ?? 0,
+                                thumbnailSize?.[1] ?? 0
+                            )}
+                        />
+                    ) : (
+                        <></>
+                    )
+                }
+                style={pairStyle as PairStyle[]}
+                onValueClick={onLoadClick}
+            />
+        </>
+    );
+};
+
+export default PairState;

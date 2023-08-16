@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from "react";
-import Button from "../button/button";
+import Button, { ButtonSize } from "../button/button";
 
 import "./button-increment.css";
 
@@ -11,7 +11,7 @@ type ButtonIncrementProps = {
     prefix?: string;
     suffix?: string;
     decimalPlaces?: number;
-    size?: string;
+    size?: ButtonSize;
     style?: string[];
     onClick?: () => void;
     onBeforeChange?: (value: number) => boolean;
