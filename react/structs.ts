@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import { base64ToBuffer, bufferToBase64 } from "./util";
 
 export const FREQUENCY_DELTA = 100000;
 
@@ -371,9 +372,18 @@ export interface Emulator extends ObservableI {
 
     keyLift(key: string): void;
 
+    serializeState?(): Uint8Array;
+
+    unserializeState?(data: Uint8Array): void;
+
+    buildState?(index: number, data: Uint8Array): SaveState;
+
     /**
      * Saves the current state of the emulator in the given
      * index, this state should be able to be loaded later.
+     *
+     * This method is typically not implemented by the concrete
+     * emulator class.
      *
      * @param index The index of the state to be saved.
      */
@@ -384,6 +394,9 @@ export interface Emulator extends ObservableI {
      * Should throw an error in case it's not possible to
      * load the state from the given index.
      *
+     * This method is typically not implemented by the concrete
+     * emulator class.
+     *
      * @param index The index of the state to be loaded.
      */
     loadState?(index: number): void;
@@ -391,6 +404,9 @@ export interface Emulator extends ObservableI {
     /**
      * Deletes the state of the emulator for the given index.
      * This operation should release any associated resources.
+     *
+     * This method is typically not implemented by the concrete
+     * emulator class.
      *
      * @param index The index of the state to be delete.
      */
@@ -400,6 +416,9 @@ export interface Emulator extends ObservableI {
      * Obtains the state of the emulator at the given index.
      * This state information should be handled carefully as
      * it may contain a large payload (eg: image buffer).
+     *
+     * This method is typically not implemented by the concrete
+     * emulator class.
      *
      * @param index The index of the state to be obtained.
      * @returns The state of the emulator at the given index,
@@ -412,6 +431,9 @@ export interface Emulator extends ObservableI {
      * List the complete set of states available in the
      * emulator, this list should be ordered by the lowest
      * index to the highest one.
+     *
+     * This method is typically not implemented by the concrete
+     * emulator class.
      *
      * @returns The list of states available in the emulator.
      */
@@ -552,6 +574,10 @@ export class EmulatorBase extends Observable {
         return [];
     }
 
+    get romInfo(): RomInfo {
+        return {};
+    }
+
     get compiler(): Compiler | null {
         return null;
     }
@@ -604,5 +630,69 @@ export class EmulatorBase extends Observable {
 
     set handlers(value: Handlers) {
         this._handlers = value;
+    }
+
+    serializeState(): Uint8Array {
+        throw new Error("Unable to serialize state");
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    unserializeState(_data: Uint8Array) {
+        throw new Error("Unable to unserialize state");
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    buildState(_index: number, _data: Uint8Array): SaveState {
+        throw new Error("Unable to build state");
+    }
+
+    saveState(index: number) {
+        if (!window.localStorage) {
+            throw new Error("Unable to save state");
+        }
+        const data = this.serializeState();
+        const dataB64 = bufferToBase64(data);
+        localStorage.setItem(`${this.romInfo.name}-s${index}`, dataB64);
+    }
+
+    loadState(index: number) {
+        if (!window.localStorage) {
+            throw new Error("Unable to load state");
+        }
+        const dataB64 = localStorage.getItem(`${this.romInfo.name}-s${index}`);
+        if (!dataB64) throw new Error("Unable to load state");
+        const data = base64ToBuffer(dataB64);
+        this.unserializeState(data);
+    }
+
+    deleteState(index: number) {
+        if (!window.localStorage) {
+            throw new Error("Unable to delete state");
+        }
+        localStorage.removeItem(`${this.romInfo.name}-s${index}`);
+    }
+
+    getState(index: number): SaveState | null {
+        if (!window.localStorage) {
+            throw new Error("Unable to get state");
+        }
+        const dataB64 = localStorage.getItem(`${this.romInfo.name}-s${index}`);
+        if (!dataB64) return null;
+        const data = base64ToBuffer(dataB64);
+        return this.buildState(index, data);
+    }
+
+    listStates(): number[] {
+        if (!window.localStorage) {
+            throw new Error("Unable to list states");
+        }
+        const states: number[] = [];
+        for (let index = 0; index < 10; index++) {
+            const dataB64 = localStorage.getItem(
+                `${this.romInfo.name}-s${index}`
+            );
+            if (dataB64 !== null) states.push(index);
+        }
+        return states;
     }
 }
