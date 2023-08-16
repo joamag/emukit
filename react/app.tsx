@@ -302,13 +302,18 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
      * Refreshes the current save states information by querying the emulator
      * for the current list of save states and then updating the state with
      * the new information.
-     * This should trigger a visual refresh.
+     * It should trigger a visual refresh on React state change, that will
+     * update the UI with the new save states.
+     * This operation is considered expensive and should used with care.
      */
     const refreshSaveStates = () => {
         const saveStates = Object.fromEntries(
             emulator
                 .listStates?.()
-                .map((s) => [s, emulator.getState?.(s) as SaveState]) ?? []
+                .map((index) => [
+                    index,
+                    emulator.getState?.(index) as SaveState
+                ]) ?? []
         );
         setSaveStates(saveStates);
     };
