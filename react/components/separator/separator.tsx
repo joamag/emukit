@@ -2,16 +2,18 @@ import React, { FC } from "react";
 
 import "./separator.css";
 
-type SectionProps = {
+export type SeparatorStyle = "";
+
+type SeparatorProps = {
     marginTop?: string | number;
     marginBottom?: string | number;
     thickness?: string | number;
     color?: string;
     clear?: boolean;
-    style?: string[];
+    style?: SeparatorStyle[];
 };
 
-export const Separator: FC<SectionProps> = ({
+export const Separator: FC<SeparatorProps> = ({
     marginTop = 20,
     marginBottom = 20,
     thickness = 1,
