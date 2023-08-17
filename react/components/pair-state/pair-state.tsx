@@ -13,6 +13,7 @@ type PairStateProps = {
     saveState?: SaveState;
     style?: PairStyle[];
     onLoadClick?: () => void;
+    onDownloadClick?: () => void;
     onDeleteClick?: () => void;
 };
 
@@ -23,6 +24,7 @@ export const PairState: FC<PairStateProps> = ({
     saveState,
     style = [],
     onLoadClick,
+    onDownloadClick,
     onDeleteClick
 }) => {
     const pairStyle = ["pair-state", ...style];
@@ -48,8 +50,30 @@ export const PairState: FC<PairStateProps> = ({
                                 : ""}
                         </div>
                         <div className="pair-state-buttons">
-                            <Link text={"Load"} onClick={onLoadClick} />
-                            <Link text={"Delete"} onClick={onDeleteClick} />
+                            {onLoadClick && (
+                                <>
+                                    <span className="link-separator">/</span>
+                                    <Link text={"Load"} onClick={onLoadClick} />
+                                </>
+                            )}
+                            {onDownloadClick && (
+                                <>
+                                    <span className="link-separator">/</span>
+                                    <Link
+                                        text={"Download"}
+                                        onClick={onDownloadClick}
+                                    />
+                                </>
+                            )}
+                            {onDeleteClick && (
+                                <>
+                                    <span className="link-separator">/</span>
+                                    <Link
+                                        text={"Delete"}
+                                        onClick={onDeleteClick}
+                                    />
+                                </>
+                            )}
                         </div>
                     </>
                 }

@@ -74,3 +74,28 @@ export const rgbToDataUrl = (
     const dataUrl = canvas.toDataURL(format);
     return dataUrl;
 };
+
+/**
+ * Downloads a file containing the data in the provided buffer.
+ * The file will be downloaded with the provided filename.
+ *
+ * @param buffer Buffer containing the data to be downloaded.
+ * @param filename Name of the file to be downloaded.
+ * @param type MIME type of the file to be downloaded.
+ * Defaults to `application/octet-stream`.
+ */
+export const downloadFromBuffer = (
+    buffer: Uint8Array,
+    filename: string,
+    type = "application/octet-stream"
+) => {
+    const blob = new Blob([buffer], { type: type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("download", filename);
+    link.setAttribute("href", url);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+};

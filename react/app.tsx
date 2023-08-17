@@ -50,6 +50,7 @@ import {
     RomInfo,
     SaveState
 } from "./structs";
+import { downloadFromBuffer } from "./util";
 
 import "./app.css";
 
@@ -310,10 +311,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         const saveStates = Object.fromEntries(
             emulator
                 .listStates?.()
-                .map((index) => [
-                    index,
-                    emulator.getState?.(index) as SaveState
-                ]) ?? []
+                .map((index) => [index, emulator.getState!(index)]) ?? []
         );
         setSaveStates(saveStates);
     };
@@ -454,6 +452,9 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                                     }
                                     onDeleteClick={() =>
                                         onDeleteStateClick(saveSate.index)
+                                    }
+                                    onDownloadClick={() =>
+                                        onDownloadStateClick(saveSate.index)
                                     }
                                 />
                                 <Separator
@@ -636,6 +637,10 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const onLoadStateClick = (index: number) => {
         emulator.loadState?.(index);
         showToast(`Loaded save state #${index} successfully!`);
+    };
+    const onDownloadStateClick = async (index: number) => {
+        const data = emulator.getStateData!(index);
+        downloadFromBuffer(data, `${emulator.romInfo.name}.s${index}`);
     };
     const onDeleteStateClick = async (index: number) => {
         const result = await showModal(

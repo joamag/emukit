@@ -420,12 +420,19 @@ export interface Emulator extends ObservableI {
      * This method is typically not implemented by the concrete
      * emulator class.
      *
-     * @param index The index of the state to be obtained.
-     * @returns The state of the emulator at the given index,
-     * or null in case no state is available.
+     * @param index Index of the state to be obtained.
+     * @returns State of the emulator at the given index.
      * @see {@link SaveState}
      */
-    getState?(index: number): SaveState | null;
+    getState?(index: number): SaveState;
+
+    /**
+     * Obtains the raw data of the state at the given index.
+     *
+     * @param index Index of the state to be obtained.
+     * @returns Raw data of the state at the given index.
+     */
+    getStateData?(index: number): Uint8Array;
 
     /**
      * List the complete set of states available in the
@@ -656,12 +663,7 @@ export class EmulatorBase extends Observable {
     }
 
     loadState(index: number) {
-        if (!window.localStorage) {
-            throw new Error("Unable to load state");
-        }
-        const dataB64 = localStorage.getItem(`${this.romInfo.name}-s${index}`);
-        if (!dataB64) throw new Error("Unable to load state");
-        const data = base64ToBuffer(dataB64);
+        const data = this.getStateData(index);
         this.unserializeState(data);
     }
 
@@ -672,14 +674,19 @@ export class EmulatorBase extends Observable {
         localStorage.removeItem(`${this.romInfo.name}-s${index}`);
     }
 
-    getState(index: number): SaveState | null {
+    getState(index: number): SaveState {
+        const data = this.getStateData(index);
+        return this.buildState(index, data);
+    }
+
+    getStateData(index: number): Uint8Array {
         if (!window.localStorage) {
             throw new Error("Unable to get state");
         }
         const dataB64 = localStorage.getItem(`${this.romInfo.name}-s${index}`);
-        if (!dataB64) return null;
+        if (!dataB64) throw new Error("Unable to get state");
         const data = base64ToBuffer(dataB64);
-        return this.buildState(index, data);
+        return data;
     }
 
     listStates(): number[] {

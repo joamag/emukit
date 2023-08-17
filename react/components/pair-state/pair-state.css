@@ -22,11 +22,19 @@ dd.pair-state {
 }
 
 .pair-state .pair-state-buttons > .link {
-    margin-right: 12px;
+    margin-right: 8px;
 }
 
 .pair-state .pair-state-buttons > .link:last-child {
     margin-right: 0px;
+}
+
+.pair-state .pair-state-buttons > .link-separator {
+    margin-right: 8px;
+}
+
+.pair-state .pair-state-buttons > .link-separator:first-of-type {
+    display: none;
 }
 
 .pair-state .pair-state-thumbnail {
