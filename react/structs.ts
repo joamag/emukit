@@ -372,6 +372,26 @@ export interface Emulator extends ObservableI {
 
     keyLift(key: string): void;
 
+    /**
+     * Processes the provided file instance as a ROM file and
+     * returns the raw data of the ROM file, ready to be fed to
+     * the emulator.
+     * 
+     * This method can be used to process the file and handle
+     * features like compression (eg: zip files).
+     * 
+     * @param file The file instance to be processed as a ROM.
+     * @returns The raw data of the ROM file.
+     */
+    buildRomData(file: File): Promise<Uint8Array>;
+
+    /**
+     * Serializes the current state of the emulator into a
+     * data buffer that can be used to store the state in
+     * a persistent storage.
+     * 
+     * @returns The serialized state of the emulator.
+     */
     serializeState?(): Uint8Array;
 
     unserializeState?(data: Uint8Array): void;
@@ -637,6 +657,12 @@ export class EmulatorBase extends Observable {
 
     set handlers(value: Handlers) {
         this._handlers = value;
+    }
+
+    async buildRomData(file: File): Promise<Uint8Array> {
+        const arrayBuffer = await file.arrayBuffer();
+        const romData = new Uint8Array(arrayBuffer);
+        return romData;
     }
 
     serializeState(): Uint8Array {
