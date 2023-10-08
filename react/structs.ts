@@ -376,10 +376,10 @@ export interface Emulator extends ObservableI {
      * Processes the provided file instance as a ROM file and
      * returns the raw data of the ROM file, ready to be fed to
      * the emulator.
-     * 
-     * This method can be used to process the file and handle
+     *
+     * This method can be used to process the file, handling
      * features like compression (eg: zip files).
-     * 
+     *
      * @param file The file instance to be processed as a ROM.
      * @returns The raw data of the ROM file.
      */
@@ -389,13 +389,29 @@ export interface Emulator extends ObservableI {
      * Serializes the current state of the emulator into a
      * data buffer that can be used to store the state in
      * a persistent storage.
-     * 
+     *
      * @returns The serialized state of the emulator.
      */
     serializeState?(): Uint8Array;
 
+    /**
+     * Deserializes the sate data buffer, loading the contents
+     * of it into the current emulator instance.
+     *
+     * @param data The saved state data buffer, that is going
+     * to be loaded into the emulator instance.
+     */
     unserializeState?(data: Uint8Array): void;
 
+    /**
+     * Builds the state of the emulator from the given data
+     * and index, this method should be able to build the
+     * state from the given data.
+     *
+     * @param index The saved state index to be built.
+     * @param data The saved state data buffer, that is going
+     * to be used in the building of the state.
+     */
     buildState?(index: number, data: Uint8Array): SaveState;
 
     /**

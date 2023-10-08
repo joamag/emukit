@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-*
+* Support for `buildRomData()` allowing ROM data processing indirection (eg: zip support).
 
 ### Changed
 

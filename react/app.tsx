@@ -547,9 +547,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             return;
         }
 
-        const arrayBuffer = await file.arrayBuffer();
-        const romData = new Uint8Array(arrayBuffer);
-
+        const romData = await emulator.buildRomData(file);
         emulator.boot({ engine: null, romName: file.name, romData: romData });
 
         showToast(`Loaded ${file.name} ROM successfully!`);
