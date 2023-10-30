@@ -549,7 +549,6 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
 
         const romData = await emulator.buildRomData(file);
         emulator.boot({ engine: null, romName: file.name, romData: romData });
-
         showToast(`Loaded ${file.name} ROM successfully!`);
     };
     const onPauseClick = () => {
