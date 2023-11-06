@@ -877,7 +877,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                             Rust Programming Language
                         </Link>{" "}
                         and is running inside this browser with the help of{" "}
-                        <Link href="https://webassembly.org/" target="_blank">
+                        <Link href="https://webassembly.org" target="_blank">
                             WebAssembly
                         </Link>
                         .
