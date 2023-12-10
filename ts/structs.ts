@@ -757,3 +757,135 @@ export class EmulatorBase extends Observable {
         return states;
     }
 }
+
+/**
+ * Emulator logic implementation meant to be used as a starting point
+ * to have an inversion of control in terms of event loop.
+ * 
+ * Any emulator implementation should be able to extend this class
+ * and avoid implementing the main game loop logic.
+ */
+export class EmulatorLogic extends EmulatorBase {
+    private paused = false;
+    private nextTickTime = 0;
+
+    /**
+     * Runs the initialization and main loop execution for the emulator.
+     * The main execution of this function should be an infinite
+     * loop running machine `tick` operations.
+     *
+     * Should be called only once per instance and serve as its main entry
+     * point of execution.
+     *
+     * @param options The set of options that are going to be
+     * used in he emulator initialization.
+     */
+    async start({ romUrl }: { romUrl?: string }) {
+        // boots the emulator subsystem with the initial
+        // ROM retrieved from a remote data source
+        await this.boot({ loadRom: true, romPath: romUrl ?? undefined });
+
+        // the counter that controls the overflowing cycles
+        // from tick to tick operation
+        let pending = 0;
+
+        // runs the sequence as an infinite loop, running
+        // the associated CPU cycles accordingly
+        while (true) {
+            // in case the machine is paused we must delay the execution
+            // a little bit until the paused state is recovered
+            if (this.paused) {
+                await new Promise((resolve) => {
+                    setTimeout(resolve, 1000 / this.idleFrequency);
+                });
+                continue;
+            }
+
+            // obtains the current time, this value is going
+            // to be used to compute the need for tick computation
+            let currentTime = EmulatorBase.now();
+
+            try {
+                pending = this.tick(
+                    currentTime,
+                    pending,
+                    Math.round(
+                        (this.logicFrequency *
+                            (this.gameBoy?.multiplier() ?? 1)) /
+                            this.visualFrequency
+                    )
+                );
+            } catch (err) {
+                // sets the default error message to be displayed
+                // to the user, this value may be overridden in case
+                // a better and more explicit message can be determined
+                let message = String(err);
+
+                // verifies if the current issue is a panic one
+                // and updates the message value if that's the case
+                const messageNormalized = (err as Error).message.toLowerCase();
+                const isPanic =
+                    messageNormalized.startsWith("unreachable") ||
+                    messageNormalized.startsWith("recursive use of an object");
+                if (isPanic) {
+                    message = "Unrecoverable error, restarting Game Boy";
+                }
+
+                // displays the error information to both the end-user
+                // and the developer (for diagnostics)
+                this.trigger("message", {
+                    text: message,
+                    error: true,
+                    timeout: 5000
+                });
+                console.error(err);
+
+                // pauses the machine, allowing the end-user to act
+                // on the error in a proper fashion
+                this.pause();
+
+                // if we're talking about a panic, proper action must be taken
+                // which in this case means restarting both the WASM sub
+                // system and the machine state (to be able to recover)
+                if (isPanic) {
+                    await wasm(true);
+                    await this.boot({ restore: false });
+
+                    this.trigger("error");
+                }
+            }
+
+            // calculates the amount of time until the next draw operation
+            // this is the amount of time that is going to be pending
+            currentTime = EmulatorBase.now();
+            const pendingTime = Math.max(this.nextTickTime - currentTime, 0);
+
+            // waits a little bit for the next frame to be draw,
+            // this should control the flow of render
+            await new Promise((resolve) => {
+                setTimeout(resolve, pendingTime);
+            });
+        }
+    }
+
+    toggleRunning() {
+        if (this.paused) {
+            this.resume();
+        } else {
+            this.pause();
+        }
+    }
+
+    pause() {
+        this.paused = true;
+    }
+
+    resume() {
+        this.paused = false;
+        this.nextTickTime = EmulatorLogic.now();
+    }
+
+    reset() {
+        this.boot({ engine: null });
+    }
+}
