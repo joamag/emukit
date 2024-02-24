@@ -557,6 +557,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             showToast(`Loaded ${file.name} ROM successfully!`);
         } catch (err) {
             showToast(`Failed to load ${file.name} ROM!`, true);
+            console.error(`Failed to load ${file.name} ROM (${err})!`);
         }
     };
     const onPauseClick = () => {
@@ -668,6 +669,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             showToast(`Loaded ${file.name} ROM successfully!`);
         } catch (err) {
             showToast(`Failed to load ${file.name} ROM!`, true);
+            console.error(`Failed to load ${file.name} ROM (${err})!`);
         }
     };
     const onEngineChange = async (engine: string) => {
