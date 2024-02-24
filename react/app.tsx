@@ -548,8 +548,16 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         }
 
         const romData = await emulator.buildRomData(file);
-        emulator.boot({ engine: null, romName: file.name, romData: romData });
-        showToast(`Loaded ${file.name} ROM successfully!`);
+        try {
+            await emulator.boot({
+                engine: null,
+                romName: file.name,
+                romData: romData
+            });
+            showToast(`Loaded ${file.name} ROM successfully!`);
+        } catch (err) {
+            showToast(`Failed to load ${file.name} ROM!`, true);
+        }
     };
     const onPauseClick = () => {
         emulator.toggleRunning();
@@ -651,11 +659,19 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     };
     const onUploadFile = async (file: File) => {
         const romData = await emulator.buildRomData(file);
-        emulator.boot({ engine: null, romName: file.name, romData: romData });
-        showToast(`Loaded ${file.name} ROM successfully!`);
+        try {
+            await emulator.boot({
+                engine: null,
+                romName: file.name,
+                romData: romData
+            });
+            showToast(`Loaded ${file.name} ROM successfully!`);
+        } catch (err) {
+            showToast(`Failed to load ${file.name} ROM!`, true);
+        }
     };
-    const onEngineChange = (engine: string) => {
-        emulator.boot({ engine: engine });
+    const onEngineChange = async (engine: string) => {
+        await emulator.boot({ engine: engine });
         showToast(
             `${emulator.device.text} running on engine "${engine}" from now on!`
         );

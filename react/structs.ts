@@ -350,7 +350,7 @@ export interface Emulator extends ObservableI {
      * @param options The options that are going to be used for
      * the booting operation of the emulator.
      */
-    boot(options: unknown): void;
+    boot(options: unknown): Promise<void>;
 
     /**
      * Toggle the running state of the emulator between paused
@@ -358,15 +358,15 @@ export interface Emulator extends ObservableI {
      * the current running state of the emulator to implement
      * a logic toggle.
      */
-    toggleRunning(): void;
-    pause(): void;
-    resume(): void;
+    toggleRunning(): Promise<void>;
+    pause(): Promise<void>;
+    resume(): Promise<void>;
 
     /**
      * Resets the emulator machine to the start state and
      * re-loads the ROM that is currently set in the emulator.
      */
-    reset(): void;
+    reset(): Promise<void>;
 
     keyPress(key: string): void;
 
