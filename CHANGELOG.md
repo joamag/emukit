@@ -13,11 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* Made `boot()`, `pause()`, `resume()` and `reset()` async methods.
+*
 
 ### Fixed
 
 *
+
+## [0.9.5] - 2024-02-24
+
+### Changed
+
+* Made `boot()`, `pause()`, `resume()` and `reset()` async methods
 
 ## [0.9.4] - 2023-10-30
 
