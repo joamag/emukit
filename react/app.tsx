@@ -555,8 +555,10 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 romData: romData
             });
             showToast(`Loaded ${file.name} ROM successfully!`);
+            emulator.logger.info(`Loaded ${file.name} ROM successfully`);
         } catch (err) {
             showToast(`Failed to load ${file.name} ROM!`, true);
+            emulator.logger.error(`Failed to load ${file.name} ROM (${err})`);
         }
     };
     const onPauseClick = () => {
@@ -565,6 +567,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     };
     const onResetClick = () => {
         emulator.reset();
+        emulator.logger.info(`Finished reset operation`);
     };
     const onSoundClick = () => {
         if (!audioStateRef.current.audioContext) {
@@ -666,8 +669,10 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 romData: romData
             });
             showToast(`Loaded ${file.name} ROM successfully!`);
+            emulator.logger.info(`Loaded ${file.name} ROM successfully`);
         } catch (err) {
             showToast(`Failed to load ${file.name} ROM!`, true);
+            emulator.logger.error(`Failed to load ${file.name} ROM (${err})`);
         }
     };
     const onEngineChange = async (engine: string) => {

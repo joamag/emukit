@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import { base64ToBuffer, bufferToBase64 } from "./util";
+import { Logger, logger } from "./logging";
 
 export const FREQUENCY_DELTA = 100000;
 
@@ -344,6 +345,13 @@ export interface Emulator extends ObservableI {
     set handlers(value: Handlers);
 
     /**
+     * The logger instance that is going to be used for the
+     * logging of the emulator, this is a reference to the
+     * main logger of the application.
+     */
+    get logger(): Logger;
+
+    /**
      * Boot (or reboots) the emulator according to the provided
      * set of options.
      *
@@ -673,6 +681,10 @@ export class EmulatorBase extends Observable {
 
     set handlers(value: Handlers) {
         this._handlers = value;
+    }
+
+    get logger(): Logger {
+        return logger;
     }
 
     async buildRomData(file: File): Promise<Uint8Array> {
