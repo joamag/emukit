@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { base64ToBuffer, bufferToBase64 } from "./util";
-import { Logger, logger } from "./log";
+import { Logger, logger } from "./logging";
 
 export const FREQUENCY_DELTA = 100000;
 
