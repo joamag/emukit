@@ -1,5 +1,5 @@
 import React, { FC, useState } from "react";
-import Button, { ButtonSize, ButtonStyle } from "../button/button";
+import Button, { ButtonSize, ButtonStyle } from "../button/button.tsx";
 
 type ButtonSwitchProps = {
     options: string[];

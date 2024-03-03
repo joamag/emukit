@@ -1,5 +1,5 @@
 import React, { FC, ReactNode } from "react";
-import Link from "../link/link";
+import Link from "../link/link.tsx";
 
 import "./pair.css";
 

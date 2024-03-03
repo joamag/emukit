@@ -1,5 +1,5 @@
 import React, { FC, ReactNode, useEffect, useRef } from "react";
-import Button from "../button/button";
+import Button from "../button/button.tsx";
 
 import "./modal.css";
 

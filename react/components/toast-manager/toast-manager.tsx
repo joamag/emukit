@@ -4,7 +4,7 @@ import React, {
     useRef,
     useState
 } from "react";
-import Toast from "../toast/toast";
+import Toast from "../toast/toast.tsx";
 
 type ToastManagerProps = {
     style?: string[];

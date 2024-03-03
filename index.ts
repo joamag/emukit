@@ -1,2 +1,2 @@
-export * from "./react";
-export * from "./ts";
+export * from "./react/index.ts";
+export * from "./ts/index.ts";

@@ -1,5 +1,5 @@
 import React, { FC, ReactNode } from "react";
-import PanelTab from "../panel-tab/panel-tab";
+import PanelTab from "../panel-tab/panel-tab.tsx";
 
 import "./help.css";
 

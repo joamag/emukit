@@ -37,7 +37,7 @@ import {
     Title,
     ToastManager,
     ToastManagerHandle
-} from "./components";
+} from "./components/index.ts";
 import {
     downloadFromBuffer,
     AudioChunk,
@@ -50,7 +50,7 @@ import {
     PixelFormat,
     RomInfo,
     SaveState
-} from "../ts";
+} from "../ts/index.ts";
 
 import "./app.css";
 

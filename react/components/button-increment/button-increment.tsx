@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useState } from "react";
-import Button, { ButtonSize } from "../button/button";
+import Button, { ButtonSize } from "../button/button.tsx";
 
 import "./button-increment.css";
 

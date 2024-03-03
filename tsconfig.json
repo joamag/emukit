@@ -13,6 +13,8 @@
         "strictNullChecks": true,
         "strictFunctionTypes": true,
         "strictPropertyInitialization": true,
+        "allowImportingTsExtensions": true,
+        "noEmit": true,
         "sourceMap": true,
         "jsx": "react",
         "outDir": ".",

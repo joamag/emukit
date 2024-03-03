@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-*
+* Made all imports explicit (with extensions) to prevent file resolution issues
 
 ## [0.9.7] - 2024-03-03
 

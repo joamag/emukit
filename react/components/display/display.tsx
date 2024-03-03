@@ -1,5 +1,5 @@
 import React, { FC, useState, useRef, useEffect } from "react";
-import { PixelFormat } from "../../../ts";
+import { PixelFormat } from "../../../ts/index.ts";
 
 import "./display.css";
 
