@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useRef, useState } from "react";
-import { isAndroid } from "../../util";
+import { isAndroid } from "../../../ts";
 
 import "./keyboard-gb.css";
 

@@ -39,6 +39,7 @@ import {
     ToastManagerHandle
 } from "./components";
 import {
+    downloadFromBuffer,
     AudioChunk,
     AudioState,
     Emulator,
@@ -49,8 +50,7 @@ import {
     PixelFormat,
     RomInfo,
     SaveState
-} from "./structs";
-import { downloadFromBuffer } from "./util";
+} from "../ts";
 
 import "./app.css";
 

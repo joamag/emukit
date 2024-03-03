@@ -1,8 +1,7 @@
 import React, { FC } from "react";
 import Pair, { PairStyle } from "../pair/pair";
 import Link from "../link/link";
-import { rgbToDataUrl } from "../../util";
-import { SaveState } from "../../structs";
+import { rgbToDataUrl, SaveState } from "../../../ts";
 
 import "./pair-state.css";
 
