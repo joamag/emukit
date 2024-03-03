@@ -9,15 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+*
+
+### Changed
+
+*
+
+### Fixed
+
+*
+
+## [0.9.7] - 2024-03-03
+
+### Added
+
 * Initial rudimentary logging support
 
 ### Changed
 
 * Separated `./ts` and `./react` folders to prevents issues with `.tsx` vs `.ts` files
-
-### Fixed
-
-*
 
 ## [0.9.6] - 2024-02-25
 
