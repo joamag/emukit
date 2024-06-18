@@ -4,6 +4,13 @@ import { Logger, logger } from "./logging.ts";
 
 export const FREQUENCY_DELTA = 100000;
 
+/**
+ * The frequency of the pause polling update operation,
+ * increasing this value will make resume from emulation
+ * paused state fasted.
+ */
+export const IDLE_HZ = 10;
+
 export type Callback<T> = (owner: T, params?: unknown) => void;
 
 export type RomInfo = {
@@ -761,13 +768,14 @@ export class EmulatorBase extends Observable {
 /**
  * Emulator logic implementation meant to be used as a starting point
  * to have an inversion of control in terms of event loop.
- * 
+ *
  * Any emulator implementation should be able to extend this class
  * and avoid implementing the main game loop logic.
  */
 export class EmulatorLogic extends EmulatorBase {
-    private paused = false;
-    private nextTickTime = 0;
+    protected paused = false;
+    protected nextTickTime = 0;
+    protected idleFrequency = IDLE_HZ;
 
     /**
      * Runs the initialization and main loop execution for the emulator.
@@ -828,7 +836,7 @@ export class EmulatorLogic extends EmulatorBase {
                     messageNormalized.startsWith("unreachable") ||
                     messageNormalized.startsWith("recursive use of an object");
                 if (isPanic) {
-                    message = "Unrecoverable error, restarting Game Boy";
+                    message = "Unrecoverable error, restarting emulator";
                 }
 
                 // displays the error information to both the end-user
@@ -866,6 +874,11 @@ export class EmulatorLogic extends EmulatorBase {
                 setTimeout(resolve, pendingTime);
             });
         }
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    boot(options: unknown) {
+        throw new Error("Not implemented");
     }
 
     toggleRunning() {
