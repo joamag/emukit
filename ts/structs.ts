@@ -147,6 +147,15 @@ export enum PixelFormat {
     RGBA = 4
 }
 
+/**
+ * Enumeration that describes the multiple loop modes
+ * that are available for the emulator game loop.
+ */
+export enum LoopMode {
+    SetTimeout = 1,
+    AnimationFrame = 2
+}
+
 export const frequencyRatios = {
     Hz: 1,
     KHz: 1000,
@@ -811,12 +820,13 @@ export class EmulatorLogic extends EmulatorBase {
      * @param options The set of options that are going to be
      * used in he emulator initialization.
      */
-    async start({ romUrl }: { romUrl?: string }) {
-        // initializes the current time value to be used in the
-        // main loop execution, this value is going to be updated
-        // in each iteration of the loop - with an high resolution
-        let currentTime = 0;
-
+    async start({
+        romUrl,
+        loopMode = LoopMode.AnimationFrame
+    }: {
+        romUrl?: string;
+        loopMode?: LoopMode;
+    }) {
         // boots the emulator subsystem with the initial
         // ROM retrieved from a remote data source
         await this.boot({ loadRom: true, romPath: romUrl ?? undefined });
@@ -840,89 +850,13 @@ export class EmulatorLogic extends EmulatorBase {
             }
         });
 
-        // runs the sequence as an infinite loop, running
-        // the associated CPU cycles accordingly
-        while (true) {
-            // in case the machine is paused we must delay the execution
-            // a little bit until the paused state is recovered
-            if (this.paused) {
-                await new Promise((resolve) => {
-                    setTimeout(resolve, 1000 / this.idleFrequency);
-                });
-                continue;
-            }
-
-            // obtains the current time, this value is going
-            // to be used to compute the need for tick computation
-            currentTime = EmulatorBase.now();
-
-            try {
-                this.tick();
-            } catch (err) {
-                // sets the default error message to be displayed
-                // to the user, this value may be overridden in case
-                // a better and more explicit message can be determined
-                let message = String(err);
-
-                // verifies if the current issue is a panic one
-                // and updates the message value if that's the case
-                const messageNormalized = (err as Error).message.toLowerCase();
-                const isPanic =
-                    messageNormalized.startsWith("unreachable") ||
-                    messageNormalized.startsWith("recursive use of an object");
-                if (isPanic) {
-                    message = "Unrecoverable error, restarting emulator";
-                }
-
-                // displays the error information to both the end-user
-                // and the developer (for diagnostics)
-                this.trigger("message", {
-                    text: message,
-                    error: true,
-                    timeout: 5000
-                });
-                console.error(err);
-
-                // pauses the machine, allowing the end-user to act
-                // on the error in a proper fashion
-                this.pause();
-
-                // if we're talking about a panic, proper action must be taken
-                // which in this case means restarting both the WASM sub
-                // system and the machine state (to be able to recover)
-                if (isPanic) {
-                    await this.hardReset();
-                    this.trigger("error");
-                }
-            }
-
-            // calculates the number of ticks that have elapsed since the
-            // last draw operation, this is critical to be able to properly
-            // operate the clock of the CPU in frame drop situations, meaning
-            // a situation where the system resources are not able to emulate
-            // the system on time and frames must be skipped (ticks > 1)
-            if (this.nextTickTime === 0) this.nextTickTime = currentTime;
-            let ticks = Math.ceil(
-                (currentTime - this.nextTickTime) /
-                    ((1 / this.visualFrequency) * 1000)
-            );
-            ticks = Math.max(ticks, 1);
-
-            // updates the next update time according to the number of ticks
-            // that have elapsed since the last operation, this way this value
-            // can better be used to control the game loop
-            this.nextTickTime += (1000 / this.visualFrequency) * ticks;
-
-            // calculates the amount of time until the next draw operation
-            // this is the amount of time that is going to be pending
-            currentTime = EmulatorBase.now();
-            const pendingTime = Math.max(this.nextTickTime - currentTime, 0);
-
-            // waits the required time until until the next tick operation
-            // should be executed - this should control the flow of render
-            await new Promise((resolve) => {
-                setTimeout(resolve, pendingTime);
-            });
+        switch (loopMode) {
+            case LoopMode.SetTimeout:
+                await this.loopSetTimeout();
+                break;
+            case LoopMode.AnimationFrame:
+                await this.loopAnimationFrame();
+                break;
         }
     }
 
@@ -960,5 +894,115 @@ export class EmulatorLogic extends EmulatorBase {
 
     async hardReset() {
         throw new Error("Not implemented");
+    }
+
+    async handleError(err: Error) {
+        // sets the default error message to be displayed
+        // to the user, this value may be overridden in case
+        // a better and more explicit message can be determined
+        let message = String(err);
+
+        // verifies if the current issue is a panic one
+        // and updates the message value if that's the case
+        const messageNormalized = (err as Error).message.toLowerCase();
+        const isPanic =
+            messageNormalized.startsWith("unreachable") ||
+            messageNormalized.startsWith("recursive use of an object");
+        if (isPanic) {
+            message = "Unrecoverable error, restarting emulator";
+        }
+
+        // displays the error information to both the end-user
+        // and the developer (for diagnostics)
+        this.trigger("message", {
+            text: message,
+            error: true,
+            timeout: 5000
+        });
+        console.error(err);
+
+        // pauses the machine, allowing the end-user to act
+        // on the error in a proper fashion
+        this.pause();
+
+        // if we're talking about a panic, proper action must be taken
+        // which in this case means restarting both the WASM sub
+        // system and the machine state (to be able to recover)
+        if (isPanic) {
+            await this.hardReset();
+            this.trigger("error");
+        }
+    }
+
+    private async loopSetTimeout() {
+        // initializes the current time value to be used in the
+        // main loop execution, this value is going to be updated
+        // in each iteration of the loop - with an high resolution
+        let currentTime = 0;
+
+        // runs the sequence as an infinite loop, running
+        // the associated CPU cycles accordingly
+        while (true) {
+            // in case the machine is paused we must delay the execution
+            // a little bit until the paused state is recovered
+            if (this.paused) {
+                await new Promise((resolve) => {
+                    setTimeout(resolve, 1000 / this.idleFrequency);
+                });
+                continue;
+            }
+
+            // obtains the current time, this value is going
+            // to be used to compute the need for tick computation
+            currentTime = EmulatorBase.now();
+
+            this.internalTick();
+
+            // calculates the number of ticks that have elapsed since the
+            // last draw operation, this is critical to be able to properly
+            // operate the clock of the CPU in frame drop situations, meaning
+            // a situation where the system resources are not able to emulate
+            // the system on time and frames must be skipped (ticks > 1)
+            if (this.nextTickTime === 0) this.nextTickTime = currentTime;
+            let ticks = Math.ceil(
+                (currentTime - this.nextTickTime) /
+                    ((1 / this.visualFrequency) * 1000)
+            );
+            ticks = Math.max(ticks, 1);
+
+            // updates the next update time according to the number of ticks
+            // that have elapsed since the last operation, this way this value
+            // can better be used to control the game loop
+            this.nextTickTime += (1000 / this.visualFrequency) * ticks;
+
+            // calculates the amount of time until the next draw operation
+            // this is the amount of time that is going to be pending
+            currentTime = EmulatorBase.now();
+            const pendingTime = Math.max(this.nextTickTime - currentTime, 0);
+
+            // waits the required time until until the next tick operation
+            // should be executed - this should control the flow of render
+            await new Promise((resolve) => {
+                setTimeout(resolve, pendingTime);
+            });
+        }
+    }
+
+    private async loopAnimationFrame() {
+        const step = () => {
+            if (!this.paused) {
+                this.internalTick();
+            }
+            window.requestAnimationFrame(step);
+        };
+        step();
+    }
+
+    private async internalTick() {
+        try {
+            this.tick();
+        } catch (err) {
+            await this.handleError(err);
+        }
     }
 }
