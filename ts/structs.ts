@@ -875,32 +875,32 @@ export class EmulatorLogic extends EmulatorBase {
     async stop() {}
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    boot(options: unknown) {
+    async boot(options: unknown) {
         throw new Error("Not implemented");
     }
 
-    toggleRunning() {
+    async toggleRunning() {
         if (this.paused) {
-            this.resume();
+            await this.resume();
         } else {
-            this.pause();
+            await this.pause();
         }
     }
 
-    pause() {
+    async pause() {
         this.paused = true;
     }
 
-    resume() {
+    async resume() {
         this.paused = false;
         this.nextTickTime = EmulatorLogic.now();
     }
 
-    reset() {
+    async reset() {
         this.boot({ engine: null });
     }
 
-    tick() {
+    async tick() {
         throw new Error("Not implemented");
     }
 
@@ -961,7 +961,7 @@ export class EmulatorLogic extends EmulatorBase {
 
             // runs the internal tick operation that is going to
             // update the state of the machine and handle possible errors
-            this.internalTick();
+            await this.internalTick();
 
             // calculates the amount of time until the next draw operation
             // this is the amount of time that is going to be pending
@@ -977,13 +977,14 @@ export class EmulatorLogic extends EmulatorBase {
     }
 
     private async loopAnimationFrame() {
-        const step = () => {
+        const step = async () => {
             if (!this.paused && EmulatorLogic.now() >= this.nextTickTime) {
-                this.internalTick();
+                await this.internalTick();
             }
             window.requestAnimationFrame(step);
         };
-        step();
+        await step();
+        await new Promise(() => {});
     }
 
     private async internalTick() {
@@ -992,7 +993,7 @@ export class EmulatorLogic extends EmulatorBase {
         const beforeTime = EmulatorLogic.now();
 
         try {
-            this.tick();
+            await this.tick();
         } catch (err) {
             await this.handleError(err);
         }
