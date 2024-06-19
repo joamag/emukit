@@ -822,7 +822,7 @@ export class EmulatorLogic extends EmulatorBase {
      */
     async start({
         romUrl,
-        loopMode = LoopMode.AnimationFrame
+        loopMode = LoopMode.SetTimeout
     }: {
         romUrl?: string;
         loopMode?: LoopMode;
