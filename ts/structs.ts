@@ -821,7 +821,10 @@ export class EmulatorLogic extends EmulatorBase {
         // ROM retrieved from a remote data source
         await this.boot({ loadRom: true, romPath: romUrl ?? undefined });
 
-        this.bind("frame", () => {  
+        // binds the frame event to the current instance of the
+        // emulator logic, this event is going to be used to
+        // calculate the number of frames per second (FPS)
+        this.bind("frame", () => {
             // increments the current frame count (as new frame exists)
             // and in case the target number of frames for FPS control
             // has been reached calculates the number of FPS and
@@ -923,8 +926,7 @@ export class EmulatorLogic extends EmulatorBase {
         }
     }
 
-    async stop() {
-    }
+    async stop() {}
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     boot(options: unknown) {
