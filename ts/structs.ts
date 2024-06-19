@@ -5,11 +5,25 @@ import { Logger, logger } from "./logging.ts";
 export const FREQUENCY_DELTA = 100000;
 
 /**
+ * The frequency at which the the visual loop is going to
+ * run, increasing this value will have a consequence in
+ * the visual frames per second (FPS) of emulation.
+ */
+const VISUAL_HZ = 60;
+
+/**
  * The frequency of the pause polling update operation,
  * increasing this value will make resume from emulation
  * paused state fasted.
  */
 export const IDLE_HZ = 10;
+
+/**
+ * The sample rate that is going to be used for FPS calculus,
+ * meaning that every N seconds we will calculate the number
+ * of frames rendered divided by the N seconds.
+ */
+const FPS_SAMPLE_RATE = 3;
 
 export type Callback<T> = (owner: T, params?: unknown) => void;
 
@@ -775,7 +789,16 @@ export class EmulatorBase extends Observable {
 export class EmulatorLogic extends EmulatorBase {
     protected paused = false;
     protected nextTickTime = 0;
+    protected visualFrequency = VISUAL_HZ;
     protected idleFrequency = IDLE_HZ;
+
+    private fps = 0;
+    private frameStart: number = EmulatorLogic.now();
+    private frameCount = 0;
+
+    get framerate(): number {
+        return this.fps;
+    }
 
     /**
      * Runs the initialization and main loop execution for the emulator.
@@ -789,13 +812,30 @@ export class EmulatorLogic extends EmulatorBase {
      * used in he emulator initialization.
      */
     async start({ romUrl }: { romUrl?: string }) {
+        // initializes the current time value to be used in the
+        // main loop execution, this value is going to be updated
+        // in each iteration of the loop - with an high resolution
+        let currentTime = 0;
+
         // boots the emulator subsystem with the initial
         // ROM retrieved from a remote data source
         await this.boot({ loadRom: true, romPath: romUrl ?? undefined });
 
-        // the counter that controls the overflowing cycles
-        // from tick to tick operation
-        let pending = 0;
+        this.bind("frame", () => {  
+            // increments the current frame count (as new frame exists)
+            // and in case the target number of frames for FPS control
+            // has been reached calculates the number of FPS and
+            // flushes the value to the screen
+            this.frameCount++;
+            if (this.frameCount >= this.visualFrequency * FPS_SAMPLE_RATE) {
+                const currentTime = EmulatorLogic.now();
+                const deltaTime = (currentTime - this.frameStart) / 1000;
+                const fps = Math.round(this.frameCount / deltaTime);
+                this.fps = fps;
+                this.frameCount = 0;
+                this.frameStart = currentTime;
+            }
+        });
 
         // runs the sequence as an infinite loop, running
         // the associated CPU cycles accordingly
@@ -811,18 +851,10 @@ export class EmulatorLogic extends EmulatorBase {
 
             // obtains the current time, this value is going
             // to be used to compute the need for tick computation
-            let currentTime = EmulatorBase.now();
+            currentTime = EmulatorBase.now();
 
             try {
-                pending = this.tick(
-                    currentTime,
-                    pending,
-                    Math.round(
-                        (this.logicFrequency *
-                            (this.gameBoy?.multiplier() ?? 1)) /
-                            this.visualFrequency
-                    )
-                );
+                this.tick();
             } catch (err) {
                 // sets the default error message to be displayed
                 // to the user, this value may be overridden in case
@@ -856,24 +888,42 @@ export class EmulatorLogic extends EmulatorBase {
                 // which in this case means restarting both the WASM sub
                 // system and the machine state (to be able to recover)
                 if (isPanic) {
-                    await wasm(true);
-                    await this.boot({ restore: false });
-
+                    await this.hardReset();
                     this.trigger("error");
                 }
             }
+
+            // calculates the number of ticks that have elapsed since the
+            // last draw operation, this is critical to be able to properly
+            // operate the clock of the CPU in frame drop situations, meaning
+            // a situation where the system resources are not able to emulate
+            // the system on time and frames must be skipped (ticks > 1)
+            if (this.nextTickTime === 0) this.nextTickTime = currentTime;
+            let ticks = Math.ceil(
+                (currentTime - this.nextTickTime) /
+                    ((1 / this.visualFrequency) * 1000)
+            );
+            ticks = Math.max(ticks, 1);
+
+            // updates the next update time according to the number of ticks
+            // that have elapsed since the last operation, this way this value
+            // can better be used to control the game loop
+            this.nextTickTime += (1000 / this.visualFrequency) * ticks;
 
             // calculates the amount of time until the next draw operation
             // this is the amount of time that is going to be pending
             currentTime = EmulatorBase.now();
             const pendingTime = Math.max(this.nextTickTime - currentTime, 0);
 
-            // waits a little bit for the next frame to be draw,
-            // this should control the flow of render
+            // waits the required time until until the next tick operation
+            // should be executed - this should control the flow of render
             await new Promise((resolve) => {
                 setTimeout(resolve, pendingTime);
             });
         }
+    }
+
+    async stop() {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -900,5 +950,13 @@ export class EmulatorLogic extends EmulatorBase {
 
     reset() {
         this.boot({ engine: null });
+    }
+
+    tick() {
+        throw new Error("Not implemented");
+    }
+
+    async hardReset() {
+        throw new Error("Not implemented");
     }
 }
