@@ -935,11 +935,6 @@ export class EmulatorLogic extends EmulatorBase {
     }
 
     private async loopSetTimeout() {
-        // initializes the current time value to be used in the
-        // main loop execution, this value is going to be updated
-        // in each iteration of the loop - with an high resolution
-        let currentTime = 0;
-
         // runs the sequence as an infinite loop, running
         // the associated CPU cycles accordingly
         while (true) {
@@ -952,33 +947,14 @@ export class EmulatorLogic extends EmulatorBase {
                 continue;
             }
 
-            // obtains the current time, this value is going
-            // to be used to compute the need for tick computation
-            currentTime = EmulatorBase.now();
-
+            // runs the internal tick operation that is going to
+            // update the state of the machine and handle possible errors
             this.internalTick();
-
-            // calculates the number of ticks that have elapsed since the
-            // last draw operation, this is critical to be able to properly
-            // operate the clock of the CPU in frame drop situations, meaning
-            // a situation where the system resources are not able to emulate
-            // the system on time and frames must be skipped (ticks > 1)
-            if (this.nextTickTime === 0) this.nextTickTime = currentTime;
-            let ticks = Math.ceil(
-                (currentTime - this.nextTickTime) /
-                    ((1 / this.visualFrequency) * 1000)
-            );
-            ticks = Math.max(ticks, 1);
-
-            // updates the next update time according to the number of ticks
-            // that have elapsed since the last operation, this way this value
-            // can better be used to control the game loop
-            this.nextTickTime += (1000 / this.visualFrequency) * ticks;
 
             // calculates the amount of time until the next draw operation
             // this is the amount of time that is going to be pending
-            currentTime = EmulatorBase.now();
-            const pendingTime = Math.max(this.nextTickTime - currentTime, 0);
+            const afterTime = EmulatorBase.now();
+            const pendingTime = Math.max(this.nextTickTime - afterTime, 0);
 
             // waits the required time until until the next tick operation
             // should be executed - this should control the flow of render
@@ -990,7 +966,7 @@ export class EmulatorLogic extends EmulatorBase {
 
     private async loopAnimationFrame() {
         const step = () => {
-            if (!this.paused) {
+            if (!this.paused && EmulatorBase.now() >= this.nextTickTime) {
                 this.internalTick();
             }
             window.requestAnimationFrame(step);
@@ -999,10 +975,31 @@ export class EmulatorLogic extends EmulatorBase {
     }
 
     private async internalTick() {
+        // obtains the current time, this value is going
+        // to be used to compute the need for tick computation
+        const beforeTime = EmulatorBase.now();
+
         try {
             this.tick();
         } catch (err) {
             await this.handleError(err);
         }
+
+        // calculates the number of ticks that have elapsed since the
+        // last draw operation, this is critical to be able to properly
+        // operate the clock of the CPU in frame drop situations, meaning
+        // a situation where the system resources are not able to emulate
+        // the system on time and frames must be skipped (ticks > 1)
+        if (this.nextTickTime === 0) this.nextTickTime = beforeTime;
+        let ticks = Math.ceil(
+            (beforeTime - this.nextTickTime) /
+                ((1 / this.visualFrequency) * 1000)
+        );
+        ticks = Math.max(ticks, 1);
+
+        // updates the next update time according to the number of ticks
+        // that have elapsed since the last operation, this way this value
+        // can better be used to control the game loop
+        this.nextTickTime += (1000 / this.visualFrequency) * ticks;
     }
 }
