@@ -1,6 +1,6 @@
 {
     "name": "emukit",
-    "version": "0.9.8",
+    "version": "0.10.0",
     "description": "Emulation Web UI toolkit",
     "repository": {
         "type": "git",
@@ -16,7 +16,7 @@
     "source": "index.ts",
     "peerDependencies": {
         "@types/react": "^18.3.3",
-        "@types/react-dom": "^18.2.11",
+        "@types/react-dom": "^18.3.0",
         "react": "^18.3.1",
         "react-dom": "^18.3.1"
     },
