@@ -953,7 +953,7 @@ export class EmulatorLogic extends EmulatorBase {
 
             // calculates the amount of time until the next draw operation
             // this is the amount of time that is going to be pending
-            const afterTime = EmulatorBase.now();
+            const afterTime = EmulatorLogic.now();
             const pendingTime = Math.max(this.nextTickTime - afterTime, 0);
 
             // waits the required time until until the next tick operation
@@ -966,7 +966,7 @@ export class EmulatorLogic extends EmulatorBase {
 
     private async loopAnimationFrame() {
         const step = () => {
-            if (!this.paused && EmulatorBase.now() >= this.nextTickTime) {
+            if (!this.paused && EmulatorLogic.now() >= this.nextTickTime) {
                 this.internalTick();
             }
             window.requestAnimationFrame(step);
@@ -977,7 +977,7 @@ export class EmulatorLogic extends EmulatorBase {
     private async internalTick() {
         // obtains the current time, this value is going
         // to be used to compute the need for tick computation
-        const beforeTime = EmulatorBase.now();
+        const beforeTime = EmulatorLogic.now();
 
         try {
             this.tick();
