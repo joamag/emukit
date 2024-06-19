@@ -152,8 +152,9 @@ export enum PixelFormat {
  * that are available for the emulator game loop.
  */
 export enum LoopMode {
-    SetTimeout = 1,
-    AnimationFrame = 2
+    Auto = 1,
+    SetTimeout = 2,
+    AnimationFrame = 3
 }
 
 export const frequencyRatios = {
@@ -822,11 +823,20 @@ export class EmulatorLogic extends EmulatorBase {
      */
     async start({
         romUrl,
-        loopMode = LoopMode.SetTimeout
+        loopMode = LoopMode.Auto
     }: {
         romUrl?: string;
         loopMode?: LoopMode;
     }) {
+        // in case the loop mode is set to auto, tries to determine
+        // the best loop mode for the current environment
+        if (loopMode === LoopMode.Auto) {
+            loopMode =
+                window.requestAnimationFrame === undefined
+                    ? LoopMode.SetTimeout
+                    : LoopMode.AnimationFrame;
+        }
+
         // boots the emulator subsystem with the initial
         // ROM retrieved from a remote data source
         await this.boot({ loadRom: true, romPath: romUrl ?? undefined });
@@ -857,6 +867,8 @@ export class EmulatorLogic extends EmulatorBase {
             case LoopMode.AnimationFrame:
                 await this.loopAnimationFrame();
                 break;
+            default:
+                throw new Error("Invalid loop mode");
         }
     }
 
