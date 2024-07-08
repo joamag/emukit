@@ -128,6 +128,7 @@ export enum Feature {
     Keyboard,
     KeyboardChip8,
     KeyboardGB,
+    BootRomInfo,
     RomTypeInfo,
     SaveState
 }

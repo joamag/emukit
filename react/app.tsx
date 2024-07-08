@@ -371,6 +371,17 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                     />
                 }
             />
+            {hasFeature(Feature.BootRomInfo) && (
+                <Pair
+                    key="boot-rom"
+                    name={"Boot ROM"}
+                    value={
+                        romInfo.extra?.bootRom
+                            ? `${romInfo.extra?.bootRom}`
+                            : "-"
+                    }
+                />
+            )}
             {hasFeature(Feature.RomTypeInfo) && (
                 <Pair
                     key="rom-type"
