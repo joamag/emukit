@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* `BootRomInfo` support for Boot ROM information display
+*
 
 ### Changed
 
@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 *
+
+## [0.10.1] - 2024-07-08
+
+### Added
+
+* `BootRomInfo` support for Boot ROM information display
 
 ## [0.10.0] - 2024-06-19
 
