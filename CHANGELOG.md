@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Support for the FPS, CPS and EmulationSpeed features, for diagnostics
+*
 
 ### Changed
 
@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 *
+
+## [0.10.2] - 2024-07-15
+
+### Added
+
+* Support for the FPS, CPS and EmulationSpeed features, for diagnostics
 
 ## [0.10.1] - 2024-07-08
 
