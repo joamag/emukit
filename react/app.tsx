@@ -51,7 +51,8 @@ import {
     RomInfo,
     SaveState,
     getLoopMode,
-    loopModes
+    loopModes,
+    DISPLAY_FREQUENCY_DELTA
 } from "../ts/index.ts";
 
 import "./app.css";
@@ -122,7 +123,9 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const titleRef = useRef<string>(document.title);
 
     const frequencyRatio =
-        frequencyRatios[emulator.frequencySpecs.unit || Frequency.Hz];
+        frequencyRatios[emulator.frequencySpecs.unit ?? Frequency.Hz];
+    const displayFrequencyRatio =
+        frequencyRatios[emulator.frequencySpecs.displayUnit ?? Frequency.Hz];
 
     useEffect(() => {
         const background = getBackground();
@@ -375,6 +378,31 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                     />
                 }
             />
+            {hasFeature(Feature.DisplayFrequency) && (
+                <Pair
+                    key="button-display-frequency"
+                    name={"Display Frequency"}
+                    valueNode={
+                        <ButtonIncrement
+                            value={
+                                emulator.displayFrequency /
+                                displayFrequencyRatio
+                            }
+                            delta={
+                                (emulator.frequencySpecs.displayDelta ??
+                                    DISPLAY_FREQUENCY_DELTA) /
+                                displayFrequencyRatio
+                            }
+                            min={0}
+                            suffix={emulator.frequencySpecs.displayUnit ?? "Hz"}
+                            decimalPlaces={
+                                emulator.frequencySpecs.displayPlaces ?? 0
+                            }
+                            onChange={onDisplayFrequencyChange}
+                        />
+                    }
+                />
+            )}
             {hasFeature(Feature.LoopMode) && (
                 <Pair
                     key="button-loop-mode"
@@ -741,6 +769,9 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         emulator.bind("frequency", (emulator: Emulator, frequency: unknown) => {
             handler((frequency as number) / frequencyRatio);
         });
+    };
+    const onDisplayFrequencyChange = (value: number) => {
+        emulator.displayFrequency = value * displayFrequencyRatio;
     };
     const onMinimize = () => {
         setFullscreenState(!fullscreenState);

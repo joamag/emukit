@@ -4,6 +4,8 @@ import { Logger, logger } from "./logging.ts";
 
 export const FREQUENCY_DELTA = 100000;
 
+export const DISPLAY_FREQUENCY_DELTA = 1;
+
 /**
  * The frequency at which the emulator emulator should
  * run "normally". This is a simple placeholder and the
@@ -92,6 +94,9 @@ export type FrequencySpecs = {
     unit?: Frequency;
     delta?: number;
     places?: number;
+    displayUnit?: Frequency;
+    displayDelta?: number;
+    displayPlaces?: number;
 };
 
 export type Compiler = {
@@ -153,6 +158,7 @@ export enum Feature {
     Keyboard,
     KeyboardChip8,
     KeyboardGB,
+    DisplayFrequency,
     Framerate,
     Cyclerate,
     EmulationSpeed,
@@ -339,10 +345,17 @@ export interface Emulator extends ObservableI {
 
     /**
      * The current CPU frequency (logic) of the emulator,
-     * should impact other elements of the emulator.
+     * should impact many other elements of the emulator.
      */
     get frequency(): number;
     set frequency(value: number);
+
+    /**
+     * The current Display frequency (visual) of the emulator,
+     * should impact visual elements of the emulator.
+     */
+    get displayFrequency(): number;
+    set displayFrequency(value: number);
 
     /**
      * The specification to be used for frequency representation
@@ -685,6 +698,12 @@ export class EmulatorBase extends Observable {
     get debug(): DebugPanel[] {
         return [];
     }
+
+    get displayFrequency(): number {
+        return 0;
+    }
+
+    set displayFrequency(_value: number) {}
 
     get frequencySpecs(): FrequencySpecs {
         return {
