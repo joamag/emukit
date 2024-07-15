@@ -895,10 +895,12 @@ export class EmulatorLogic extends EmulatorBase {
     async resume() {
         this.paused = false;
         this.nextTickTime = EmulatorLogic.now();
+        this.resetFpsCounters();
     }
 
     async reset() {
-        this.boot({ engine: null });
+        await this.boot({ engine: null });
+        this.resetFpsCounters();
     }
 
     async tick() {
@@ -1015,5 +1017,10 @@ export class EmulatorLogic extends EmulatorBase {
         // that have elapsed since the last operation, this way this value
         // can better be used to control the game loop
         this.nextTickTime += (1000 / this.visualFrequency) * ticks;
+    }
+
+    private resetFpsCounters() {
+        this.frameCount = 0;
+        this.frameStart = EmulatorLogic.now();
     }
 }
