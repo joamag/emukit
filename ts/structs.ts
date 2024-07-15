@@ -141,6 +141,7 @@ export enum Feature {
     Themes,
     Palettes,
     Benchmark,
+    LoopMode,
     Keyboard,
     KeyboardChip8,
     KeyboardGB,
@@ -373,6 +374,13 @@ export interface Emulator extends ObservableI {
      * The current emulation speed, as in `cyclerate` / `logicFrequency`.
      */
     get emulationSpeed(): number;
+
+    /**
+     * Obtains the current loop mode being used for the execution
+     * of the emulator's game loop.
+     */
+    get loopMode(): LoopMode;
+    set loopMode(value: LoopMode);
 
     /**
      * A dictionary that contains the register names associated
@@ -852,6 +860,8 @@ export class EmulatorLogic extends EmulatorBase {
     private cycleStart: number = EmulatorLogic.now();
     private cycleCount = 0;
 
+    private _loopMode = LoopMode.Auto;
+
     get framerate(): number {
         return this.fps;
     }
@@ -862,6 +872,22 @@ export class EmulatorLogic extends EmulatorBase {
 
     get emulationSpeed(): number {
         return (this.cps / this.logicFrequency) * 100.0;
+    }
+
+    get loopMode(): LoopMode {
+        return this._loopMode;
+    }
+
+    set loopMode(value: LoopMode) {
+        // in case the loop mode is set to auto, tries to determine
+        // the best loop mode for the current environment
+        if (value === LoopMode.Auto) {
+            value =
+                window.requestAnimationFrame === undefined
+                    ? LoopMode.SetTimeout
+                    : LoopMode.AnimationFrame;
+        }
+        this._loopMode = value;
     }
 
     /**
@@ -882,14 +908,7 @@ export class EmulatorLogic extends EmulatorBase {
         romUrl?: string;
         loopMode?: LoopMode;
     }) {
-        // in case the loop mode is set to auto, tries to determine
-        // the best loop mode for the current environment
-        if (loopMode === LoopMode.Auto) {
-            loopMode =
-                window.requestAnimationFrame === undefined
-                    ? LoopMode.SetTimeout
-                    : LoopMode.AnimationFrame;
-        }
+        this.loopMode = loopMode;
 
         // boots the emulator subsystem with the initial
         // ROM retrieved from a remote data source
@@ -937,19 +956,25 @@ export class EmulatorLogic extends EmulatorBase {
             }
         });
 
-        switch (loopMode) {
-            case LoopMode.SetTimeout:
-                await this.loopSetTimeout();
-                break;
-            case LoopMode.AnimationFrame:
-                await this.loopAnimationFrame();
-                break;
-            default:
-                throw new Error("Invalid loop mode");
-        }
+        await this.loop();
     }
 
     async stop() {}
+
+    private async loop() {
+        while (true) {
+            switch (this.loopMode) {
+                case LoopMode.SetTimeout:
+                    await this.loopSetTimeout();
+                    break;
+                case LoopMode.AnimationFrame:
+                    await this.loopAnimationFrame();
+                    break;
+                default:
+                    throw new Error("Invalid loop mode");
+            }
+        }
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async boot(options: unknown) {
@@ -1029,6 +1054,11 @@ export class EmulatorLogic extends EmulatorBase {
         // runs the sequence as an infinite loop, running
         // the associated CPU cycles accordingly
         while (true) {
+            // breaks the loop in case the loop mode has changed
+            if (this.loopMode !== LoopMode.SetTimeout) {
+                break;
+            }
+
             // in case the machine is paused we must delay the execution
             // a little bit until the paused state is recovered
             if (this.paused) {
@@ -1057,8 +1087,14 @@ export class EmulatorLogic extends EmulatorBase {
 
     private async loopAnimationFrame() {
         const step = async () => {
-            if (!this.paused && EmulatorLogic.now() >= this.nextTickTime) {
-                await this.internalTick();
+            if (this.loopMode !== LoopMode.AnimationFrame) {
+                this.loop();
+                return;
+            }
+            if (!this.paused) {
+                while (EmulatorLogic.now() >= this.nextTickTime) {
+                    await this.internalTick();
+                }
             }
             window.requestAnimationFrame(step);
         };
@@ -1077,22 +1113,11 @@ export class EmulatorLogic extends EmulatorBase {
             await this.handleError(err);
         }
 
-        // calculates the number of ticks that have elapsed since the
-        // last draw operation, this is critical to be able to properly
-        // operate the clock of the CPU in frame drop situations, meaning
-        // a situation where the system resources are not able to emulate
-        // the system on time and frames must be skipped (ticks > 1)
-        if (this.nextTickTime === 0) this.nextTickTime = beforeTime;
-        let ticks = Math.ceil(
-            (beforeTime - this.nextTickTime) /
-                ((1 / this.visualFrequency) * 1000)
-        );
-        ticks = Math.max(ticks, 1);
-
         // updates the next update time according to the number of ticks
         // that have elapsed since the last operation, this way this value
         // can better be used to control the game loop
-        this.nextTickTime += (1000 / this.visualFrequency) * ticks;
+        if (this.nextTickTime === 0) this.nextTickTime = beforeTime;
+        this.nextTickTime += 1000 / this.visualFrequency;
     }
 
     private resetTimeCounters() {
@@ -1108,5 +1133,23 @@ export class EmulatorLogic extends EmulatorBase {
     private resetCpsCounters() {
         this.cycleCount = 0;
         this.cycleStart = EmulatorLogic.now();
+    }
+}
+
+export function loopModes(): string[] {
+    return ["auto", "settimeout", "animation"];
+}
+
+export function getLoopMode(value: string): LoopMode {
+    switch (value) {
+        case "auto":
+            return LoopMode.Auto;
+        case "settimeout":
+            return LoopMode.SetTimeout;
+        case "animation":
+        case "animationframe":
+            return LoopMode.AnimationFrame;
+        default:
+            return LoopMode.Auto;
     }
 }

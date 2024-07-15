@@ -49,7 +49,9 @@ import {
     frequencyRatios,
     PixelFormat,
     RomInfo,
-    SaveState
+    SaveState,
+    getLoopMode,
+    loopModes
 } from "../ts/index.ts";
 
 import "./app.css";
@@ -373,6 +375,22 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                     />
                 }
             />
+            {hasFeature(Feature.LoopMode) && (
+                <Pair
+                    key="button-loop-mode"
+                    name={"Loop Mode"}
+                    valueNode={
+                        <ButtonSwitch
+                            options={loopModes()}
+                            value={"auto"}
+                            uppercase={true}
+                            size={"large"}
+                            style={["simple"]}
+                            onChange={onLoopChange}
+                        />
+                    }
+                />
+            )}
             {hasFeature(Feature.BootRomInfo) && (
                 <Pair
                     key="boot-rom"
@@ -708,6 +726,12 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         await emulator.boot({ engine: engine });
         showToast(
             `${emulator.device.text} running on engine "${engine}" from now on!`
+        );
+    };
+    const onLoopChange = async (loopMode: string) => {
+        emulator.loopMode = getLoopMode(loopMode);
+        showToast(
+            `${emulator.device.text} running on loop mode "${loopMode}" from now on!`
         );
     };
     const onFrequencyChange = (value: number) => {
