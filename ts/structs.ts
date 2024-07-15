@@ -861,7 +861,7 @@ export class EmulatorLogic extends EmulatorBase {
     }
 
     get emulationSpeed(): number {
-        return this.cps / this.logicFrequency * 100.0;
+        return (this.cps / this.logicFrequency) * 100.0;
     }
 
     /**
@@ -908,22 +908,33 @@ export class EmulatorLogic extends EmulatorBase {
                 const currentTime = EmulatorLogic.now();
                 const deltaFps = (currentTime - this.frameStart) / 1000;
                 const deltaCps = (currentTime - this.cycleStart) / 1000;
-
-                const fps = Math.round(this.frameCount / deltaFps);
-                this.fps = fps;
-                this.frameCount = 0;
-                this.frameStart = currentTime;
-
-                const cps = Math.round(this.cycleCount / deltaCps);
-                this.cps = cps;
-                this.cycleCount = 0;
-                this.cycleStart = currentTime;
+                this.fps = Math.round(this.frameCount / deltaFps);
+                this.cps = Math.round(this.cycleCount / deltaCps);
+                this.resetTimeCounters();
             }
         });
 
         this.bind("tick", (_owner, params: unknown) => {
             const tickInfo = params as TickInfo;
             this.cycleCount += tickInfo.cycles ?? 0;
+        });
+
+        // registers for the visibility change event so that the
+        // whenever we get focus on the emulator tab we reset
+        // the counters so that the FPS and CPS are accurate
+        this.bind("visible", () => {
+            this.resetTimeCounters();
+        });
+
+        // pipes some of the native visibility change events
+        // into the internal event system
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "visible") {
+                this.trigger("visible");
+            }
+            if (document.visibilityState === "hidden") {
+                this.trigger("hidden");
+            }
         });
 
         switch (loopMode) {
@@ -1095,7 +1106,7 @@ export class EmulatorLogic extends EmulatorBase {
     }
 
     private resetCpsCounters() {
-        this.cycleStart = 0;
+        this.cycleCount = 0;
         this.cycleStart = EmulatorLogic.now();
     }
 }
