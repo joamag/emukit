@@ -32,6 +32,14 @@ export const IDLE_HZ = 10;
  */
 const FPS_SAMPLE_RATE = 3;
 
+/**
+ * The maximum number of emulation ticks that can be executed
+ * for a single animation frame, this value allows an animation
+ * frame loop of 30 FPS to run an emulator that requires 90 Hz
+ * of visual execution.
+ */
+const MAX_TICKS_ANIMATION_FRAME = 3;
+
 export type Callback<T> = (owner: T, params?: unknown) => void;
 
 export type RomInfo = {
@@ -961,21 +969,6 @@ export class EmulatorLogic extends EmulatorBase {
 
     async stop() {}
 
-    private async loop() {
-        while (true) {
-            switch (this.loopMode) {
-                case LoopMode.SetTimeout:
-                    await this.loopSetTimeout();
-                    break;
-                case LoopMode.AnimationFrame:
-                    await this.loopAnimationFrame();
-                    break;
-                default:
-                    throw new Error("Invalid loop mode");
-            }
-        }
-    }
-
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async boot(options: unknown) {
         throw new Error("Not implemented");
@@ -1050,6 +1043,21 @@ export class EmulatorLogic extends EmulatorBase {
         }
     }
 
+    private async loop() {
+        while (true) {
+            switch (this.loopMode) {
+                case LoopMode.SetTimeout:
+                    await this.loopSetTimeout();
+                    break;
+                case LoopMode.AnimationFrame:
+                    await this.loopAnimationFrame();
+                    break;
+                default:
+                    throw new Error("Invalid loop mode");
+            }
+        }
+    }
+
     private async loopSetTimeout() {
         // runs the sequence as an infinite loop, running
         // the associated CPU cycles accordingly
@@ -1092,8 +1100,14 @@ export class EmulatorLogic extends EmulatorBase {
                 return;
             }
             if (!this.paused) {
+                let remainingTicks = MAX_TICKS_ANIMATION_FRAME;
                 while (EmulatorLogic.now() >= this.nextTickTime) {
+                    if (remainingTicks === 0) {
+                        this.nextTickTime = EmulatorLogic.now();
+                        break;
+                    }
                     await this.internalTick();
+                    remainingTicks--;
                 }
             }
             window.requestAnimationFrame(step);
@@ -1113,11 +1127,29 @@ export class EmulatorLogic extends EmulatorBase {
             await this.handleError(err);
         }
 
+        // calculates the number of ticks that have elapsed since the
+        // last draw operation, this is critical to be able to properly
+        // operate the clock of the CPU in frame drop situations, meaning
+        // a situation where the system resources are not able to emulate
+        // the system on time and frames must be skipped (ticks > 1)
+        //
+        // NOTE: The ticks operations does not apply to the animation frame
+        // loop mode due to the nature of the event loop, which does not
+        // allow direct control of the internal tick timing (that's controller
+        // by the browser), which means that a certain delay may always occur
+        // and multiple emulator tick operations should be performed on a single
+        // animate tick to compensate for this fact.
+        if (this.nextTickTime === 0) this.nextTickTime = beforeTime;
+        let ticks = Math.ceil(
+            (beforeTime - this.nextTickTime) / (1000 / this.visualFrequency)
+        );
+        ticks =
+            this.loopMode === LoopMode.AnimationFrame ? 1 : Math.max(ticks, 1);
+
         // updates the next update time according to the number of ticks
         // that have elapsed since the last operation, this way this value
         // can better be used to control the game loop
-        if (this.nextTickTime === 0) this.nextTickTime = beforeTime;
-        this.nextTickTime += 1000 / this.visualFrequency;
+        this.nextTickTime += (1000 / this.visualFrequency) * ticks;
     }
 
     private resetTimeCounters() {
