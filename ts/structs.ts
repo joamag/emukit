@@ -5,6 +5,13 @@ import { Logger, logger } from "./logging.ts";
 export const FREQUENCY_DELTA = 100000;
 
 /**
+ * The frequency at which the emulator emulator should
+ * run "normally". This is a simple placeholder and the
+ * concrete value should be always overridden.
+ */
+const LOGIC_HZ = 1000;
+
+/**
  * The frequency at which the the visual loop is going to
  * run, increasing this value will have a consequence in
  * the visual frames per second (FPS) of emulation.
@@ -115,6 +122,15 @@ export type SaveState = {
 };
 
 /**
+ * Represents the information about the current tick
+ * operation, this information may be used for debugging
+ * purposes.
+ */
+export type TickInfo = {
+    cycles?: number;
+};
+
+/**
  * Enumeration to be used to describe the set of
  * features that a certain emulator supports, this
  * is going to condition its runtime execution.
@@ -128,6 +144,9 @@ export enum Feature {
     Keyboard,
     KeyboardChip8,
     KeyboardGB,
+    Framerate,
+    Cyclerate,
+    EmulationSpeed,
     BootRomInfo,
     RomTypeInfo,
     SaveState
@@ -344,6 +363,16 @@ export interface Emulator extends ObservableI {
      * The current logic framerate of the running emulator.
      */
     get framerate(): number;
+
+    /**
+     * The current logic framerate of the running emulator.
+     */
+    get cyclerate(): number;
+
+    /**
+     * The current emulation speed, as in `cyclerate` / `logicFrequency`.
+     */
+    get emulationSpeed(): number;
 
     /**
      * A dictionary that contains the register names associated
@@ -673,6 +702,18 @@ export class EmulatorBase extends Observable {
         return null;
     }
 
+    get framerate(): number {
+        return 0;
+    }
+
+    get cyclerate(): number {
+        return 0;
+    }
+
+    get emulationSpeed(): number {
+        return 100.0;
+    }
+
     get audioOutput(): Record<string, number> {
         return {};
     }
@@ -800,15 +841,27 @@ export class EmulatorBase extends Observable {
 export class EmulatorLogic extends EmulatorBase {
     protected paused = false;
     protected nextTickTime = 0;
+    protected logicFrequency = LOGIC_HZ;
     protected visualFrequency = VISUAL_HZ;
     protected idleFrequency = IDLE_HZ;
 
     private fps = 0;
     private frameStart: number = EmulatorLogic.now();
     private frameCount = 0;
+    private cps = 0;
+    private cycleStart: number = EmulatorLogic.now();
+    private cycleCount = 0;
 
     get framerate(): number {
         return this.fps;
+    }
+
+    get cyclerate(): number {
+        return this.cps;
+    }
+
+    get emulationSpeed(): number {
+        return this.cps / this.logicFrequency * 100.0;
     }
 
     /**
@@ -853,12 +906,24 @@ export class EmulatorLogic extends EmulatorBase {
             this.frameCount++;
             if (this.frameCount >= this.visualFrequency * FPS_SAMPLE_RATE) {
                 const currentTime = EmulatorLogic.now();
-                const deltaTime = (currentTime - this.frameStart) / 1000;
-                const fps = Math.round(this.frameCount / deltaTime);
+                const deltaFps = (currentTime - this.frameStart) / 1000;
+                const deltaCps = (currentTime - this.cycleStart) / 1000;
+
+                const fps = Math.round(this.frameCount / deltaFps);
                 this.fps = fps;
                 this.frameCount = 0;
                 this.frameStart = currentTime;
+
+                const cps = Math.round(this.cycleCount / deltaCps);
+                this.cps = cps;
+                this.cycleCount = 0;
+                this.cycleStart = currentTime;
             }
+        });
+
+        this.bind("tick", (_owner, params: unknown) => {
+            const tickInfo = params as TickInfo;
+            this.cycleCount += tickInfo.cycles ?? 0;
         });
 
         switch (loopMode) {
@@ -895,12 +960,12 @@ export class EmulatorLogic extends EmulatorBase {
     async resume() {
         this.paused = false;
         this.nextTickTime = EmulatorLogic.now();
-        this.resetFpsCounters();
+        this.resetTimeCounters();
     }
 
     async reset() {
         await this.boot({ engine: null });
-        this.resetFpsCounters();
+        this.resetTimeCounters();
     }
 
     async tick() {
@@ -1019,8 +1084,18 @@ export class EmulatorLogic extends EmulatorBase {
         this.nextTickTime += (1000 / this.visualFrequency) * ticks;
     }
 
+    private resetTimeCounters() {
+        this.resetFpsCounters();
+        this.resetCpsCounters();
+    }
+
     private resetFpsCounters() {
         this.frameCount = 0;
         this.frameStart = EmulatorLogic.now();
+    }
+
+    private resetCpsCounters() {
+        this.cycleStart = 0;
+        this.cycleStart = EmulatorLogic.now();
     }
 }

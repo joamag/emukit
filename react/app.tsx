@@ -95,6 +95,8 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     );
     const [romInfo, setRomInfo] = useState<RomInfo>({});
     const [framerate, setFramerate] = useState(0);
+    const [cyclerate, setCyclerate] = useState(0);
+    const [emulationSpeed, setEmulationSpeed] = useState(0);
     const [paletteName, setPaletteName] = useState(palette ?? emulator.palette);
     const [saveStates, setSaveStates] = useState<Record<number, SaveState>>({});
     const [gamepads, setGamepads] = useState<Record<number, Gamepad>>({});
@@ -393,11 +395,27 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                     }
                 />
             )}
-            <Pair
-                key="framerate"
-                name={"Framerate"}
-                value={`${framerate} fps`}
-            />
+            {hasFeature(Feature.Framerate) && (
+                <Pair
+                    key="framerate"
+                    name={"Framerate"}
+                    value={`${framerate} fps`}
+                />
+            )}
+            {hasFeature(Feature.Cyclerate) && (
+                <Pair
+                    key="cyclerate"
+                    name={"Cyclerate"}
+                    value={`${cyclerate} hz`}
+                />
+            )}
+            {hasFeature(Feature.EmulationSpeed) && (
+                <Pair
+                    key="emulation-speed"
+                    name={"Emulation Speed"}
+                    value={`${Math.round(emulationSpeed)} %`}
+                />
+            )}
         </Info>
     );
     const renderDetailsTab = () => (
@@ -735,6 +753,8 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         emulator.bind("frame", () => {
             handler(emulator.imageBuffer, PixelFormat.RGB);
             setFramerate(emulator.framerate);
+            setCyclerate(emulator.cyclerate);
+            setEmulationSpeed(emulator.emulationSpeed);
         });
     };
     const onClearHandler = (handler: ClearHandler) => {
