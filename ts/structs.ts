@@ -703,7 +703,7 @@ export class EmulatorBase extends Observable {
         return 0;
     }
 
-    set displayFrequency(_value: number) {}
+    set displayFrequency(value: number) {}
 
     get frequencySpecs(): FrequencySpecs {
         return {
