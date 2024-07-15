@@ -424,7 +424,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 <Pair
                     key="cyclerate"
                     name={"Cyclerate"}
-                    value={`${cyclerate} hz`}
+                    value={`${Intl.NumberFormat().format(cyclerate)} hz`}
                 />
             )}
             {hasFeature(Feature.EmulationSpeed) && (
