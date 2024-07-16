@@ -25,7 +25,7 @@ const VISUAL_HZ = 60;
  * increasing this value will make resume from emulation
  * paused state fasted.
  */
-export const IDLE_HZ = 10;
+const IDLE_HZ = 10;
 
 /**
  * The sample rate that is going to be used for FPS calculus,
@@ -1187,20 +1187,19 @@ export class EmulatorLogic extends EmulatorBase {
     }
 }
 
+export const LOOP_MODES_M: { [key: string]: LoopMode } = {
+    auto: LoopMode.Auto,
+    settimeout: LoopMode.SetTimeout,
+    animation: LoopMode.AnimationFrame,
+    animationframe: LoopMode.AnimationFrame
+};
+
+export const LOOP_MODES_S = ["auto", "settimeout", "animation"];
+
 export function loopModes(): string[] {
-    return ["auto", "settimeout", "animation"];
+    return LOOP_MODES_S;
 }
 
 export function getLoopMode(value: string): LoopMode {
-    switch (value) {
-        case "auto":
-            return LoopMode.Auto;
-        case "settimeout":
-            return LoopMode.SetTimeout;
-        case "animation":
-        case "animationframe":
-            return LoopMode.AnimationFrame;
-        default:
-            return LoopMode.Auto;
-    }
+    return LOOP_MODES_M[value] ?? LoopMode.Auto;
 }
