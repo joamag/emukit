@@ -1142,7 +1142,7 @@ export class EmulatorLogic extends EmulatorBase {
     }
 
     private async loopAnimationFrame() {
-        const step = async () => {
+        const step = async (time: DOMHighResTimeStamp) => {
             if (this.loopMode !== LoopMode.AnimationFrame) {
                 this.loop();
                 return;
@@ -1150,26 +1150,26 @@ export class EmulatorLogic extends EmulatorBase {
             window.requestAnimationFrame(step);
             if (!this.paused) {
                 let remainingTicks = MAX_TICKS_ANIMATION_FRAME;
-                const now = EmulatorLogic.now();
+                const now = time;
                 while (now >= this.nextTickTime) {
                     if (remainingTicks === 0) {
-                        this.nextTickTime = EmulatorBase.now();
+                        this.nextTickTime = time;
                         break;
                     }
-                    await this.internalTick();
+                    await this.internalTick(time);
                     remainingTicks--;
                 }
             }
             this.trigger("animation-frame");
         };
-        await step();
+        window.requestAnimationFrame(step);
         await new Promise(() => {});
     }
 
-    private async internalTick() {
+    private async internalTick(time?: DOMHighResTimeStamp) {
         // obtains the current time, this value is going
         // to be used to compute the need for tick computation
-        const beforeTime = EmulatorLogic.now();
+        const beforeTime = time ?? EmulatorLogic.now();
 
         try {
             await this.tick();
