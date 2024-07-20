@@ -99,6 +99,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const [romInfo, setRomInfo] = useState<RomInfo>({});
     const [framerate, setFramerate] = useState(0);
     const [cyclerate, setCyclerate] = useState(0);
+    const [animationrate, setAnimationrate] = useState(0);
     const [emulationSpeed, setEmulationSpeed] = useState(0);
     const [paletteName, setPaletteName] = useState(palette ?? emulator.palette);
     const [saveStates, setSaveStates] = useState<Record<number, SaveState>>({});
@@ -455,6 +456,13 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                     value={`${Intl.NumberFormat().format(cyclerate)} Hz`}
                 />
             )}
+            {hasFeature(Feature.Animationrate) && (
+                <Pair
+                    key="animationrate"
+                    name={"Animationrate"}
+                    value={`${Intl.NumberFormat().format(animationrate)} Hz`}
+                />
+            )}
             {hasFeature(Feature.EmulationSpeed) && (
                 <Pair
                     key="emulation-speed"
@@ -809,6 +817,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             handler(emulator.imageBuffer, PixelFormat.RGB);
             setFramerate(emulator.framerate);
             setCyclerate(emulator.cyclerate);
+            setAnimationrate(emulator.animationrate);
             setEmulationSpeed(emulator.emulationSpeed);
         });
     };

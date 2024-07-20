@@ -161,6 +161,7 @@ export enum Feature {
     DisplayFrequency,
     Framerate,
     Cyclerate,
+    Animationrate,
     EmulationSpeed,
     BootRomInfo,
     RomTypeInfo,
@@ -390,6 +391,11 @@ export interface Emulator extends ObservableI {
      * The current logic framerate of the running emulator.
      */
     get cyclerate(): number;
+
+    /**
+     * The current animation framerate of the running emulator.
+     */
+    get animationrate(): number;
 
     /**
      * The current emulation speed, as in `cyclerate` / `logicFrequency`.
@@ -745,6 +751,10 @@ export class EmulatorBase extends Observable {
         return 0;
     }
 
+    get animationrate(): number {
+        return 0;
+    }
+
     get emulationSpeed(): number {
         return 100.0;
     }
@@ -898,6 +908,10 @@ export class EmulatorLogic extends EmulatorBase {
 
     get cyclerate(): number {
         return this.cps;
+    }
+
+    get animationrate(): number {
+        return this.afps;
     }
 
     get emulationSpeed(): number {
@@ -1099,6 +1113,7 @@ export class EmulatorLogic extends EmulatorBase {
             // in case the machine is paused we must delay the execution
             // a little bit until the paused state is recovered
             if (this.paused) {
+                this.trigger("animation-frame");
                 await new Promise((resolve) => {
                     setTimeout(resolve, 1000 / this.idleFrequency);
                 });
@@ -1114,6 +1129,10 @@ export class EmulatorLogic extends EmulatorBase {
             const afterTime = EmulatorLogic.now();
             const pendingTime = Math.max(this.nextTickTime - afterTime, 0);
 
+            // triggers the animation frame event so that any listener "knows"
+            // that a new frame render loop has been executed
+            this.trigger("animation-frame");
+
             // waits the required time until until the next tick operation
             // should be executed - this should control the flow of render
             await new Promise((resolve) => {
@@ -1128,11 +1147,13 @@ export class EmulatorLogic extends EmulatorBase {
                 this.loop();
                 return;
             }
+            window.requestAnimationFrame(step);
             if (!this.paused) {
                 let remainingTicks = MAX_TICKS_ANIMATION_FRAME;
-                while (EmulatorLogic.now() >= this.nextTickTime) {
+                const now = EmulatorLogic.now();
+                while (now >= this.nextTickTime) {
                     if (remainingTicks === 0) {
-                        this.nextTickTime = EmulatorLogic.now();
+                        this.nextTickTime = EmulatorBase.now();
                         break;
                     }
                     await this.internalTick();
@@ -1140,7 +1161,6 @@ export class EmulatorLogic extends EmulatorBase {
                 }
             }
             this.trigger("animation-frame");
-            window.requestAnimationFrame(step);
         };
         await step();
         await new Promise(() => {});
