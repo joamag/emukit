@@ -886,6 +886,9 @@ export class EmulatorLogic extends EmulatorBase {
     private cps = 0;
     private cycleStart: number = EmulatorLogic.now();
     private cycleCount = 0;
+    private afps = 0;
+    private animationFrameStart: number = EmulatorLogic.now();
+    private animationFrameCount = 0;
 
     private _loopMode = LoopMode.Auto;
 
@@ -954,8 +957,11 @@ export class EmulatorLogic extends EmulatorBase {
                 const currentTime = EmulatorLogic.now();
                 const deltaFps = (currentTime - this.frameStart) / 1000;
                 const deltaCps = (currentTime - this.cycleStart) / 1000;
+                const deltaAfps =
+                    (currentTime - this.animationFrameStart) / 1000;
                 this.fps = Math.round(this.frameCount / deltaFps);
                 this.cps = Math.round(this.cycleCount / deltaCps);
+                this.afps = Math.round(this.animationFrameCount / deltaAfps);
                 this.resetTimeCounters();
             }
         });
@@ -963,6 +969,10 @@ export class EmulatorLogic extends EmulatorBase {
         this.bind("tick", (_owner, params: unknown) => {
             const tickInfo = params as TickInfo;
             this.cycleCount += tickInfo.cycles ?? 0;
+        });
+
+        this.bind("animation-frame", () => {
+            this.animationFrameCount++;
         });
 
         // registers for the visibility change event so that the
@@ -1129,6 +1139,7 @@ export class EmulatorLogic extends EmulatorBase {
                     remainingTicks--;
                 }
             }
+            this.trigger("animation-frame");
             window.requestAnimationFrame(step);
         };
         await step();
@@ -1174,6 +1185,7 @@ export class EmulatorLogic extends EmulatorBase {
     private resetTimeCounters() {
         this.resetFpsCounters();
         this.resetCpsCounters();
+        this.resetAfpsCounters();
     }
 
     private resetFpsCounters() {
@@ -1184,6 +1196,11 @@ export class EmulatorLogic extends EmulatorBase {
     private resetCpsCounters() {
         this.cycleCount = 0;
         this.cycleStart = EmulatorLogic.now();
+    }
+
+    private resetAfpsCounters() {
+        this.animationFrameCount = 0;
+        this.animationFrameStart = EmulatorLogic.now();
     }
 }
 
