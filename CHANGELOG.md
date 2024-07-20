@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+*
+
+## [0.10.5] - 2024-07-20
+
+### Fixed
+
 * Animation frame loop mode frame skipping, making loop more fluid
 
 ## [0.10.4] - 2024-07-15
