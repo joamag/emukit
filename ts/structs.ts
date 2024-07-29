@@ -915,6 +915,7 @@ export class EmulatorLogic extends EmulatorBase {
     }
 
     get emulationSpeed(): number {
+        if (this.logicFrequency === 0.0) return 0.0;
         return (this.cps / this.logicFrequency) * 100.0;
     }
 
