@@ -11,14 +11,14 @@ dd.pair-state {
 }
 
 .pair-state .pair-state-description {
+    color: #f0f0f0;
     font-size: 16px;
     margin-top: 6px;
-    color: #f0f0f0;
 }
 
 .pair-state .pair-state-buttons {
-    margin-top: 26px;
     font-size: 17px;
+    margin-top: 26px;
 }
 
 .pair-state .pair-state-buttons > .link {
@@ -38,10 +38,10 @@ dd.pair-state {
 }
 
 .pair-state .pair-state-thumbnail {
-    width: 100px;
-    border-radius: 6px;
-    image-rendering: pixelated;
-    border: 1px solid #ffffff;
-    padding: 5px 5px 5px 5px;
     background: #000000;
+    border: 1px solid #ffffff;
+    border-radius: 6px 6px 6px 6px;
+    image-rendering: pixelated;
+    padding: 5px 5px 5px 5px;
+    width: 100px;
 }

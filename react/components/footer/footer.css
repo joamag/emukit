@@ -10,6 +10,7 @@
     left: 0px;
     position: fixed;
     width: 100%;
+    z-index: 1;
 }
 
 .footer > .footer-contents {
@@ -21,4 +22,5 @@
     position: fixed;
     text-align: center;
     width: 100%;
+    z-index: 1;
 }
