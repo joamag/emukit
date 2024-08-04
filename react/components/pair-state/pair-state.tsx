@@ -35,7 +35,7 @@ export const PairState: FC<PairStateProps> = ({
                 nameNode={
                     <>
                         <div>Save State #{index}</div>
-                        <div className="pair-state-datetime">
+                        <div className="pair-state-description">
                             {saveState && saveState.timestamp !== undefined
                                 ? new Date(
                                       saveState.timestamp * 1000
@@ -47,23 +47,29 @@ export const PairState: FC<PairStateProps> = ({
                                       minute: "2-digit"
                                   })
                                 : ""}
+                            {saveState && saveState.error !== undefined
+                                ? "Error - " + saveState.error
+                                : ""}
                         </div>
                         <div className="pair-state-buttons">
-                            {onLoadClick && (
+                            {onLoadClick && saveState?.error === undefined && (
                                 <>
                                     <span className="link-separator">/</span>
                                     <Link text={"Load"} onClick={onLoadClick} />
                                 </>
                             )}
-                            {onDownloadClick && (
-                                <>
-                                    <span className="link-separator">/</span>
-                                    <Link
-                                        text={"Download"}
-                                        onClick={onDownloadClick}
-                                    />
-                                </>
-                            )}
+                            {onDownloadClick &&
+                                saveState?.error === undefined && (
+                                    <>
+                                        <span className="link-separator">
+                                            /
+                                        </span>
+                                        <Link
+                                            text={"Download"}
+                                            onClick={onDownloadClick}
+                                        />
+                                    </>
+                                )}
                             {onDeleteClick && (
                                 <>
                                     <span className="link-separator">/</span>

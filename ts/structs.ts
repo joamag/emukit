@@ -132,6 +132,7 @@ export type SaveState = {
     agent?: string;
     model?: string;
     thumbnail?: Uint8Array;
+    error?: Error;
 };
 
 /**
