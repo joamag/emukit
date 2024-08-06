@@ -13,6 +13,7 @@ type PairStateProps = {
     style?: PairStyle[];
     onLoadClick?: () => void;
     onDownloadClick?: () => void;
+    onInfoClick?: () => void;
     onDeleteClick?: () => void;
 };
 
@@ -24,6 +25,7 @@ export const PairState: FC<PairStateProps> = ({
     style = [],
     onLoadClick,
     onDownloadClick,
+    onInfoClick,
     onDeleteClick
 }) => {
     const pairStyle = ["pair-state", ...style];
@@ -70,6 +72,12 @@ export const PairState: FC<PairStateProps> = ({
                                         />
                                     </>
                                 )}
+                            {onInfoClick && (
+                                <>
+                                    <span className="link-separator">/</span>
+                                    <Link text={"Info"} onClick={onInfoClick} />
+                                </>
+                            )}
                             {onDeleteClick && (
                                 <>
                                     <span className="link-separator">/</span>

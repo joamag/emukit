@@ -32,6 +32,7 @@ import {
     PanelSplit,
     PanelTab,
     Paragraph,
+    SaveInfo,
     Section,
     Separator,
     Title,
@@ -536,6 +537,9 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                                     onDeleteClick={() =>
                                         onDeleteStateClick(saveSate.index)
                                     }
+                                    onInfoClick={() =>
+                                        onInfoStateClick(saveSate.index)
+                                    }
                                     onDownloadClick={() =>
                                         onDownloadStateClick(saveSate.index)
                                     }
@@ -611,6 +615,13 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 panels={emulator.help.map((h) => h.node)}
                 names={emulator.help.map((h) => h.name)}
             />
+        );
+    };
+    const showSaveInfo = async (saveState: SaveState) => {
+        await showModal(
+            `Save State #${saveState.index}`,
+            undefined,
+            <SaveInfo saveState={saveState} emulator={emulator} />
         );
     };
     const showToast = async (text: string, error = false, timeout = 3500) => {
@@ -732,6 +743,10 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const onDownloadStateClick = async (index: number) => {
         const data = emulator.getStateData!(index);
         downloadFromBuffer(data, `${emulator.romInfo.name}.s${index}`);
+    };
+    const onInfoStateClick = async (index: number) => {
+        const saveState = emulator.getState!(index);
+        showSaveInfo(saveState);
     };
     const onDeleteStateClick = async (index: number) => {
         const result = await showModal(

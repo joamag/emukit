@@ -19,6 +19,7 @@ export * from "./pair-state/pair-state.tsx";
 export * from "./panel-split/panel-split.tsx";
 export * from "./panel-tab/panel-tab.tsx";
 export * from "./paragraph/paragraph.tsx";
+export * from "./save-info/save-info.tsx";
 export * from "./section/section.tsx";
 export * from "./separator/separator.tsx";
 export * from "./text-input/text-input.tsx";

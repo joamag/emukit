@@ -131,6 +131,8 @@ export type SaveState = {
     timestamp?: number;
     agent?: string;
     model?: string;
+    format?: string;
+    size?: number;
     thumbnail?: Uint8Array;
     error?: Error;
 };
