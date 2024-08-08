@@ -9,8 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Improved CSS structure
-* Support for the `SaveInfo` panel
+*
 
 ### Changed
 
@@ -19,6 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 *
+
+## [0.10.7] - 2024-08-08
+
+### Added
+
+* Improved CSS structure
+* Support for the `SaveInfo` panel
 
 ## [0.10.6] - 2024-08-04
 
