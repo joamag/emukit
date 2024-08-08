@@ -1,14 +1,3 @@
-.save-info .save-info-main {
-    list-style: none;
-    margin: 0px 0px 0px 0px;
-    padding: 0px 0px 0px 0px;
-}
-
-.save-info .save-info-main > li {
-    font-size: 18px;
-    line-height: 28px;
-}
-
 .save-info .save-info-thumbnail > img {
     image-rendering: pixelated;
     width: 100%;

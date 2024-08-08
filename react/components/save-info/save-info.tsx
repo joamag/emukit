@@ -41,38 +41,44 @@ type SaveInfoTabProps = {
 export const SaveInfoMain: FC<SaveInfoTabProps> = ({ saveState }) => (
     <div className="save-info-main">
         <Info>
-            <Pair key="model" name="Model" value={saveState.model} />
-            <Pair key="format" name="Format" value={saveState.format} />
-            <Pair key="agent" name="Agent" value={saveState.agent} />
-            <Pair
-                key="size"
-                name="Size"
-                value={
-                    saveState.size
-                        ? `${new Intl.NumberFormat().format(
-                              saveState.size
-                          )} bytes`
-                        : "-"
-                }
-            />
-            <Pair
-                key="date"
-                name="Date"
-                value={
-                    saveState.timestamp
-                        ? new Date(saveState.timestamp * 1000).toLocaleString(
-                              undefined,
-                              {
-                                  day: "2-digit",
-                                  month: "2-digit",
-                                  year: "numeric",
-                                  hour: "2-digit",
-                                  minute: "2-digit"
-                              }
-                          )
-                        : "-"
-                }
-            />
+            {saveState.model && (
+                <Pair key="model" name="Model" value={saveState.model} />
+            )}
+            {saveState.format && (
+                <Pair key="format" name="Format" value={saveState.format} />
+            )}
+            {saveState.agent && (
+                <Pair key="agent" name="Agent" value={saveState.agent} />
+            )}
+            {saveState.size && (
+                <Pair
+                    key="size"
+                    name="Size"
+                    value={
+                        saveState.size
+                            ? `${new Intl.NumberFormat().format(
+                                  saveState.size
+                              )} bytes`
+                            : "-"
+                    }
+                />
+            )}
+            {saveState.timestamp && (
+                <Pair
+                    key="date"
+                    name="Date"
+                    value={new Date(saveState.timestamp * 1000).toLocaleString(
+                        undefined,
+                        {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit"
+                        }
+                    )}
+                />
+            )}
         </Info>
     </div>
 );

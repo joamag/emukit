@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 * Improved CSS structure
+* Support for the `SaveInfo` panel
 
 ### Changed
 
