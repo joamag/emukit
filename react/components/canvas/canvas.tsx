@@ -50,7 +50,16 @@ export const Canvas: FC<CanvasProps> = ({
             );
             structure && onCanvas && onCanvas(structure);
         }
-    }, [canvasRef]);
+    }, [
+        onCanvas,
+        canvasRef,
+        width,
+        height,
+        init,
+        pixelRatio,
+        scale,
+        smoothing
+    ]);
     return (
         <canvas
             ref={canvasRef}
