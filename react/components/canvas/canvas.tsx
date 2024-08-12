@@ -14,13 +14,13 @@ export type CanvasStructure = {
 type CanvasProps = {
     width: number;
     height: number;
+    canvasRef: RefObject<HTMLCanvasElement>;
     scaledWidth?: number | string;
     pixelRatio?: number;
     scale?: number;
     smoothing?: boolean;
     imageRendering?: "auto" | "crisp-edges" | "pixelated";
     init?: boolean;
-    canvasRef?: RefObject<HTMLCanvasElement>;
     style?: string[];
     onCanvas?: (structure: CanvasStructure) => void;
 };
@@ -28,13 +28,13 @@ type CanvasProps = {
 export const Canvas: FC<CanvasProps> = ({
     width,
     height,
+    canvasRef,
     scaledWidth,
     pixelRatio = window.devicePixelRatio,
     scale = 1,
     smoothing = false,
     imageRendering = "pixelated",
     init = true,
-    canvasRef = useRef<HTMLCanvasElement>(null),
     style = [],
     onCanvas
 }) => {
