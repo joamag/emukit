@@ -1049,7 +1049,7 @@ export class EmulatorLogic extends EmulatorBase {
     }
 
     async hardReset() {
-        throw new Error("Not implemented");
+        this.reset();
     }
 
     async handleError(err: Error) {
