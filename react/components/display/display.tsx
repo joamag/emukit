@@ -90,11 +90,12 @@ export const Display: FC<DisplayProps> = ({
     }, [canvasRef, options.scale, options.logicWidth, options.logicHeight]);
 
     useEffect(() => {
+        const onResize = resizeRef.current;
         if (fullscreen) {
             canvasRef.current?.focus();
             resizeRef.current();
             document.getElementsByTagName("body")[0].style.overflow = "hidden";
-            window.addEventListener("resize", resizeRef.current);
+            window.addEventListener("resize", onResize);
 
             // requests the browser to go fullscreen using the
             // body of the document as the entry HTML element
@@ -114,7 +115,7 @@ export const Display: FC<DisplayProps> = ({
             document
                 .getElementsByTagName("body")[0]
                 .style.removeProperty("overflow");
-            window.removeEventListener("resize", resizeRef.current);
+            window.removeEventListener("resize", onResize);
 
             // restores the window mode, returning from the
             // fullscreen browser
@@ -130,7 +131,7 @@ export const Display: FC<DisplayProps> = ({
             }
         }
         return () => {
-            window.removeEventListener("resize", resizeRef.current);
+            window.removeEventListener("resize", onResize);
         };
     }, [fullscreen, nativeFullscreen]);
 

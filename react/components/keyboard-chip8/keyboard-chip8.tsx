@@ -81,7 +81,7 @@ export const KeyboardChip8: FC<KeyboardChip8Props> = ({
             document.removeEventListener("keydown", _onKeyDown);
             document.removeEventListener("keyup", _onKeyUp);
         };
-    }, []);
+    }, [onKeyDown, onKeyUp, physical]);
     const renderKey = (
         key: string,
         selected = false,
