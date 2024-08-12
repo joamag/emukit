@@ -2,7 +2,7 @@ import React, { FC } from "react";
 
 import "./separator.css";
 
-export type SeparatorStyle = "";
+export type SeparatorStyle = string;
 
 type SeparatorProps = {
     marginTop?: string | number;

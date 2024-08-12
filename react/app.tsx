@@ -2,6 +2,7 @@ import React, {
     FC,
     Fragment,
     ReactNode,
+    useCallback,
     useEffect,
     useRef,
     useState
@@ -134,7 +135,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         document.body.style.backgroundColor = `#${background}`;
         onBackground && onBackground(background);
         emulator.onBackground && emulator.onBackground(background);
-    }, [backgroundIndex]);
+    }, [emulator, backgroundIndex, onBackground]);
     useEffect(() => {
         if (romInfo.name) {
             document.title = `${titleRef.current} - ${romInfo.name}`;
@@ -185,7 +186,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 }
                 break;
         }
-    }, [keyaction]);
+    }, [emulator, keyaction, fast, fullscreenState, keyboardVisible]);
     useEffect(() => {
         if (palette) {
             emulator.palette = palette;
@@ -297,7 +298,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             emulator.unbind("booted", onBooted);
             emulator.unbind("message", onMessage);
         };
-    }, []);
+    }, [emulator, palette]);
 
     /**
      * Refreshes the current ROM information by querying the emulator
@@ -631,7 +632,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         return emulator.features.includes(feature);
     };
 
-    const onFile = async (file: File) => {
+    const onFile = useCallback(async (file: File) => {
         const fileExtension = file.name.split(".").pop() ?? "";
         if (!emulator.romExts.includes(fileExtension)) {
             showToast(
@@ -654,16 +655,16 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             showToast(`Failed to load ${file.name} ROM!`, true);
             emulator.logger.error(`Failed to load ${file.name} ROM (${err})`);
         }
-    };
-    const onPauseClick = () => {
+    }, [emulator]);
+    const onPauseClick = useCallback(() => {
         emulator.toggleRunning();
         setPaused(!paused);
-    };
-    const onResetClick = () => {
+    }, [emulator, paused]);
+    const onResetClick = useCallback(() => {
         emulator.reset();
         emulator.logger.info(`Finished reset operation`);
-    };
-    const onSoundClick = () => {
+    }, [emulator]);
+    const onSoundClick = useCallback(() => {
         if (!audioStateRef.current.audioContext) {
             return;
         }
@@ -677,7 +678,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             emulator.pauseAudio?.();
             setMuted(true);
         }
-    };
+    }, [emulator, muted, audioStateRef]);
     const onBenchmarkClick = async () => {
         if (!emulator.benchmark) return;
         const result = await showModal(
@@ -843,7 +844,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             await handler(undefined, require("../res/storm.png"), 0.2);
         });
     };
-    const onAudioReady = () => {
+    const onAudioReady = useCallback(() => {
         // in case the emulator does not provide proper audio specs
         // then the audio should not be enabled for it
         if (emulator.audioSpecs === null) {
@@ -935,7 +936,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
 
             audioState.audioChunks.push(chunk);
         });
-    };
+    }, [emulator, audioStateRef]);
 
     return (
         <div className="app" onClick={onAudioReady} onTouchStart={onAudioReady}>
