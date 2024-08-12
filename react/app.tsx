@@ -135,7 +135,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         document.body.style.backgroundColor = `#${background}`;
         onBackground && onBackground(background);
         emulator.onBackground && emulator.onBackground(background);
-    }, [emulator, backgroundIndex, onBackground]);
+    }, [onBackground, emulator, backgroundIndex]);
     useEffect(() => {
         if (romInfo.name) {
             document.title = `${titleRef.current} - ${romInfo.name}`;

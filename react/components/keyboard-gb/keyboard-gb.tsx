@@ -225,7 +225,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
                 onGamepadDisconnected
             );
         };
-    }, []);
+    }, [onGamepad, onKeyDown, onKeyUp, physical]);
     const renderKey = (
         key: string,
         keyName?: string,
