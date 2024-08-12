@@ -683,7 +683,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             emulator.pauseAudio?.();
             setMuted(true);
         }
-    }, [emulator, muted, audioStateRef]);
+    }, [emulator, muted]);
     const onBenchmarkClick = async () => {
         if (!emulator.benchmark) return;
         const result = await showModal(
@@ -941,7 +941,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
 
             audioState.audioChunks.push(chunk);
         });
-    }, [emulator, audioStateRef]);
+    }, [emulator]);
 
     return (
         <div className="app" onClick={onAudioReady} onTouchStart={onAudioReady}>
