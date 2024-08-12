@@ -1049,6 +1049,10 @@ export class EmulatorLogic extends EmulatorBase {
     }
 
     async hardReset() {
+        // calls the (soft) reset as a fallback default implementation
+        // of the hard reset operation, this should be enough for most
+        // of the cases, but may be overridden by the concrete emulator
+        // implementation if a more specific (hard) behavior is required
         this.reset();
     }
 
