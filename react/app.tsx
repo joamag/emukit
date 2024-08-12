@@ -632,30 +632,35 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         return emulator.features.includes(feature);
     };
 
-    const onFile = useCallback(async (file: File) => {
-        const fileExtension = file.name.split(".").pop() ?? "";
-        if (!emulator.romExts.includes(fileExtension)) {
-            showToast(
-                `This is probably not a ${emulator.device.text} ROM file!`,
-                true
-            );
-            return;
-        }
+    const onFile = useCallback(
+        async (file: File) => {
+            const fileExtension = file.name.split(".").pop() ?? "";
+            if (!emulator.romExts.includes(fileExtension)) {
+                showToast(
+                    `This is probably not a ${emulator.device.text} ROM file!`,
+                    true
+                );
+                return;
+            }
 
-        const romData = await emulator.buildRomData(file);
-        try {
-            await emulator.boot({
-                engine: null,
-                romName: file.name,
-                romData: romData
-            });
-            showToast(`Loaded ${file.name} ROM successfully!`);
-            emulator.logger.info(`Loaded ${file.name} ROM successfully`);
-        } catch (err) {
-            showToast(`Failed to load ${file.name} ROM!`, true);
-            emulator.logger.error(`Failed to load ${file.name} ROM (${err})`);
-        }
-    }, [emulator]);
+            const romData = await emulator.buildRomData(file);
+            try {
+                await emulator.boot({
+                    engine: null,
+                    romName: file.name,
+                    romData: romData
+                });
+                showToast(`Loaded ${file.name} ROM successfully!`);
+                emulator.logger.info(`Loaded ${file.name} ROM successfully`);
+            } catch (err) {
+                showToast(`Failed to load ${file.name} ROM!`, true);
+                emulator.logger.error(
+                    `Failed to load ${file.name} ROM (${err})`
+                );
+            }
+        },
+        [emulator]
+    );
     const onPauseClick = useCallback(() => {
         emulator.toggleRunning();
         setPaused(!paused);

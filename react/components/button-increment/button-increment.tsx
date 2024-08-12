@@ -38,7 +38,7 @@ export const ButtonIncrement: FC<ButtonIncrementProps> = ({
     const classes = () => ["button-increment", size, ...style].join(" ");
     useEffect(() => {
         onReady && onReady((value) => setValue(value));
-    }, []);
+    }, [onReady]);
     const _onMinusClick = () => {
         let valueNew = valueState - delta;
         if (onBeforeChange) {

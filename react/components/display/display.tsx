@@ -87,7 +87,7 @@ export const Display: FC<DisplayProps> = ({
                 canvasRef.current
             );
         }
-    }, [canvasRef, options.scale]);
+    }, [canvasRef, options.scale, options.logicWidth, options.logicHeight]);
 
     useEffect(() => {
         if (fullscreen) {
@@ -132,7 +132,7 @@ export const Display: FC<DisplayProps> = ({
         return () => {
             window.removeEventListener("resize", resizeRef.current);
         };
-    }, [fullscreen]);
+    }, [fullscreen, nativeFullscreen]);
 
     if (onDrawHandler) {
         onDrawHandler((pixels, format) => {
