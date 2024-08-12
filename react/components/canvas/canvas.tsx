@@ -34,11 +34,11 @@ export const Canvas: FC<CanvasProps> = ({
     smoothing = false,
     imageRendering = "pixelated",
     init = true,
-    canvasRef = useRef<HTMLCanvasElement>(null),
     style = [],
     onCanvas
 }) => {
     const classes = () => ["canvas", ...style].join(" ");
+    const canvasRef = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
         if (canvasRef.current && init) {
             const structure = initCanvas(
