@@ -87,7 +87,7 @@ export const Display: FC<DisplayProps> = ({
                 canvasRef.current
             );
         }
-    }, [canvasRef, options.scale, options.logicWidth, options.logicHeight]);
+    }, [canvasRef, options.logicWidth, options.logicHeight]);
 
     useEffect(() => {
         const onResize = resizeRef.current;

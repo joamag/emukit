@@ -135,7 +135,9 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         document.body.style.backgroundColor = `#${background}`;
         onBackground && onBackground(background);
         emulator.onBackground && emulator.onBackground(background);
-    }, [onBackground, emulator, backgroundIndex]);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [emulator, backgroundIndex]);
     useEffect(() => {
         if (romInfo.name) {
             document.title = `${titleRef.current} - ${romInfo.name}`;
@@ -298,7 +300,9 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             emulator.unbind("booted", onBooted);
             emulator.unbind("message", onMessage);
         };
-    }, [emulator, palette]);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [emulator, palette]);
 
     /**
      * Refreshes the current ROM information by querying the emulator

@@ -1,4 +1,4 @@
-import React, { FC, RefObject, useEffect, useRef } from "react";
+import React, { FC, RefObject, useEffect } from "react";
 
 import "./canvas.css";
 
