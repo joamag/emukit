@@ -19,16 +19,15 @@ export const SaveInfo: FC<SaveInfoProps> = ({
     style = []
 }) => {
     const classes = () => ["save-info", ...style].join(" ");
+    const tabs = [SaveInfoMain({ saveState, emulator })];
+    const tabNames = ["Main"];
+    if (saveState.thumbnail !== undefined) {
+        tabs.push(SaveInfoThumbnail({ saveState, emulator }));
+        tabNames.push("Thumbnail");
+    }
     return (
         <div className={classes()}>
-            <PanelTab
-                tabs={[
-                    SaveInfoMain({ saveState, emulator }),
-                    SaveInfoThumbnail({ saveState, emulator })
-                ]}
-                tabNames={["Main", "Thumbnail"]}
-                flex={true}
-            />
+            <PanelTab tabs={tabs} tabNames={tabNames} flex={true} />
         </div>
     );
 };

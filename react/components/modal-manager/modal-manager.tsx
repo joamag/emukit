@@ -1,6 +1,7 @@
 import React, {
     forwardRef,
     ReactNode,
+    useCallback,
     useImperativeHandle,
     useRef,
     useState
@@ -46,20 +47,20 @@ export const ModalManager = forwardRef<ModalManagerHandle, ModalManagerProps>(
             }
         }));
 
-        const onModalConfirm = () => {
+        const onModalConfirm = useCallback(() => {
             if (modalCallbackRef.current) {
                 modalCallbackRef.current(true);
                 modalCallbackRef.current = undefined;
             }
             setModalVisible(false);
-        };
-        const onModalCancel = () => {
+        }, []);
+        const onModalCancel = useCallback(() => {
             if (modalCallbackRef.current) {
                 modalCallbackRef.current(false);
                 modalCallbackRef.current = undefined;
             }
             setModalVisible(false);
-        };
+        }, []);
 
         return (
             <Modal

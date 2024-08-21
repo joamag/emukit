@@ -2,7 +2,7 @@ import React, { FC } from "react";
 
 import "./toast.css";
 
-export type ToastStyle = "";
+export type ToastStyle = string;
 
 type ToastProps = {
     text?: string;

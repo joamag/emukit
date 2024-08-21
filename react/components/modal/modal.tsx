@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useEffect, useRef } from "react";
+import React, { FC, ReactNode, useCallback, useEffect, useRef } from "react";
 import Button from "../button/button.tsx";
 
 import "./modal.css";
@@ -39,14 +39,14 @@ export const Modal: FC<ModalProps> = ({
     useEffect(() => {
         const onKeyDown = (event: KeyboardEvent) => {
             if (event.key === "Escape") {
-                onCancel && onCancel();
+                onCancel?.();
             }
         };
         document.addEventListener("keydown", onKeyDown);
         return () => {
             document.removeEventListener("keydown", onKeyDown);
         };
-    }, []);
+    }, [onCancel]);
     useEffect(() => {
         if (visible) {
             modalRef.current?.focus();
@@ -58,12 +58,13 @@ export const Modal: FC<ModalProps> = ({
                   __html: text.replace(separator, "<br/>")
               }
             : undefined;
-    const onWindowClick = (
-        event: React.MouseEvent<HTMLDivElement, MouseEvent>
-    ) => {
-        if (!overlayClose) return;
-        event.stopPropagation();
-    };
+    const onWindowClick = useCallback(
+        (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+            if (!overlayClose) return;
+            event.stopPropagation();
+        },
+        [overlayClose]
+    );
     return (
         <div className={classes()} onClick={onCancel}>
             <div

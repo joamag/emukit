@@ -5,7 +5,7 @@ import "./overlay.css";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const require: any;
 
-export type OverlayStyle = "";
+export type OverlayStyle = string;
 
 type OverlayProps = {
     text?: string;
@@ -54,7 +54,7 @@ export const Overlay: FC<OverlayProps> = ({ text, style = [], onFile }) => {
             setVisible(false);
 
             const file = event.dataTransfer.files[0];
-            onFile && onFile(file);
+            onFile?.(file);
 
             event.preventDefault();
             event.stopPropagation();
@@ -82,7 +82,7 @@ export const Overlay: FC<OverlayProps> = ({ text, style = [], onFile }) => {
             document.removeEventListener("dragenter", onDragEnter);
             document.removeEventListener("dragleave", onDragLeave);
         };
-    }, []);
+    }, [onFile]);
     return (
         <div className={classes()}>
             <div className="overlay-container">

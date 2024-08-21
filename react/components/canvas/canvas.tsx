@@ -1,4 +1,4 @@
-import React, { FC, RefObject, useEffect, useRef } from "react";
+import React, { FC, RefObject, useEffect } from "react";
 
 import "./canvas.css";
 
@@ -48,9 +48,18 @@ export const Canvas: FC<CanvasProps> = ({
                 canvasRef.current,
                 smoothing
             );
-            structure && onCanvas && onCanvas(structure);
+            structure && onCanvas?.(structure);
         }
-    }, [canvasRef]);
+    }, [
+        onCanvas,
+        canvasRef,
+        width,
+        height,
+        init,
+        pixelRatio,
+        scale,
+        smoothing
+    ]);
     return (
         <canvas
             ref={canvasRef}
