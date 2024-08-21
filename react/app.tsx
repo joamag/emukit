@@ -130,14 +130,16 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const displayFrequencyRatio =
         frequencyRatios[emulator.frequencySpecs.displayUnit ?? Frequency.Hz];
 
-    useEffect(() => {
-        const background = getBackground();
-        document.body.style.backgroundColor = `#${background}`;
-        onBackground && onBackground(background);
-        emulator.onBackground && emulator.onBackground(background);
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [emulator, backgroundIndex]);
+    useEffect(
+        () => {
+            const background = getBackground();
+            document.body.style.backgroundColor = `#${background}`;
+            onBackground && onBackground(background);
+            emulator.onBackground && emulator.onBackground(background);
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [emulator, backgroundIndex]
+    );
     useEffect(() => {
         if (romInfo.name) {
             document.title = `${titleRef.current} - ${romInfo.name}`;
@@ -189,120 +191,122 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 break;
         }
     }, [emulator, keyaction, fast, fullscreenState, keyboardVisible]);
-    useEffect(() => {
-        if (palette) {
-            emulator.palette = palette;
-        }
-        const onFullChange = () => {
-            if (
-                !document.fullscreenElement &&
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                !(document as any).webkitFullscreenElement
-            ) {
-                setFullscreenState(false);
+    useEffect(
+        () => {
+            if (palette) {
+                emulator.palette = palette;
             }
-        };
-        const onKeyDown = (event: KeyboardEvent) => {
-            switch (event.key) {
-                case "+":
-                    setKeyaction("Plus");
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                case "-":
-                    setKeyaction("Minus");
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-                case "Escape":
-                    setKeyaction("Escape");
-                    event.stopPropagation();
-                    event.preventDefault();
-                    break;
-            }
-            if (event.ctrlKey === true) {
+            const onFullChange = () => {
+                if (
+                    !document.fullscreenElement &&
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    !(document as any).webkitFullscreenElement
+                ) {
+                    setFullscreenState(false);
+                }
+            };
+            const onKeyDown = (event: KeyboardEvent) => {
                 switch (event.key) {
-                    case "f":
-                        setKeyaction("Fullscreen");
+                    case "+":
+                        setKeyaction("Plus");
                         event.stopPropagation();
                         event.preventDefault();
                         break;
-                    case "k":
-                        setKeyaction("Keyboard");
+                    case "-":
+                        setKeyaction("Minus");
                         event.stopPropagation();
                         event.preventDefault();
                         break;
-                    case "d":
-                        setKeyaction("Accelerate");
-                        event.stopPropagation();
-                        event.preventDefault();
-                        break;
-                    case "p":
-                        setKeyaction("Palette");
+                    case "Escape":
+                        setKeyaction("Escape");
                         event.stopPropagation();
                         event.preventDefault();
                         break;
                 }
-            }
-        };
-        const onKeyUp = (event: KeyboardEvent) => {
-            if (event.ctrlKey === true) {
-                switch (event.key) {
-                    case "d":
-                        setKeyaction("Slowdown");
-                        event.stopPropagation();
-                        event.preventDefault();
-                        break;
+                if (event.ctrlKey === true) {
+                    switch (event.key) {
+                        case "f":
+                            setKeyaction("Fullscreen");
+                            event.stopPropagation();
+                            event.preventDefault();
+                            break;
+                        case "k":
+                            setKeyaction("Keyboard");
+                            event.stopPropagation();
+                            event.preventDefault();
+                            break;
+                        case "d":
+                            setKeyaction("Accelerate");
+                            event.stopPropagation();
+                            event.preventDefault();
+                            break;
+                        case "p":
+                            setKeyaction("Palette");
+                            event.stopPropagation();
+                            event.preventDefault();
+                            break;
+                    }
                 }
-            } else {
-                switch (event.key) {
-                    case "Control":
-                        setKeyaction("Slowdown");
-                        break;
+            };
+            const onKeyUp = (event: KeyboardEvent) => {
+                if (event.ctrlKey === true) {
+                    switch (event.key) {
+                        case "d":
+                            setKeyaction("Slowdown");
+                            event.stopPropagation();
+                            event.preventDefault();
+                            break;
+                    }
+                } else {
+                    switch (event.key) {
+                        case "Control":
+                            setKeyaction("Slowdown");
+                            break;
+                    }
                 }
-            }
-        };
-        const onBooted = () => {
-            refreshRom();
-            setPaused(false);
-        };
-        const onMessage = (emulator: Emulator, _params: unknown = {}) => {
-            const params = _params as Record<string, unknown>;
-            showToast(
-                params.text as string,
-                params.error as boolean,
-                params.timeout as number
-            );
-        };
-        document.addEventListener("fullscreenchange", onFullChange);
-        document.addEventListener("webkitfullscreenchange", onFullChange);
-        document.addEventListener("keydown", onKeyDown);
-        document.addEventListener("keyup", onKeyUp);
-        emulator.bind("booted", onBooted);
-        emulator.bind("message", onMessage);
+            };
+            const onBooted = () => {
+                refreshRom();
+                setPaused(false);
+            };
+            const onMessage = (emulator: Emulator, _params: unknown = {}) => {
+                const params = _params as Record<string, unknown>;
+                showToast(
+                    params.text as string,
+                    params.error as boolean,
+                    params.timeout as number
+                );
+            };
+            document.addEventListener("fullscreenchange", onFullChange);
+            document.addEventListener("webkitfullscreenchange", onFullChange);
+            document.addEventListener("keydown", onKeyDown);
+            document.addEventListener("keyup", onKeyUp);
+            emulator.bind("booted", onBooted);
+            emulator.bind("message", onMessage);
 
-        // updates the emulator with the handles that can be used to control
-        // some of the UI functionality directly from the emulator instance
-        emulator.handlers = {
-            showModal: showModal,
-            showHelp: showHelp,
-            showToast: showToast
-        };
+            // updates the emulator with the handles that can be used to control
+            // some of the UI functionality directly from the emulator instance
+            emulator.handlers = {
+                showModal: showModal,
+                showHelp: showHelp,
+                showToast: showToast
+            };
 
-        return () => {
-            document.removeEventListener("fullscreenchange", onFullChange);
-            document.removeEventListener(
-                "webkitfullscreenchange",
-                onFullChange
-            );
-            document.removeEventListener("keydown", onKeyDown);
-            document.removeEventListener("keyup", onKeyUp);
-            emulator.unbind("booted", onBooted);
-            emulator.unbind("message", onMessage);
-        };
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [emulator, palette]);
+            return () => {
+                document.removeEventListener("fullscreenchange", onFullChange);
+                document.removeEventListener(
+                    "webkitfullscreenchange",
+                    onFullChange
+                );
+                document.removeEventListener("keydown", onKeyDown);
+                document.removeEventListener("keyup", onKeyUp);
+                emulator.unbind("booted", onBooted);
+                emulator.unbind("message", onMessage);
+            };
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [emulator, palette]
+    );
 
     /**
      * Refreshes the current ROM information by querying the emulator

@@ -1,9 +1,19 @@
-import React, { FC, useEffect, useRef, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { isAndroid } from "../../../ts/index.ts";
 
 import "./keyboard-gb.css";
 
-const KEYS: Record<string, string> = {
+type KeyNames =
+    | "ArrowUp"
+    | "ArrowDown"
+    | "ArrowLeft"
+    | "ArrowRight"
+    | "Start"
+    | "Select"
+    | "A"
+    | "B";
+
+const KEYS: Record<string, KeyNames> = {
     ArrowUp: "ArrowUp",
     ArrowDown: "ArrowDown",
     ArrowLeft: "ArrowLeft",
@@ -16,7 +26,7 @@ const KEYS: Record<string, string> = {
     S: "B"
 };
 
-const KEYS_STANDARD: Record<number, string> = {
+const KEYS_STANDARD: Record<number, KeyNames> = {
     12: "ArrowUp",
     102: "ArrowUp",
     13: "ArrowDown",
@@ -58,7 +68,6 @@ type KeyboardGBProps = {
     fullscreen?: boolean;
     physical?: boolean;
     vibrate?: number;
-    selectedKeys?: string[];
     style?: string[];
     onKeyDown?: (key: string) => void;
     onKeyUp?: (key: string) => void;
@@ -80,7 +89,6 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
     fullscreen = false,
     physical = true,
     vibrate = 75,
-    selectedKeys = [],
     style = [],
     onKeyDown,
     onKeyUp,
@@ -88,8 +96,16 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
 }) => {
     const containerClasses = () =>
         ["keyboard-container", fullscreen ? "fullscreen" : ""].join(" ");
-    const recordRef =
-        useRef<Record<string, React.Dispatch<React.SetStateAction<boolean>>>>();
+    const [pressed, setPressed] = useState({
+        ArrowUp: false,
+        ArrowDown: false,
+        ArrowLeft: false,
+        ArrowRight: false,
+        Start: false,
+        Select: false,
+        A: false,
+        B: false
+    });
     const classes = () =>
         [
             "keyboard",
@@ -110,9 +126,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
             const isPrevent = PREVENT_KEYS[event.key] ?? false;
             if (isPrevent) event.preventDefault();
             if (keyCode !== undefined) {
-                const records = recordRef.current ?? {};
-                const setter = records[keyCode];
-                setter(true);
+                setPressed((prev) => ({ ...prev, [keyCode]: true }));
                 onKeyDown && onKeyDown(keyCode);
                 return;
             }
@@ -122,9 +136,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
             const isPrevent = PREVENT_KEYS[event.key] ?? false;
             if (isPrevent) event.preventDefault();
             if (keyCode !== undefined) {
-                const records = recordRef.current ?? {};
-                const setter = records[keyCode];
-                setter(false);
+                setPressed((prev) => ({ ...prev, [keyCode]: false }));
                 onKeyUp && onKeyUp(keyCode);
                 return;
             }
@@ -178,16 +190,12 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
                 const keyUp = !pressed && state;
 
                 if (keyDown) {
-                    const records = recordRef.current ?? {};
-                    const setter = records[keyCode];
-                    setter(true);
+                    setPressed((prev) => ({ ...prev, [keyCode]: true }));
                     onKeyDown && onKeyDown(keyCode);
                 }
 
                 if (keyUp) {
-                    const records = recordRef.current ?? {};
-                    const setter = records[keyCode];
-                    setter(false);
+                    setPressed((prev) => ({ ...prev, [keyCode]: false }));
                     onKeyUp && onKeyUp(keyCode);
                 }
 
@@ -228,15 +236,15 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
     }, [onGamepad, onKeyDown, onKeyUp, physical]);
     const renderKey = (
         key: string,
-        keyName?: string,
-        selected = false,
+        keyName?: KeyNames,
         styles: string[] = []
     ) => {
-        const [pressed, setPressed] = useState(selected);
-        const classes = ["key", pressed ? "pressed" : "", ...styles].join(" ");
-        const records = recordRef.current ?? {};
-        records[keyName ?? key ?? undefined] = setPressed;
-        recordRef.current = records;
+        const keyCode = KEYS[keyName ?? key] ?? keyName ?? key ?? undefined;
+        const classes = [
+            "key",
+            pressed[keyCode] ? "pressed" : "",
+            ...styles
+        ].join(" ");
         return (
             <span
                 className={classes}
@@ -244,44 +252,44 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
                 tabIndex={focusable ? 0 : undefined}
                 onKeyDown={(event) => {
                     if (event.key !== "Enter") return;
-                    setPressed(true);
+                    setPressed((prev) => ({ ...prev, [keyCode]: true }));
                     onKeyDown && onKeyDown(keyName ?? key);
                     event.preventDefault();
                 }}
                 onKeyUp={(event) => {
                     if (event.key !== "Enter") return;
-                    setPressed(false);
+                    setPressed((prev) => ({ ...prev, [keyCode]: false }));
                     onKeyUp && onKeyUp(keyName ?? key);
                     event.preventDefault();
                 }}
                 onBlur={() => {
-                    setPressed(false);
+                    setPressed((prev) => ({ ...prev, [keyCode]: false }));
                     onKeyUp && onKeyUp(key);
                 }}
                 onMouseDown={(event) => {
-                    setPressed(true);
+                    setPressed((prev) => ({ ...prev, [keyCode]: true }));
                     onKeyDown && onKeyDown(keyName ?? key);
                     event.preventDefault();
                 }}
                 onMouseUp={(event) => {
-                    setPressed(false);
+                    setPressed((prev) => ({ ...prev, [keyCode]: false }));
                     onKeyUp && onKeyUp(keyName ?? key);
                     event.preventDefault();
                 }}
                 onMouseLeave={(event) => {
-                    if (!pressed) return;
-                    setPressed(false);
+                    if (!pressed[keyCode]) return;
+                    setPressed((prev) => ({ ...prev, [keyCode]: false }));
                     onKeyUp && onKeyUp(keyName ?? key);
                     event.preventDefault();
                 }}
                 onTouchStart={(event) => {
-                    setPressed(true);
+                    setPressed((prev) => ({ ...prev, [keyCode]: true }));
                     vibrate && window?.navigator?.vibrate?.(vibrate);
                     onKeyDown && onKeyDown(keyName ?? key);
                     event.preventDefault();
                 }}
                 onTouchEnd={(event) => {
-                    setPressed(false);
+                    setPressed((prev) => ({ ...prev, [keyCode]: false }));
                     onKeyUp && onKeyUp(keyName ?? key);
                     event.preventDefault();
                 }}
@@ -299,54 +307,30 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
             >
                 <div className="dpad">
                     <div className="dpad-top">
-                        {renderKey(
-                            isAndroid() ? "▲" : "▲",
-                            "ArrowUp",
-                            selectedKeys.includes("ArrowUp"),
-                            ["up"]
-                        )}
+                        {renderKey(isAndroid() ? "▲" : "▲", "ArrowUp", ["up"])}
                     </div>
                     <div>
-                        {renderKey(
-                            isAndroid() ? "◀" : "◄",
-                            "ArrowLeft",
-                            selectedKeys.includes("ArrowLeft"),
-                            ["left"]
-                        )}
-                        {renderKey(
-                            isAndroid() ? "▶" : "►",
-                            "ArrowRight",
-                            selectedKeys.includes("ArrowRight"),
-                            ["right"]
-                        )}
+                        {renderKey(isAndroid() ? "◀" : "◄", "ArrowLeft", [
+                            "left"
+                        ])}
+                        {renderKey(isAndroid() ? "▶" : "►", "ArrowRight", [
+                            "right"
+                        ])}
                     </div>
                     <div className="dpad-bottom">
-                        {renderKey(
-                            isAndroid() ? "▼" : "▼",
-                            "ArrowDown",
-                            selectedKeys.includes("ArrowDown"),
-                            ["down"]
-                        )}
+                        {renderKey(isAndroid() ? "▼" : "▼", "ArrowDown", [
+                            "down"
+                        ])}
                     </div>
                 </div>
                 <div className="action">
-                    {renderKey("B", "B", selectedKeys.includes("B"), ["b"])}
-                    {renderKey("A", "A", selectedKeys.includes("A"), ["a"])}
+                    {renderKey("B", "B", ["b"])}
+                    {renderKey("A", "A", ["a"])}
                 </div>
                 <div className="break"></div>
                 <div className="options">
-                    {renderKey(
-                        "SELECT",
-                        "Select",
-                        selectedKeys.includes("Select"),
-                        ["select"]
-                    )}
-                    {renderKey(
-                        "START",
-                        "Start",
-                        selectedKeys.includes("Start"),
-                        ["start"]
-                    )}
+                    {renderKey("SELECT", "Select", ["select"])}
+                    {renderKey("START", "Start", ["start"])}
                 </div>
             </div>
         </div>
