@@ -54,7 +54,7 @@ export const Overlay: FC<OverlayProps> = ({ text, style = [], onFile }) => {
             setVisible(false);
 
             const file = event.dataTransfer.files[0];
-            onFile && onFile(file);
+            onFile?.(file);
 
             event.preventDefault();
             event.stopPropagation();

@@ -134,8 +134,8 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         () => {
             const background = getBackground();
             document.body.style.backgroundColor = `#${background}`;
-            onBackground && onBackground(background);
-            emulator.onBackground && emulator.onBackground(background);
+            onBackground?.(background);
+            emulator.onBackground?.(background);
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [emulator, backgroundIndex]

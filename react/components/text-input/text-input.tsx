@@ -26,7 +26,7 @@ export const TextInput: FC<TextInputProps> = ({
             type={type}
             value={value}
             placeholder={placeholder}
-            onChange={(e) => onChange && onChange(e.target.value)}
+            onChange={(e) => onChange?.(e.target.value)}
         />
     );
 };

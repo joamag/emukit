@@ -93,7 +93,7 @@ export const KeyboardChip8: FC<KeyboardChip8Props> = ({
             const keyCode = KEYS[event.key];
             if (keyCode !== undefined) {
                 setPressed((prev) => ({ ...prev, [keyCode]: true }));
-                onKeyDown && onKeyDown(keyCode);
+                onKeyDown?.(keyCode);
                 return;
             }
         };
@@ -101,7 +101,7 @@ export const KeyboardChip8: FC<KeyboardChip8Props> = ({
             const keyCode = KEYS[event.key];
             if (keyCode !== undefined) {
                 setPressed((prev) => ({ ...prev, [keyCode]: false }));
-                onKeyUp && onKeyUp(keyCode);
+                onKeyUp?.(keyCode);
                 return;
             }
         };
@@ -124,44 +124,44 @@ export const KeyboardChip8: FC<KeyboardChip8Props> = ({
                 onKeyDown={(event) => {
                     if (event.key !== "Enter") return;
                     setPressed((prev) => ({ ...prev, [key]: true }));
-                    onKeyDown && onKeyDown(key);
+                    onKeyDown?.(key);
                     event.preventDefault();
                 }}
                 onKeyUp={(event) => {
                     if (event.key !== "Enter") return;
                     setPressed((prev) => ({ ...prev, [key]: false }));
-                    onKeyUp && onKeyUp(key);
+                    onKeyUp?.(key);
                     event.preventDefault();
                 }}
                 onBlur={() => {
                     setPressed((prev) => ({ ...prev, [key]: false }));
-                    onKeyUp && onKeyUp(key);
+                    onKeyUp?.(key);
                 }}
                 onMouseDown={(event) => {
                     setPressed((prev) => ({ ...prev, [key]: true }));
-                    onKeyDown && onKeyDown(key);
+                    onKeyDown?.(key);
                     event.preventDefault();
                 }}
                 onMouseUp={(event) => {
                     setPressed((prev) => ({ ...prev, [key]: false }));
-                    onKeyUp && onKeyUp(key);
+                    onKeyUp?.(key);
                     event.preventDefault();
                 }}
                 onMouseLeave={(event) => {
                     if (!pressed[key]) return;
                     setPressed((prev) => ({ ...prev, [key]: false }));
-                    onKeyUp && onKeyUp(key);
+                    onKeyUp?.(key);
                     event.preventDefault();
                 }}
                 onTouchStart={(event) => {
                     setPressed((prev) => ({ ...prev, [key]: true }));
                     vibrate && window?.navigator?.vibrate?.(vibrate);
-                    onKeyDown && onKeyDown(key);
+                    onKeyDown?.(key);
                     event.preventDefault();
                 }}
                 onTouchEnd={(event) => {
                     setPressed((prev) => ({ ...prev, [key]: false }));
-                    onKeyUp && onKeyUp(key);
+                    onKeyUp?.(key);
                     event.preventDefault();
                 }}
             >

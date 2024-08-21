@@ -56,7 +56,7 @@ export const Button: FC<ButtonProps> = ({
         if (!event.target.files) return;
         if (event.target.files.length === 0) return;
         const file = event.target.files[0];
-        onFile && onFile(file);
+        onFile?.(file);
         event.target.value = "";
     };
     const onMouseDown = (event: React.MouseEvent) => {
@@ -68,7 +68,7 @@ export const Button: FC<ButtonProps> = ({
     const onKeyDown = (event: React.KeyboardEvent) => {
         if (event.key !== "Enter") return;
         if (file) fileRef.current?.click();
-        onClick && onClick();
+        onClick?.();
     };
     const renderSimple = () => (
         <span

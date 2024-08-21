@@ -39,7 +39,7 @@ export const Modal: FC<ModalProps> = ({
     useEffect(() => {
         const onKeyDown = (event: KeyboardEvent) => {
             if (event.key === "Escape") {
-                onCancel && onCancel();
+                onCancel?.();
             }
         };
         document.addEventListener("keydown", onKeyDown);

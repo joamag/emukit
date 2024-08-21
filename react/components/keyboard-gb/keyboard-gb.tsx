@@ -127,7 +127,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
             if (isPrevent) event.preventDefault();
             if (keyCode !== undefined) {
                 setPressed((prev) => ({ ...prev, [keyCode]: true }));
-                onKeyDown && onKeyDown(keyCode);
+                onKeyDown?.(keyCode);
                 return;
             }
         };
@@ -137,7 +137,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
             if (isPrevent) event.preventDefault();
             if (keyCode !== undefined) {
                 setPressed((prev) => ({ ...prev, [keyCode]: false }));
-                onKeyUp && onKeyUp(keyCode);
+                onKeyUp?.(keyCode);
                 return;
             }
         };
@@ -191,12 +191,12 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
 
                 if (keyDown) {
                     setPressed((prev) => ({ ...prev, [keyCode]: true }));
-                    onKeyDown && onKeyDown(keyCode);
+                    onKeyDown?.(keyCode);
                 }
 
                 if (keyUp) {
                     setPressed((prev) => ({ ...prev, [keyCode]: false }));
-                    onKeyUp && onKeyUp(keyCode);
+                    onKeyUp?.(keyCode);
                 }
 
                 buttonStates[index] = pressed;
@@ -253,44 +253,44 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
                 onKeyDown={(event) => {
                     if (event.key !== "Enter") return;
                     setPressed((prev) => ({ ...prev, [keyCode]: true }));
-                    onKeyDown && onKeyDown(keyName ?? key);
+                    onKeyDown?.(keyName ?? key);
                     event.preventDefault();
                 }}
                 onKeyUp={(event) => {
                     if (event.key !== "Enter") return;
                     setPressed((prev) => ({ ...prev, [keyCode]: false }));
-                    onKeyUp && onKeyUp(keyName ?? key);
+                    onKeyUp?.(keyName ?? key);
                     event.preventDefault();
                 }}
                 onBlur={() => {
                     setPressed((prev) => ({ ...prev, [keyCode]: false }));
-                    onKeyUp && onKeyUp(key);
+                    onKeyUp?.(key);
                 }}
                 onMouseDown={(event) => {
                     setPressed((prev) => ({ ...prev, [keyCode]: true }));
-                    onKeyDown && onKeyDown(keyName ?? key);
+                    onKeyDown?.(keyName ?? key);
                     event.preventDefault();
                 }}
                 onMouseUp={(event) => {
                     setPressed((prev) => ({ ...prev, [keyCode]: false }));
-                    onKeyUp && onKeyUp(keyName ?? key);
+                    onKeyUp?.(keyName ?? key);
                     event.preventDefault();
                 }}
                 onMouseLeave={(event) => {
                     if (!pressed[keyCode]) return;
                     setPressed((prev) => ({ ...prev, [keyCode]: false }));
-                    onKeyUp && onKeyUp(keyName ?? key);
+                    onKeyUp?.(keyName ?? key);
                     event.preventDefault();
                 }}
                 onTouchStart={(event) => {
                     setPressed((prev) => ({ ...prev, [keyCode]: true }));
                     vibrate && window?.navigator?.vibrate?.(vibrate);
-                    onKeyDown && onKeyDown(keyName ?? key);
+                    onKeyDown?.(keyName ?? key);
                     event.preventDefault();
                 }}
                 onTouchEnd={(event) => {
                     setPressed((prev) => ({ ...prev, [keyCode]: false }));
-                    onKeyUp && onKeyUp(keyName ?? key);
+                    onKeyUp?.(keyName ?? key);
                     event.preventDefault();
                 }}
             >
