@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useRef } from "react";
+import React, { ChangeEvent, FC, useCallback, useRef } from "react";
 
 import "./button.css";
 
@@ -52,24 +52,30 @@ export const Button: FC<ButtonProps> = ({
             ...style
         ].join(" ");
     const fileRef = useRef<HTMLInputElement>(null);
-    const onFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-        if (!event.target.files) return;
-        if (event.target.files.length === 0) return;
-        const file = event.target.files[0];
-        onFile?.(file);
-        event.target.value = "";
-    };
-    const onMouseDown = (event: React.MouseEvent) => {
+    const onFileChange = useCallback(
+        (event: ChangeEvent<HTMLInputElement>) => {
+            if (!event.target.files) return;
+            if (event.target.files.length === 0) return;
+            const file = event.target.files[0];
+            onFile?.(file);
+            event.target.value = "";
+        },
+        [onFile]
+    );
+    const onMouseDown = useCallback((event: React.MouseEvent) => {
         event.preventDefault();
-    };
-    const onMouseUp = (event: React.MouseEvent) => {
+    }, []);
+    const onMouseUp = useCallback((event: React.MouseEvent) => {
         event.preventDefault();
-    };
-    const onKeyDown = (event: React.KeyboardEvent) => {
-        if (event.key !== "Enter") return;
-        if (file) fileRef.current?.click();
-        onClick?.();
-    };
+    }, []);
+    const onKeyDown = useCallback(
+        (event: React.KeyboardEvent) => {
+            if (event.key !== "Enter") return;
+            if (file) fileRef.current?.click();
+            onClick?.();
+        },
+        [onClick, file]
+    );
     const renderSimple = () => (
         <span
             className={classes()}
