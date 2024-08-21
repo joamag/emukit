@@ -1,8 +1,26 @@
-import React, { FC, useEffect, useRef, useState } from "react";
+import React, { FC, useEffect, useState } from "react";
 
 import "./keyboard-chip8.css";
 
-const KEYS: Record<string, string> = {
+type KeyNames =
+    | "1"
+    | "2"
+    | "3"
+    | "4"
+    | "Q"
+    | "W"
+    | "E"
+    | "R"
+    | "A"
+    | "S"
+    | "D"
+    | "F"
+    | "Z"
+    | "X"
+    | "C"
+    | "V";
+
+const KEYS: Record<string, KeyNames> = {
     "1": "1",
     "2": "2",
     "3": "3",
@@ -51,16 +69,30 @@ export const KeyboardChip8: FC<KeyboardChip8Props> = ({
     onKeyUp
 }) => {
     const classes = () => ["keyboard", "keyboard-chip8", ...style].join(" ");
-    const recordRef =
-        useRef<Record<string, React.Dispatch<React.SetStateAction<boolean>>>>();
+    const [pressed, setPressed] = useState({
+        "1": false,
+        "2": false,
+        "3": false,
+        "4": false,
+        Q: false,
+        W: false,
+        E: false,
+        R: false,
+        A: false,
+        S: false,
+        D: false,
+        F: false,
+        Z: false,
+        X: false,
+        C: false,
+        V: false
+    });
     useEffect(() => {
         if (!physical) return;
         const _onKeyDown = (event: KeyboardEvent) => {
             const keyCode = KEYS[event.key];
             if (keyCode !== undefined) {
-                const records = recordRef.current ?? {};
-                const setter = records[keyCode];
-                setter(true);
+                setPressed((prev) => ({ ...prev, [keyCode]: true }));
                 onKeyDown && onKeyDown(keyCode);
                 return;
             }
@@ -68,9 +100,7 @@ export const KeyboardChip8: FC<KeyboardChip8Props> = ({
         const _onKeyUp = (event: KeyboardEvent) => {
             const keyCode = KEYS[event.key];
             if (keyCode !== undefined) {
-                const records = recordRef.current ?? {};
-                const setter = records[keyCode];
-                setter(false);
+                setPressed((prev) => ({ ...prev, [keyCode]: false }));
                 onKeyUp && onKeyUp(keyCode);
                 return;
             }
@@ -82,16 +112,10 @@ export const KeyboardChip8: FC<KeyboardChip8Props> = ({
             document.removeEventListener("keyup", _onKeyUp);
         };
     }, [onKeyDown, onKeyUp, physical]);
-    const renderKey = (
-        key: string,
-        selected = false,
-        styles: string[] = []
-    ) => {
-        const [pressed, setPressed] = useState(selected);
-        const classes = ["key", pressed ? "pressed" : "", ...styles].join(" ");
-        const records = recordRef.current ?? {};
-        records[key ?? "undefined"] = setPressed;
-        recordRef.current = records;
+    const renderKey = (key: KeyNames, styles: string[] = []) => {
+        const classes = ["key", pressed[key] ? "pressed" : "", ...styles].join(
+            " "
+        );
         return (
             <span
                 className={classes}
@@ -99,44 +123,44 @@ export const KeyboardChip8: FC<KeyboardChip8Props> = ({
                 tabIndex={focusable ? 0 : undefined}
                 onKeyDown={(event) => {
                     if (event.key !== "Enter") return;
-                    setPressed(true);
+                    setPressed((prev) => ({ ...prev, [key]: true }));
                     onKeyDown && onKeyDown(key);
                     event.preventDefault();
                 }}
                 onKeyUp={(event) => {
                     if (event.key !== "Enter") return;
-                    setPressed(false);
+                    setPressed((prev) => ({ ...prev, [key]: false }));
                     onKeyUp && onKeyUp(key);
                     event.preventDefault();
                 }}
                 onBlur={() => {
-                    setPressed(false);
+                    setPressed((prev) => ({ ...prev, [key]: false }));
                     onKeyUp && onKeyUp(key);
                 }}
                 onMouseDown={(event) => {
-                    setPressed(true);
+                    setPressed((prev) => ({ ...prev, [key]: true }));
                     onKeyDown && onKeyDown(key);
                     event.preventDefault();
                 }}
                 onMouseUp={(event) => {
-                    setPressed(false);
+                    setPressed((prev) => ({ ...prev, [key]: false }));
                     onKeyUp && onKeyUp(key);
                     event.preventDefault();
                 }}
                 onMouseLeave={(event) => {
-                    if (!pressed) return;
-                    setPressed(false);
+                    if (!pressed[key]) return;
+                    setPressed((prev) => ({ ...prev, [key]: false }));
                     onKeyUp && onKeyUp(key);
                     event.preventDefault();
                 }}
                 onTouchStart={(event) => {
-                    setPressed(true);
+                    setPressed((prev) => ({ ...prev, [key]: true }));
                     vibrate && window?.navigator?.vibrate?.(vibrate);
                     onKeyDown && onKeyDown(key);
                     event.preventDefault();
                 }}
                 onTouchEnd={(event) => {
-                    setPressed(false);
+                    setPressed((prev) => ({ ...prev, [key]: false }));
                     onKeyUp && onKeyUp(key);
                     event.preventDefault();
                 }}
@@ -148,16 +172,16 @@ export const KeyboardChip8: FC<KeyboardChip8Props> = ({
     return (
         <div className={classes()}>
             <div className="keyboard-line">
-                {["1", "2", "3", "4"].map((k) => renderKey(k))}
+                {["1", "2", "3", "4"].map((k) => renderKey(k as KeyNames))}
             </div>
             <div className="keyboard-line">
-                {["Q", "W", "E", "R"].map((k) => renderKey(k))}
+                {["Q", "W", "E", "R"].map((k) => renderKey(k as KeyNames))}
             </div>
             <div className="keyboard-line">
-                {["A", "S", "D", "F"].map((k) => renderKey(k))}
+                {["A", "S", "D", "F"].map((k) => renderKey(k as KeyNames))}
             </div>
             <div className="keyboard-line">
-                {["Z", "X", "C", "V"].map((k) => renderKey(k))}
+                {["Z", "X", "C", "V"].map((k) => renderKey(k as KeyNames))}
             </div>
         </div>
     );
