@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useCallback, useMemo } from "react";
 import Pair, { PairStyle } from "../pair/pair.tsx";
 import Link from "../link/link.tsx";
 import { rgbToDataUrl, SaveState } from "../../../ts/index.ts";
@@ -11,16 +11,16 @@ type PairStateProps = {
     thumbnailSize?: [number, number];
     saveState?: SaveState;
     style?: PairStyle[];
-    onLoadClick?: () => void;
-    onDownloadClick?: () => void;
-    onInfoClick?: () => void;
-    onDeleteClick?: () => void;
+    onLoadClick?: (saveState?: SaveState) => void;
+    onDownloadClick?: (saveState?: SaveState) => void;
+    onInfoClick?: (saveState?: SaveState) => void;
+    onDeleteClick?: (saveState?: SaveState) => void;
 };
 
 export const PairState: FC<PairStateProps> = ({
     index,
     thumbnail,
-    thumbnailSize,
+    thumbnailSize = [100, 100],
     saveState,
     style = [],
     onLoadClick,
@@ -28,7 +28,33 @@ export const PairState: FC<PairStateProps> = ({
     onInfoClick,
     onDeleteClick
 }) => {
-    const pairStyle = ["pair-state", ...style];
+    const pairStyle = useMemo(() => ["pair-state", ...style], [style]);
+    const thumbnailUrl = useMemo(
+        () =>
+            thumbnail &&
+            rgbToDataUrl(
+                thumbnail,
+                thumbnailSize?.[0] ?? 0,
+                thumbnailSize?.[1] ?? 0
+            ),
+        [thumbnail, thumbnailSize]
+    );
+    const _onLoadClick = useCallback(
+        () => onLoadClick?.(saveState),
+        [onLoadClick, saveState]
+    );
+    const _onDownloadClick = useCallback(
+        () => onDownloadClick?.(saveState),
+        [onDownloadClick, saveState]
+    );
+    const _onInfoClick = useCallback(
+        () => onInfoClick?.(saveState),
+        [onInfoClick, saveState]
+    );
+    const _onDeleteClick = useCallback(
+        () => onDeleteClick?.(saveState),
+        [onDeleteClick, saveState]
+    );
     return (
         <>
             <Pair
@@ -57,7 +83,10 @@ export const PairState: FC<PairStateProps> = ({
                             {onLoadClick && saveState?.error === undefined && (
                                 <>
                                     <span className="link-separator">/</span>
-                                    <Link text={"Load"} onClick={onLoadClick} />
+                                    <Link
+                                        text={"Load"}
+                                        onClick={_onLoadClick}
+                                    />
                                 </>
                             )}
                             {onDownloadClick &&
@@ -68,14 +97,17 @@ export const PairState: FC<PairStateProps> = ({
                                         </span>
                                         <Link
                                             text={"Download"}
-                                            onClick={onDownloadClick}
+                                            onClick={_onDownloadClick}
                                         />
                                     </>
                                 )}
                             {onInfoClick && (
                                 <>
                                     <span className="link-separator">/</span>
-                                    <Link text={"Info"} onClick={onInfoClick} />
+                                    <Link
+                                        text={"Info"}
+                                        onClick={_onInfoClick}
+                                    />
                                 </>
                             )}
                             {onDeleteClick && (
@@ -83,7 +115,7 @@ export const PairState: FC<PairStateProps> = ({
                                     <span className="link-separator">/</span>
                                     <Link
                                         text={"Delete"}
-                                        onClick={onDeleteClick}
+                                        onClick={_onDeleteClick}
                                     />
                                 </>
                             )}
@@ -91,14 +123,10 @@ export const PairState: FC<PairStateProps> = ({
                     </>
                 }
                 valueNode={
-                    thumbnail ? (
+                    thumbnailUrl ? (
                         <img
                             className="pair-state-thumbnail"
-                            src={rgbToDataUrl(
-                                thumbnail,
-                                thumbnailSize?.[0] ?? 0,
-                                thumbnailSize?.[1] ?? 0
-                            )}
+                            src={thumbnailUrl}
                         />
                     ) : (
                         <></>

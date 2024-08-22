@@ -137,6 +137,14 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             ],
         [emulator]
     );
+    const thumbnailSize = useMemo(
+        () => [emulator.dimensions.width, emulator.dimensions.height],
+        [emulator]
+    ) as [number, number];
+    const saveStateEntries = useMemo(
+        () => Object.entries(saveStates),
+        [saveStates]
+    );
 
     useEffect(
         () => {
@@ -536,30 +544,19 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const renderSaveStatesTab = () =>
         hasSaveStatesTab() ? (
             <>
-                <Info style={["large"]}>
-                    {Object.keys(saveStates).length > 0 ? (
-                        Object.entries(saveStates).map(([index, saveSate]) => (
+                <Info>
+                    {saveStateEntries.length > 0 ? (
+                        saveStateEntries.map(([index, saveSate]) => (
                             <Fragment key={`#${index}`}>
                                 <PairState
                                     index={saveSate.index}
                                     thumbnail={saveSate.thumbnail}
-                                    thumbnailSize={[
-                                        emulator.dimensions.width,
-                                        emulator.dimensions.height
-                                    ]}
+                                    thumbnailSize={thumbnailSize}
                                     saveState={saveSate}
-                                    onLoadClick={() =>
-                                        onLoadStateClick(saveSate.index)
-                                    }
-                                    onDeleteClick={() =>
-                                        onDeleteStateClick(saveSate.index)
-                                    }
-                                    onInfoClick={() =>
-                                        onInfoStateClick(saveSate.index)
-                                    }
-                                    onDownloadClick={() =>
-                                        onDownloadStateClick(saveSate.index)
-                                    }
+                                    onLoadClick={onLoadStateClick}
+                                    onDeleteClick={onDeleteStateClick}
+                                    onInfoClick={onInfoStateClick}
+                                    onDownloadClick={onDownloadStateClick}
                                 />
                                 <Separator
                                     marginTop={12}
@@ -595,8 +592,20 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 ))}
             </Info>
         ) : null;
-    const hasSaveStatesTab = () => hasFeature(Feature.SaveState);
-    const hasControllersTab = () => Object.keys(gamepads).length > 0;
+    const hasFeature = useCallback(
+        (feature: Feature) => {
+            return emulator.features.includes(feature);
+        },
+        [emulator]
+    );
+    const hasSaveStatesTab = useCallback(
+        () => hasFeature(Feature.SaveState),
+        [hasFeature]
+    );
+    const hasControllersTab = useCallback(
+        () => Object.keys(gamepads).length > 0,
+        [gamepads]
+    );
     const getTabs = () => {
         const tabs = [];
         tabs.push(renderGeneralTab());
@@ -662,12 +671,6 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             );
         },
         []
-    );
-    const hasFeature = useCallback(
-        (feature: Feature) => {
-            return emulator.features.includes(feature);
-        },
-        [emulator]
     );
 
     const onFile = useCallback(
@@ -784,36 +787,38 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         }
     }, [refreshSaveStates, emulator, saveStates]);
     const onLoadStateClick = useCallback(
-        (index: number) => {
-            emulator.loadState?.(index);
-            showToast(`Loaded save state #${index} successfully!`);
+        (saveState?: SaveState) => {
+            emulator.loadState?.(saveState!.index);
+            showToast(`Loaded save state #${saveState!.index} successfully!`);
         },
         [showToast, emulator]
     );
     const onDownloadStateClick = useCallback(
-        async (index: number) => {
-            const data = emulator.getStateData!(index);
-            downloadFromBuffer(data, `${emulator.romInfo.name}.s${index}`);
+        async (saveState?: SaveState) => {
+            const data = emulator.getStateData!(saveState!.index);
+            downloadFromBuffer(
+                data,
+                `${emulator.romInfo.name}.s${saveState!.index}`
+            );
         },
         [emulator]
     );
     const onInfoStateClick = useCallback(
-        async (index: number) => {
-            const saveState = emulator.getState!(index);
-            showSaveInfo(saveState);
+        async (saveState?: SaveState) => {
+            showSaveInfo(saveState!);
         },
-        [showSaveInfo, emulator]
+        [showSaveInfo]
     );
     const onDeleteStateClick = useCallback(
-        async (index: number) => {
+        async (saveState?: SaveState) => {
             const result = await showModal(
                 "Confirm",
-                `Are you sure you want to delete save state #${index}?\nThis operation is not reversible!`
+                `Are you sure you want to delete save state #${saveState!.index}?\nThis operation is not reversible!`
             );
             if (!result) return;
-            emulator.deleteState?.(index);
+            emulator.deleteState?.(saveState!.index);
             refreshSaveStates();
-            showToast(`Deleted save state #${index} successfully!`);
+            showToast(`Deleted save state #${saveState!.index} successfully!`);
         },
         [showModal, showToast, refreshSaveStates, emulator]
     );
