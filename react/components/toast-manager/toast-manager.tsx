@@ -1,5 +1,6 @@
 import React, {
     forwardRef,
+    useCallback,
     useImperativeHandle,
     useRef,
     useState
@@ -43,9 +44,9 @@ export const ToastManager = forwardRef<ToastManagerHandle, ToastManagerProps>(
             }
         }));
 
-        const onToastCancel = () => {
+        const onToastCancel = useCallback(() => {
             setToastVisible(false);
-        };
+        }, []);
 
         return (
             <Toast

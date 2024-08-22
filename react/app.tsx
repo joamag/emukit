@@ -4,6 +4,7 @@ import React, {
     ReactNode,
     useCallback,
     useEffect,
+    useMemo,
     useRef,
     useState
 } from "react";
@@ -125,10 +126,17 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const errorRef = useRef<boolean>(false);
     const titleRef = useRef<string>(document.title);
 
-    const frequencyRatio =
-        frequencyRatios[emulator.frequencySpecs.unit ?? Frequency.Hz];
-    const displayFrequencyRatio =
-        frequencyRatios[emulator.frequencySpecs.displayUnit ?? Frequency.Hz];
+    const frequencyRatio = useMemo(
+        () => frequencyRatios[emulator.frequencySpecs.unit ?? Frequency.Hz],
+        [emulator]
+    );
+    const displayFrequencyRatio = useMemo(
+        () =>
+            frequencyRatios[
+                emulator.frequencySpecs.displayUnit ?? Frequency.Hz
+            ],
+        [emulator]
+    );
 
     useEffect(
         () => {
@@ -325,14 +333,14 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
      * update the UI with the new save states.
      * This operation is considered expensive and should used with care.
      */
-    const refreshSaveStates = () => {
+    const refreshSaveStates = useCallback(() => {
         const saveStates = Object.fromEntries(
             emulator
                 .listStates?.()
                 .map((index) => [index, emulator.getState!(index)]) ?? []
         );
         setSaveStates(saveStates);
-    };
+    }, [emulator]);
 
     const getPauseText = () => (paused ? "Resume" : "Pause");
     const getPauseIcon = () =>
@@ -606,39 +614,61 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         return tabNames;
     };
 
-    const showModal = async (
-        title = "Alert",
-        text?: string,
-        contents?: ReactNode
-    ): Promise<boolean> => {
-        return (
-            (await modalManagerRef.current?.showModal(title, text, contents)) ??
-            true
-        );
-    };
-    const showHelp = async (title = "Help") => {
-        await showModal(
-            title,
-            undefined,
-            <Help
-                panels={emulator.help.map((h) => h.node)}
-                names={emulator.help.map((h) => h.name)}
-            />
-        );
-    };
-    const showSaveInfo = async (saveState: SaveState) => {
-        await showModal(
-            `Save State #${saveState.index}`,
-            undefined,
-            <SaveInfo saveState={saveState} emulator={emulator} />
-        );
-    };
-    const showToast = async (text: string, error = false, timeout = 3500) => {
-        return await toastManagerRef.current?.showToast(text, error, timeout);
-    };
-    const hasFeature = (feature: Feature) => {
-        return emulator.features.includes(feature);
-    };
+    const showModal = useCallback(
+        async (
+            title = "Alert",
+            text?: string,
+            contents?: ReactNode
+        ): Promise<boolean> => {
+            return (
+                (await modalManagerRef.current?.showModal(
+                    title,
+                    text,
+                    contents
+                )) ?? true
+            );
+        },
+        []
+    );
+    const showHelp = useCallback(
+        async (title = "Help") => {
+            await showModal(
+                title,
+                undefined,
+                <Help
+                    panels={emulator.help.map((h) => h.node)}
+                    names={emulator.help.map((h) => h.name)}
+                />
+            );
+        },
+        [showModal, emulator]
+    );
+    const showSaveInfo = useCallback(
+        async (saveState: SaveState) => {
+            await showModal(
+                `Save State #${saveState.index}`,
+                undefined,
+                <SaveInfo saveState={saveState} emulator={emulator} />
+            );
+        },
+        [showModal, emulator]
+    );
+    const showToast = useCallback(
+        async (text: string, error = false, timeout = 3500) => {
+            return await toastManagerRef.current?.showToast(
+                text,
+                error,
+                timeout
+            );
+        },
+        []
+    );
+    const hasFeature = useCallback(
+        (feature: Feature) => {
+            return emulator.features.includes(feature);
+        },
+        [emulator]
+    );
 
     const onFile = useCallback(
         async (file: File) => {
@@ -667,7 +697,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 );
             }
         },
-        [emulator]
+        [showToast, emulator]
     );
     const onPauseClick = useCallback(() => {
         emulator.toggleRunning();
@@ -692,7 +722,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             setMuted(true);
         }
     }, [emulator, muted]);
-    const onBenchmarkClick = async () => {
+    const onBenchmarkClick = useCallback(async () => {
         if (!emulator.benchmark) return;
         const result = await showModal(
             "Confirm",
@@ -709,39 +739,42 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             undefined,
             7500
         );
-    };
-    const onFullscreenClick = () => {
+    }, [showModal, showToast, emulator]);
+    const onFullscreenClick = useCallback(() => {
         setFullscreenState(!fullscreenState);
-    };
-    const onKeyboardClick = () => {
+    }, [fullscreenState]);
+    const onKeyboardClick = useCallback(() => {
         setKeyboardVisible(!keyboardVisible);
-    };
-    const onInformationClick = () => {
+    }, [keyboardVisible]);
+    const onInformationClick = useCallback(() => {
         setInfoVisible(!infoVisible);
-    };
-    const onHelpClick = () => {
+    }, [infoVisible]);
+    const onHelpClick = useCallback(() => {
         showHelp();
-    };
-    const onDebugClick = () => {
+    }, [showHelp]);
+    const onDebugClick = useCallback(() => {
         setDebugVisible(!debugVisible);
-    };
-    const onThemeClick = () => {
+    }, [debugVisible]);
+    const onThemeClick = useCallback(() => {
         setBackgroundIndex((backgroundIndex + 1) % backgrounds.length);
-    };
-    const onPaletteClick = () => {
+    }, [backgroundIndex, backgrounds.length]);
+    const onPaletteClick = useCallback(() => {
         if (!emulator.changePalette) return;
         const palette = emulator.changePalette();
         setPaletteName(palette);
-    };
-    const onSectionClick = (name: string) => {
-        const isVisible = visibleSections.includes(name);
-        if (isVisible) {
-            setVisibleSections(visibleSections.filter((s) => s !== name));
-        } else {
-            setVisibleSections([...visibleSections, name]);
-        }
-    };
-    const onSaveStateClick = () => {
+    }, [emulator]);
+    const onSectionClick = useCallback(
+        (name: string) => {
+            const isVisible = visibleSections.includes(name);
+            if (isVisible) {
+                setVisibleSections(visibleSections.filter((s) => s !== name));
+            } else {
+                setVisibleSections([...visibleSections, name]);
+            }
+        },
+        [visibleSections]
+    );
+    const onSaveStateClick = useCallback(() => {
         for (let index = 0; index < 10; index++) {
             if (saveStates[index] === undefined) {
                 emulator.saveState?.(index);
@@ -749,114 +782,160 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 break;
             }
         }
-    };
-    const onLoadStateClick = (index: number) => {
-        emulator.loadState?.(index);
-        showToast(`Loaded save state #${index} successfully!`);
-    };
-    const onDownloadStateClick = async (index: number) => {
-        const data = emulator.getStateData!(index);
-        downloadFromBuffer(data, `${emulator.romInfo.name}.s${index}`);
-    };
-    const onInfoStateClick = async (index: number) => {
-        const saveState = emulator.getState!(index);
-        showSaveInfo(saveState);
-    };
-    const onDeleteStateClick = async (index: number) => {
-        const result = await showModal(
-            "Confirm",
-            `Are you sure you want to delete save state #${index}?\nThis operation is not reversible!`
-        );
-        if (!result) return;
-        emulator.deleteState?.(index);
-        refreshSaveStates();
-        showToast(`Deleted save state #${index} successfully!`);
-    };
-    const onUploadFile = async (file: File) => {
-        const romData = await emulator.buildRomData(file);
-        try {
-            await emulator.boot({
-                engine: null,
-                romName: file.name,
-                romData: romData
-            });
-            showToast(`Loaded ${file.name} ROM successfully!`);
-            emulator.logger.info(`Loaded ${file.name} ROM successfully`);
-        } catch (err) {
-            showToast(`Failed to load ${file.name} ROM!`, true);
-            emulator.logger.error(`Failed to load ${file.name} ROM (${err})`);
-        }
-    };
-    const onEngineChange = async (engine: string) => {
-        await emulator.boot({ engine: engine });
-        showToast(
-            `${emulator.device.text} running on engine "${engine}" from now on!`
-        );
-    };
-    const onLoopChange = async (loopMode: string) => {
-        emulator.loopMode = getLoopMode(loopMode);
-        showToast(
-            `${emulator.device.text} running on loop mode "${loopMode}" from now on!`
-        );
-    };
-    const onFrequencyChange = (value: number) => {
-        emulator.frequency = value * frequencyRatio;
-    };
-    const onFrequencyReady = (handler: (value: number) => void) => {
-        emulator.bind("frequency", (emulator: Emulator, frequency: unknown) => {
-            handler((frequency as number) / frequencyRatio);
-        });
-    };
-    const onDisplayFrequencyChange = (value: number) => {
-        emulator.displayFrequency = value * displayFrequencyRatio;
-    };
-    const onMinimize = () => {
-        setFullscreenState(!fullscreenState);
-    };
-    const onKeyDown = (key: string) => {
-        emulator.keyPress(key);
-    };
-    const onKeyUp = (key: string) => {
-        emulator.keyLift(key);
-    };
-    const onGamepad = (
-        gamepad: Gamepad,
-        isValid: boolean,
-        connected = true
-    ) => {
-        const { index, id } = gamepad;
-        if (connected) {
-            if (isValid) {
-                gamepads[gamepad.index] = gamepad;
-                setGamepads({ ...gamepads });
-                showToast(`🕹️ Gamepad #${index} connect ${id}`);
-            } else {
-                showToast(`😥 Unsupported gamepad connect ${id}`, true);
+    }, [refreshSaveStates, emulator, saveStates]);
+    const onLoadStateClick = useCallback(
+        (index: number) => {
+            emulator.loadState?.(index);
+            showToast(`Loaded save state #${index} successfully!`);
+        },
+        [showToast, emulator]
+    );
+    const onDownloadStateClick = useCallback(
+        async (index: number) => {
+            const data = emulator.getStateData!(index);
+            downloadFromBuffer(data, `${emulator.romInfo.name}.s${index}`);
+        },
+        [emulator]
+    );
+    const onInfoStateClick = useCallback(
+        async (index: number) => {
+            const saveState = emulator.getState!(index);
+            showSaveInfo(saveState);
+        },
+        [showSaveInfo, emulator]
+    );
+    const onDeleteStateClick = useCallback(
+        async (index: number) => {
+            const result = await showModal(
+                "Confirm",
+                `Are you sure you want to delete save state #${index}?\nThis operation is not reversible!`
+            );
+            if (!result) return;
+            emulator.deleteState?.(index);
+            refreshSaveStates();
+            showToast(`Deleted save state #${index} successfully!`);
+        },
+        [showModal, showToast, refreshSaveStates, emulator]
+    );
+    const onUploadFile = useCallback(
+        async (file: File) => {
+            const romData = await emulator.buildRomData(file);
+            try {
+                await emulator.boot({
+                    engine: null,
+                    romName: file.name,
+                    romData: romData
+                });
+                showToast(`Loaded ${file.name} ROM successfully!`);
+                emulator.logger.info(`Loaded ${file.name} ROM successfully`);
+            } catch (err) {
+                showToast(`Failed to load ${file.name} ROM!`, true);
+                emulator.logger.error(
+                    `Failed to load ${file.name} ROM (${err})`
+                );
             }
-        } else if (isValid) {
-            delete gamepads[index];
-            setGamepads({ ...gamepads });
-            showToast(`🕹️ Gamepad #${index} disconnected ${id}`, true);
-        }
-    };
-    const onDrawHandler = (handler: DrawHandler) => {
-        if (frameRef.current) return;
-        frameRef.current = true;
-        emulator.bind("frame", () => {
-            handler(emulator.imageBuffer, PixelFormat.RGB);
-            setFramerate(emulator.framerate);
-            setCyclerate(emulator.cyclerate);
-            setAnimationrate(emulator.animationrate);
-            setEmulationSpeed(emulator.emulationSpeed);
-        });
-    };
-    const onClearHandler = (handler: ClearHandler) => {
-        if (errorRef.current) return;
-        errorRef.current = true;
-        emulator.bind("error", async () => {
-            await handler(undefined, require("../res/storm.png"), 0.2);
-        });
-    };
+        },
+        [showToast, emulator]
+    );
+    const onEngineChange = useCallback(
+        async (engine: string) => {
+            await emulator.boot({ engine: engine });
+            showToast(
+                `${emulator.device.text} running on engine "${engine}" from now on!`
+            );
+        },
+        [showToast, emulator]
+    );
+    const onLoopChange = useCallback(
+        async (loopMode: string) => {
+            emulator.loopMode = getLoopMode(loopMode);
+            showToast(
+                `${emulator.device.text} running on loop mode "${loopMode}" from now on!`
+            );
+        },
+        [showToast, emulator]
+    );
+    const onFrequencyChange = useCallback(
+        (value: number) => {
+            emulator.frequency = value * frequencyRatio;
+        },
+        [emulator, frequencyRatio]
+    );
+    const onFrequencyReady = useCallback(
+        (handler: (value: number) => void) => {
+            emulator.bind(
+                "frequency",
+                (emulator: Emulator, frequency: unknown) => {
+                    handler((frequency as number) / frequencyRatio);
+                }
+            );
+        },
+        [emulator, frequencyRatio]
+    );
+    const onDisplayFrequencyChange = useCallback(
+        (value: number) => {
+            emulator.displayFrequency = value * displayFrequencyRatio;
+        },
+        [emulator, displayFrequencyRatio]
+    );
+    const onMinimize = useCallback(() => {
+        setFullscreenState(!fullscreenState);
+    }, [fullscreenState]);
+    const onKeyDown = useCallback(
+        (key: string) => {
+            emulator.keyPress(key);
+        },
+        [emulator]
+    );
+    const onKeyUp = useCallback(
+        (key: string) => {
+            emulator.keyLift(key);
+        },
+        [emulator]
+    );
+    const onGamepad = useCallback(
+        (gamepad: Gamepad, isValid: boolean, connected = true) => {
+            const { index, id } = gamepad;
+            if (connected) {
+                if (isValid) {
+                    gamepads[gamepad.index] = gamepad;
+                    setGamepads({ ...gamepads });
+                    showToast(`🕹️ Gamepad #${index} connect ${id}`);
+                } else {
+                    showToast(`😥 Unsupported gamepad connect ${id}`, true);
+                }
+            } else if (isValid) {
+                delete gamepads[index];
+                setGamepads({ ...gamepads });
+                showToast(`🕹️ Gamepad #${index} disconnected ${id}`, true);
+            }
+        },
+        [showToast, gamepads]
+    );
+    const onDrawHandler = useCallback(
+        (handler: DrawHandler) => {
+            if (frameRef.current) return;
+            frameRef.current = true;
+            emulator.bind("frame", () => {
+                handler(emulator.imageBuffer, PixelFormat.RGB);
+                setFramerate(emulator.framerate);
+                setCyclerate(emulator.cyclerate);
+                setAnimationrate(emulator.animationrate);
+                setEmulationSpeed(emulator.emulationSpeed);
+            });
+        },
+        [emulator]
+    );
+    const onClearHandler = useCallback(
+        (handler: ClearHandler) => {
+            if (errorRef.current) return;
+            errorRef.current = true;
+            emulator.bind("error", async () => {
+                await handler(undefined, require("../res/storm.png"), 0.2);
+            });
+        },
+        [emulator]
+    );
     const onAudioReady = useCallback(() => {
         // in case the emulator does not provide proper audio specs
         // then the audio should not be enabled for it
