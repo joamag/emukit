@@ -2,6 +2,7 @@ import React, {
     FC,
     Fragment,
     ReactNode,
+    StrictMode,
     useCallback,
     useEffect,
     useMemo,
@@ -144,6 +145,16 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const saveStateEntries = useMemo(
         () => Object.entries(saveStates),
         [saveStates]
+    );
+    const displayOptions = useMemo(
+        () => ({
+            width: emulator.dimensions.width * (emulator.dimensions.scale ?? 2),
+            height:
+                emulator.dimensions.height * (emulator.dimensions.scale ?? 2),
+            logicWidth: emulator.dimensions.width,
+            logicHeight: emulator.dimensions.height
+        }),
+        [emulator]
     );
 
     useEffect(
@@ -1050,16 +1061,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 left={
                     <div className="display-container">
                         <Display
-                            options={{
-                                width:
-                                    emulator.dimensions.width *
-                                    (emulator.dimensions.scale ?? 2),
-                                height:
-                                    emulator.dimensions.height *
-                                    (emulator.dimensions.scale ?? 2),
-                                logicWidth: emulator.dimensions.width,
-                                logicHeight: emulator.dimensions.height
-                            }}
+                            options={displayOptions}
                             fullscreen={fullscreenState}
                             nativeFullscreen={nativeFullscreen}
                             onDrawHandler={onDrawHandler}
@@ -1069,22 +1071,24 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                     </div>
                 }
             >
-                <Section visible={keyboardVisible} separatorBottom={true}>
-                    {hasFeature(Feature.KeyboardChip8) && (
-                        <KeyboardChip8
-                            onKeyDown={onKeyDown}
-                            onKeyUp={onKeyUp}
-                        />
-                    )}
-                    {hasFeature(Feature.KeyboardGB) && (
-                        <KeyboardGB
-                            fullscreen={fullscreenState}
-                            onKeyDown={onKeyDown}
-                            onKeyUp={onKeyUp}
-                            onGamepad={onGamepad}
-                        />
-                    )}
-                </Section>
+                {keyboardVisible && (
+                    <Section visible={keyboardVisible} separatorBottom={true}>
+                        {hasFeature(Feature.KeyboardChip8) && (
+                            <KeyboardChip8
+                                onKeyDown={onKeyDown}
+                                onKeyUp={onKeyUp}
+                            />
+                        )}
+                        {hasFeature(Feature.KeyboardGB) && (
+                            <KeyboardGB
+                                fullscreen={fullscreenState}
+                                onKeyDown={onKeyDown}
+                                onKeyUp={onKeyUp}
+                                onGamepad={onGamepad}
+                            />
+                        )}
+                    </Section>
+                )}
                 <Title
                     text={emulator.name}
                     version={emulator.version?.text}
@@ -1284,6 +1288,7 @@ export const startApp = (
     element: string,
     {
         emulator,
+        strictMode = true,
         fullscreen = false,
         debug = false,
         keyboard = false,
@@ -1292,6 +1297,7 @@ export const startApp = (
         backgrounds
     }: {
         emulator: Emulator;
+        strictMode?: boolean;
         fullscreen?: boolean;
         debug?: boolean;
         keyboard?: boolean;
@@ -1304,17 +1310,33 @@ export const startApp = (
     if (!elementRef) return;
 
     const root = ReactDOM.createRoot(elementRef);
-    root.render(
-        <EmulatorApp
-            emulator={emulator}
-            fullscreen={fullscreen}
-            debug={debug}
-            keyboard={keyboard}
-            palette={palette}
-            background={background}
-            backgrounds={backgrounds}
-        />
-    );
+    if (strictMode) {
+        root.render(
+            <StrictMode>
+                <EmulatorApp
+                    emulator={emulator}
+                    fullscreen={fullscreen}
+                    debug={debug}
+                    keyboard={keyboard}
+                    palette={palette}
+                    background={background}
+                    backgrounds={backgrounds}
+                />
+            </StrictMode>
+        );
+    } else {
+        root.render(
+            <EmulatorApp
+                emulator={emulator}
+                fullscreen={fullscreen}
+                debug={debug}
+                keyboard={keyboard}
+                palette={palette}
+                background={background}
+                backgrounds={backgrounds}
+            />
+        );
+    }
 };
 
 export default EmulatorApp;

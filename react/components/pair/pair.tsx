@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from "react";
+import React, { FC, ReactNode, useCallback } from "react";
 import Link from "../link/link.tsx";
 
 import "./pair.css";
@@ -39,8 +39,14 @@ export const Pair: FC<PairProps> = ({
             onValueClick ? "value-click" : "",
             ...style
         ].join(" ");
-    const _onNameClick = () => (onNameClick ? onNameClick() : undefined);
-    const _onValueClick = () => (onValueClick ? onValueClick() : undefined);
+    const _onNameClick = useCallback(
+        () => (onNameClick ? onNameClick() : undefined),
+        [onNameClick]
+    );
+    const _onValueClick = useCallback(
+        () => (onValueClick ? onValueClick() : undefined),
+        [onValueClick]
+    );
     return (
         <>
             <dt className={classes()} onClick={_onNameClick}>
