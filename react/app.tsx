@@ -369,7 +369,10 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         muted
             ? require("../res/sound_off.svg")
             : require("../res/sound_on.svg");
-    const getBackground = () => backgrounds[backgroundIndex];
+    const getBackground = useCallback(
+        () => backgrounds[backgroundIndex],
+        [backgrounds, backgroundIndex]
+    );
     const renderGeneralTab = () => (
         <Info>
             <Pair
@@ -1046,6 +1049,39 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         });
     }, [emulator]);
 
+    const displayContainer = useMemo(
+        () => (
+            <div className="display-container">
+                <Display
+                    options={displayOptions}
+                    fullscreen={fullscreenState}
+                    nativeFullscreen={nativeFullscreen}
+                    onDrawHandler={onDrawHandler}
+                    onClearHandler={onClearHandler}
+                    onMinimize={onMinimize}
+                />
+            </div>
+        ),
+        [
+            onDrawHandler,
+            onMinimize,
+            onClearHandler,
+            displayOptions,
+            fullscreenState,
+            nativeFullscreen
+        ]
+    );
+    const footer = useMemo(
+        () => (
+            <Footer color={getBackground()}>
+                Built with ❤️ by{" "}
+                <Link href="https://joao.me" target="_blank">
+                    João Magalhães
+                </Link>
+            </Footer>
+        ),
+        [getBackground]
+    );
     const title = useMemo(
         () => (
             <Title
@@ -1108,26 +1144,8 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             <ModalManager ref={modalManagerRef} />
             <ToastManager ref={toastManagerRef} />
             <Overlay text={"Drag to load ROM"} onFile={onFile} />
-            <Footer color={getBackground()}>
-                Built with ❤️ by{" "}
-                <Link href="https://joao.me" target="_blank">
-                    João Magalhães
-                </Link>
-            </Footer>
-            <PanelSplit
-                left={
-                    <div className="display-container">
-                        <Display
-                            options={displayOptions}
-                            fullscreen={fullscreenState}
-                            nativeFullscreen={nativeFullscreen}
-                            onDrawHandler={onDrawHandler}
-                            onClearHandler={onClearHandler}
-                            onMinimize={onMinimize}
-                        />
-                    </div>
-                }
-            >
+            {footer}
+            <PanelSplit left={displayContainer}>
                 {keyboardVisible && (
                     <Section visible={keyboardVisible} separatorBottom={true}>
                         {hasFeature(Feature.KeyboardChip8) && (
@@ -1300,7 +1318,7 @@ export const startApp = (
     element: string,
     {
         emulator,
-        strictMode = true,
+        strictMode = false,
         fullscreen = false,
         debug = false,
         keyboard = false,
