@@ -133,7 +133,7 @@ export const PairState: FC<PairStateProps> = ({
                     )
                 }
                 style={pairStyle as PairStyle[]}
-                onValueClick={onLoadClick}
+                onValueClick={_onLoadClick}
             />
         </>
     );
