@@ -101,10 +101,6 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         background ? Math.max(backgrounds.indexOf(background), 0) : 0
     );
     const [romInfo, setRomInfo] = useState<RomInfo>({});
-    const [framerate, setFramerate] = useState(0);
-    const [cyclerate, setCyclerate] = useState(0);
-    const [animationrate, setAnimationrate] = useState(0);
-    const [emulationSpeed, setEmulationSpeed] = useState(0);
     const [paletteName, setPaletteName] = useState(palette ?? emulator.palette);
     const [saveStates, setSaveStates] = useState<Record<number, SaveState>>({});
     const [gamepads, setGamepads] = useState<Record<number, Gamepad>>({});
@@ -482,34 +478,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                     }
                 />
             )}
-            {hasFeature(Feature.Framerate) && (
-                <Pair
-                    key="framerate"
-                    name={"Framerate"}
-                    value={`${framerate} FPS`}
-                />
-            )}
-            {hasFeature(Feature.Cyclerate) && (
-                <Pair
-                    key="cyclerate"
-                    name={"Cyclerate"}
-                    value={`${Intl.NumberFormat().format(cyclerate)} Hz`}
-                />
-            )}
-            {hasFeature(Feature.Animationrate) && (
-                <Pair
-                    key="animationrate"
-                    name={"Animationrate"}
-                    value={`${Intl.NumberFormat().format(animationrate)} Hz`}
-                />
-            )}
-            {hasFeature(Feature.EmulationSpeed) && (
-                <Pair
-                    key="emulation-speed"
-                    name={"Emulation Speed"}
-                    value={`${Math.round(emulationSpeed)} %`}
-                />
-            )}
+            <SpeedSection emulator={emulator} />
         </Info>
     );
     const renderDetailsTab = () => (
@@ -937,10 +906,6 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             frameRef.current = true;
             emulator.bind("frame", () => {
                 handler(emulator.imageBuffer, PixelFormat.RGB);
-                setFramerate(emulator.framerate);
-                setCyclerate(emulator.cyclerate);
-                setAnimationrate(emulator.animationrate);
-                setEmulationSpeed(emulator.emulationSpeed);
             });
         },
         [emulator]
@@ -1367,6 +1332,63 @@ export const startApp = (
             />
         );
     }
+};
+
+type SpeedSectionProps = {
+    emulator: Emulator;
+};
+
+export const SpeedSection: FC<SpeedSectionProps> = ({ emulator }) => {
+    const [framerate, setFramerate] = useState(0);
+    const [cyclerate, setCyclerate] = useState(0);
+    const [animationrate, setAnimationrate] = useState(0);
+    const [emulationSpeed, setEmulationSpeed] = useState(0);
+    const hasFeature = useCallback(
+        (feature: Feature) => {
+            return emulator.features.includes(feature);
+        },
+        [emulator]
+    );
+    useEffect(() => {
+        emulator.bind("frame", () => {
+            setFramerate(emulator.framerate);
+            setCyclerate(emulator.cyclerate);
+            setAnimationrate(emulator.animationrate);
+            setEmulationSpeed(emulator.emulationSpeed);
+        });
+    }, [emulator]);
+    return (
+        <>
+            {hasFeature(Feature.Framerate) && (
+                <Pair
+                    key="framerate"
+                    name={"Framerate"}
+                    value={`${framerate} FPS`}
+                />
+            )}
+            {hasFeature(Feature.Cyclerate) && (
+                <Pair
+                    key="cyclerate"
+                    name={"Cyclerate"}
+                    value={`${Intl.NumberFormat().format(cyclerate)} Hz`}
+                />
+            )}
+            {hasFeature(Feature.Animationrate) && (
+                <Pair
+                    key="animationrate"
+                    name={"Animationrate"}
+                    value={`${Intl.NumberFormat().format(animationrate)} Hz`}
+                />
+            )}
+            {hasFeature(Feature.EmulationSpeed) && (
+                <Pair
+                    key="emulation-speed"
+                    name={"Emulation Speed"}
+                    value={`${Math.round(emulationSpeed)} %`}
+                />
+            )}
+        </>
+    );
 };
 
 export default EmulatorApp;
