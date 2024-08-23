@@ -1046,6 +1046,63 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         });
     }, [emulator]);
 
+    const title = useMemo(
+        () => (
+            <Title
+                text={emulator.name}
+                version={emulator.version?.text}
+                versionUrl={emulator.version?.url}
+                iconSrc={emulator.icon ?? require("../res/thunder.png")}
+            ></Title>
+        ),
+        [emulator]
+    );
+    const descriptionSection = useMemo(
+        () => (
+            <Section>
+                <Paragraph>
+                    This is a{" "}
+                    {emulator.device.url ? (
+                        <Link href={emulator.device.url} target="_blank">
+                            {emulator.device.text}
+                        </Link>
+                    ) : (
+                        emulator.device.text
+                    )}{" "}
+                    emulator built using the{" "}
+                    <Link href="https://www.rust-lang.org" target="_blank">
+                        Rust Programming Language
+                    </Link>{" "}
+                    and is running inside this browser with the help of{" "}
+                    <Link href="https://webassembly.org" target="_blank">
+                        WebAssembly
+                    </Link>
+                    .
+                </Paragraph>
+                {emulator.repository && (
+                    <Paragraph>
+                        You can check the source code of it on{" "}
+                        {emulator.repository.url ? (
+                            <Link
+                                href={emulator.repository.url}
+                                target="_blank"
+                            >
+                                {emulator.repository.text}
+                            </Link>
+                        ) : (
+                            <>{emulator.repository.text}</>
+                        )}
+                        .
+                    </Paragraph>
+                )}
+                <Paragraph>
+                    TIP: Drag and Drop ROM files to the Browser to load the ROM.
+                </Paragraph>
+            </Section>
+        ),
+        [emulator]
+    );
+
     return (
         <div className="app" onClick={onAudioReady} onTouchStart={onAudioReady}>
             <ModalManager ref={modalManagerRef} />
@@ -1089,53 +1146,8 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                         )}
                     </Section>
                 )}
-                <Title
-                    text={emulator.name}
-                    version={emulator.version?.text}
-                    versionUrl={emulator.version?.url}
-                    iconSrc={emulator.icon ?? require("../res/thunder.png")}
-                ></Title>
-                <Section>
-                    <Paragraph>
-                        This is a{" "}
-                        {emulator.device.url ? (
-                            <Link href={emulator.device.url} target="_blank">
-                                {emulator.device.text}
-                            </Link>
-                        ) : (
-                            emulator.device.text
-                        )}{" "}
-                        emulator built using the{" "}
-                        <Link href="https://www.rust-lang.org" target="_blank">
-                            Rust Programming Language
-                        </Link>{" "}
-                        and is running inside this browser with the help of{" "}
-                        <Link href="https://webassembly.org" target="_blank">
-                            WebAssembly
-                        </Link>
-                        .
-                    </Paragraph>
-                    {emulator.repository && (
-                        <Paragraph>
-                            You can check the source code of it on{" "}
-                            {emulator.repository.url ? (
-                                <Link
-                                    href={emulator.repository.url}
-                                    target="_blank"
-                                >
-                                    {emulator.repository.text}
-                                </Link>
-                            ) : (
-                                <>{emulator.repository.text}</>
-                            )}
-                            .
-                        </Paragraph>
-                    )}
-                    <Paragraph>
-                        TIP: Drag and Drop ROM files to the Browser to load the
-                        ROM.
-                    </Paragraph>
-                </Section>
+                {title}
+                {descriptionSection}
                 {debugVisible && (
                     <Section>
                         <Debug
