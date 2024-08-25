@@ -12,7 +12,11 @@ import React, {
 import ReactDOM from "react-dom/client";
 import { RecoilRoot, useRecoilState } from "recoil";
 
-import { infoVisibleState } from "./atoms/index.ts";
+import {
+    infoVisibleState,
+    debugVisibleState,
+    keyboardVisibleState
+} from "./atoms/index.ts";
 import {
     Button,
     ButtonContainer,
@@ -107,11 +111,10 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const [saveStates, setSaveStates] = useState<Record<number, SaveState>>({});
     const [gamepads, setGamepads] = useState<Record<number, Gamepad>>({});
     const [keyaction, setKeyaction] = useState<string>();
-    const [keyboardVisible, setKeyboardVisible] = useState(
-        isTouchDevice() || keyboard
-    );
+    const [keyboardVisible, setKeyboardVisible] =
+        useRecoilState(keyboardVisibleState);
     const [infoVisible, setInfoVisible] = useRecoilState(infoVisibleState);
-    const [debugVisible, setDebugVisible] = useState(debug);
+    const [debugVisible, setDebugVisible] = useRecoilState(debugVisibleState);
     const [visibleSections, setVisibleSections] = useState<string[]>([]);
 
     const audioStateRef = useRef<AudioState>({
@@ -155,6 +158,10 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         [emulator]
     );
 
+    useEffect(() => {
+        setKeyboardVisible(isTouchDevice() || keyboard);
+        setDebugVisible(debug);
+    }, [setKeyboardVisible, setDebugVisible, keyboard, debug]);
     useEffect(
         () => {
             const background = getBackground();
@@ -215,7 +222,14 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 }
                 break;
         }
-    }, [emulator, keyaction, fast, fullscreenState, keyboardVisible]);
+    }, [
+        setKeyboardVisible,
+        emulator,
+        keyaction,
+        fast,
+        fullscreenState,
+        keyboardVisible
+    ]);
     useEffect(
         () => {
             if (palette) {
@@ -733,16 +747,16 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     }, [fullscreenState]);
     const onKeyboardClick = useCallback(() => {
         setKeyboardVisible(!keyboardVisible);
-    }, [keyboardVisible]);
+    }, [setKeyboardVisible, keyboardVisible]);
     const onInformationClick = useCallback(() => {
         setInfoVisible(!infoVisible);
-    }, [infoVisible]);
+    }, [setInfoVisible, infoVisible]);
     const onHelpClick = useCallback(() => {
         showHelp();
     }, [showHelp]);
     const onDebugClick = useCallback(() => {
         setDebugVisible(!debugVisible);
-    }, [debugVisible]);
+    }, [setDebugVisible, debugVisible]);
     const onThemeClick = useCallback(() => {
         setBackgroundIndex((backgroundIndex + 1) % backgrounds.length);
     }, [backgroundIndex, backgrounds.length]);
