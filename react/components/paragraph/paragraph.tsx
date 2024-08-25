@@ -2,7 +2,7 @@ import React, { ReactNode, FC } from "react";
 
 import "./paragraph.css";
 
-export type ParagraphStyle = string;
+export type ParagraphStyle = "no-margin-top";
 
 type ParagraphProps = {
     children?: ReactNode;
