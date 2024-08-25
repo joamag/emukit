@@ -10,7 +10,9 @@ import React, {
     useState
 } from "react";
 import ReactDOM from "react-dom/client";
+import { RecoilRoot, useRecoilState } from "recoil";
 
+import { infoVisibleState } from "./atoms/index.ts";
 import {
     Button,
     ButtonContainer,
@@ -108,7 +110,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const [keyboardVisible, setKeyboardVisible] = useState(
         isTouchDevice() || keyboard
     );
-    const [infoVisible, setInfoVisible] = useState(true);
+    const [infoVisible, setInfoVisible] = useRecoilState(infoVisibleState);
     const [debugVisible, setDebugVisible] = useState(debug);
     const [visibleSections, setVisibleSections] = useState<string[]>([]);
 
@@ -1305,22 +1307,8 @@ export const startApp = (
     if (!elementRef) return;
 
     const root = ReactDOM.createRoot(elementRef);
-    if (strictMode) {
-        root.render(
-            <StrictMode>
-                <EmulatorApp
-                    emulator={emulator}
-                    fullscreen={fullscreen}
-                    debug={debug}
-                    keyboard={keyboard}
-                    palette={palette}
-                    background={background}
-                    backgrounds={backgrounds}
-                />
-            </StrictMode>
-        );
-    } else {
-        root.render(
+    const app = (
+        <RecoilRoot>
             <EmulatorApp
                 emulator={emulator}
                 fullscreen={fullscreen}
@@ -1330,7 +1318,12 @@ export const startApp = (
                 background={background}
                 backgrounds={backgrounds}
             />
-        );
+        </RecoilRoot>
+    );
+    if (strictMode) {
+        root.render(<StrictMode>{app}</StrictMode>);
+    } else {
+        root.render(app);
     }
 };
 
