@@ -10,7 +10,17 @@ import React, {
     useState
 } from "react";
 import ReactDOM from "react-dom/client";
+import { RecoilRoot, useRecoilState } from "recoil";
 
+import {
+    infoVisibleState,
+    debugVisibleState,
+    keyboardVisibleState,
+    visibleSectionsState,
+    mutedState,
+    pausedState,
+    fastState
+} from "./atoms/index.ts";
 import {
     Button,
     ButtonContainer,
@@ -93,9 +103,9 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     backgrounds = ["264653"],
     onBackground
 }) => {
-    const [paused, setPaused] = useState(false);
-    const [muted, setMuted] = useState(false);
-    const [fast, setFast] = useState(false);
+    const [paused, setPaused] = useRecoilState(pausedState);
+    const [muted, setMuted] = useRecoilState(mutedState);
+    const [fast, setFast] = useRecoilState(fastState);
     const [fullscreenState, setFullscreenState] = useState(fullscreen);
     const [backgroundIndex, setBackgroundIndex] = useState(
         background ? Math.max(backgrounds.indexOf(background), 0) : 0
@@ -105,12 +115,12 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const [saveStates, setSaveStates] = useState<Record<number, SaveState>>({});
     const [gamepads, setGamepads] = useState<Record<number, Gamepad>>({});
     const [keyaction, setKeyaction] = useState<string>();
-    const [keyboardVisible, setKeyboardVisible] = useState(
-        isTouchDevice() || keyboard
-    );
-    const [infoVisible, setInfoVisible] = useState(true);
-    const [debugVisible, setDebugVisible] = useState(debug);
-    const [visibleSections, setVisibleSections] = useState<string[]>([]);
+    const [keyboardVisible, setKeyboardVisible] =
+        useRecoilState(keyboardVisibleState);
+    const [infoVisible, setInfoVisible] = useRecoilState(infoVisibleState);
+    const [debugVisible, setDebugVisible] = useRecoilState(debugVisibleState);
+    const [visibleSections, setVisibleSections] =
+        useRecoilState(visibleSectionsState);
 
     const audioStateRef = useRef<AudioState>({
         audioContext: null,
@@ -153,6 +163,10 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         [emulator]
     );
 
+    useEffect(() => {
+        setKeyboardVisible(isTouchDevice() || keyboard);
+        setDebugVisible(debug);
+    }, [setKeyboardVisible, setDebugVisible, keyboard, debug]);
     useEffect(
         () => {
             const background = getBackground();
@@ -213,7 +227,15 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 }
                 break;
         }
-    }, [emulator, keyaction, fast, fullscreenState, keyboardVisible]);
+    }, [
+        setFast,
+        setKeyboardVisible,
+        emulator,
+        keyaction,
+        fast,
+        fullscreenState,
+        keyboardVisible
+    ]);
     useEffect(
         () => {
             if (palette) {
@@ -688,7 +710,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const onPauseClick = useCallback(() => {
         emulator.toggleRunning();
         setPaused(!paused);
-    }, [emulator, paused]);
+    }, [setPaused, emulator, paused]);
     const onResetClick = useCallback(() => {
         emulator.reset();
         emulator.logger.info(`Finished reset operation`);
@@ -707,7 +729,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             emulator.pauseAudio?.();
             setMuted(true);
         }
-    }, [emulator, muted]);
+    }, [setMuted, emulator, muted]);
     const onBenchmarkClick = useCallback(async () => {
         if (!emulator.benchmark) return;
         const result = await showModal(
@@ -731,16 +753,16 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     }, [fullscreenState]);
     const onKeyboardClick = useCallback(() => {
         setKeyboardVisible(!keyboardVisible);
-    }, [keyboardVisible]);
+    }, [setKeyboardVisible, keyboardVisible]);
     const onInformationClick = useCallback(() => {
         setInfoVisible(!infoVisible);
-    }, [infoVisible]);
+    }, [setInfoVisible, infoVisible]);
     const onHelpClick = useCallback(() => {
         showHelp();
     }, [showHelp]);
     const onDebugClick = useCallback(() => {
         setDebugVisible(!debugVisible);
-    }, [debugVisible]);
+    }, [setDebugVisible, debugVisible]);
     const onThemeClick = useCallback(() => {
         setBackgroundIndex((backgroundIndex + 1) % backgrounds.length);
     }, [backgroundIndex, backgrounds.length]);
@@ -758,7 +780,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 setVisibleSections([...visibleSections, name]);
             }
         },
-        [visibleSections]
+        [setVisibleSections, visibleSections]
     );
     const onSaveStateClick = useCallback(() => {
         for (let index = 0; index < 10; index++) {
@@ -1036,6 +1058,16 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             nativeFullscreen
         ]
     );
+    const header = useMemo(
+        () => (
+            <>
+                <ModalManager ref={modalManagerRef} />
+                <ToastManager ref={toastManagerRef} />
+                <Overlay text={"Drag to load ROM"} onFile={onFile} />
+            </>
+        ),
+        [onFile]
+    );
     const footer = useMemo(
         () => (
             <Footer color={getBackground()}>
@@ -1103,42 +1135,52 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         ),
         [emulator]
     );
+    const debugSection = useMemo(
+        () => (
+            <Section>
+                <Debug
+                    panels={emulator.debug.map((h) => h.node)}
+                    names={emulator.debug.map((h) => h.name)}
+                />
+            </Section>
+        ),
+        [emulator]
+    );
+    const keyboardSection = useMemo(
+        () => (
+            <Section visible={keyboardVisible} separatorBottom={true}>
+                {hasFeature(Feature.KeyboardChip8) && (
+                    <KeyboardChip8 onKeyDown={onKeyDown} onKeyUp={onKeyUp} />
+                )}
+                {hasFeature(Feature.KeyboardGB) && (
+                    <KeyboardGB
+                        fullscreen={fullscreenState}
+                        onKeyDown={onKeyDown}
+                        onKeyUp={onKeyUp}
+                        onGamepad={onGamepad}
+                    />
+                )}
+            </Section>
+        ),
+        [
+            hasFeature,
+            onGamepad,
+            onKeyDown,
+            onKeyUp,
+            fullscreenState,
+            keyboardVisible
+        ]
+    );
 
     return (
         <div className="app" onClick={onAudioReady} onTouchStart={onAudioReady}>
-            <ModalManager ref={modalManagerRef} />
-            <ToastManager ref={toastManagerRef} />
-            <Overlay text={"Drag to load ROM"} onFile={onFile} />
+            {header}
             {footer}
             <PanelSplit left={displayContainer}>
-                {keyboardVisible && (
-                    <Section visible={keyboardVisible} separatorBottom={true}>
-                        {hasFeature(Feature.KeyboardChip8) && (
-                            <KeyboardChip8
-                                onKeyDown={onKeyDown}
-                                onKeyUp={onKeyUp}
-                            />
-                        )}
-                        {hasFeature(Feature.KeyboardGB) && (
-                            <KeyboardGB
-                                fullscreen={fullscreenState}
-                                onKeyDown={onKeyDown}
-                                onKeyUp={onKeyUp}
-                                onGamepad={onGamepad}
-                            />
-                        )}
-                    </Section>
-                )}
+                {keyboardSection}
                 {title}
                 {descriptionSection}
-                {debugVisible && (
-                    <Section>
-                        <Debug
-                            panels={emulator.debug.map((h) => h.node)}
-                            names={emulator.debug.map((h) => h.name)}
-                        />
-                    </Section>
-                )}
+                {debugVisible && debugSection}
                 {infoVisible && (
                     <Section>
                         <PanelTab
@@ -1305,22 +1347,8 @@ export const startApp = (
     if (!elementRef) return;
 
     const root = ReactDOM.createRoot(elementRef);
-    if (strictMode) {
-        root.render(
-            <StrictMode>
-                <EmulatorApp
-                    emulator={emulator}
-                    fullscreen={fullscreen}
-                    debug={debug}
-                    keyboard={keyboard}
-                    palette={palette}
-                    background={background}
-                    backgrounds={backgrounds}
-                />
-            </StrictMode>
-        );
-    } else {
-        root.render(
+    const app = (
+        <RecoilRoot>
             <EmulatorApp
                 emulator={emulator}
                 fullscreen={fullscreen}
@@ -1330,7 +1358,12 @@ export const startApp = (
                 background={background}
                 backgrounds={backgrounds}
             />
-        );
+        </RecoilRoot>
+    );
+    if (strictMode) {
+        root.render(<StrictMode>{app}</StrictMode>);
+    } else {
+        root.render(app);
     }
 };
 
