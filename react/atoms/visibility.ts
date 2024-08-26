@@ -14,3 +14,8 @@ export const debugVisibleState = atom<boolean>({
     key: "debugVisible",
     default: false
 });
+
+export const visibleSectionsState = atom<string[]>({
+    key: "visibleSections",
+    default: []
+});

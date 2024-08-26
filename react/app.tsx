@@ -15,7 +15,8 @@ import { RecoilRoot, useRecoilState } from "recoil";
 import {
     infoVisibleState,
     debugVisibleState,
-    keyboardVisibleState
+    keyboardVisibleState,
+    visibleSectionsState
 } from "./atoms/index.ts";
 import {
     Button,
@@ -115,7 +116,8 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         useRecoilState(keyboardVisibleState);
     const [infoVisible, setInfoVisible] = useRecoilState(infoVisibleState);
     const [debugVisible, setDebugVisible] = useRecoilState(debugVisibleState);
-    const [visibleSections, setVisibleSections] = useState<string[]>([]);
+    const [visibleSections, setVisibleSections] =
+        useRecoilState(visibleSectionsState);
 
     const audioStateRef = useRef<AudioState>({
         audioContext: null,
@@ -774,7 +776,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 setVisibleSections([...visibleSections, name]);
             }
         },
-        [visibleSections]
+        [setVisibleSections, visibleSections]
     );
     const onSaveStateClick = useCallback(() => {
         for (let index = 0; index < 10; index++) {
