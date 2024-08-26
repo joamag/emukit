@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+*
+
+## [0.10.9] - 2024-08-26
+
+### Fixed
+
 * Major issue with stack overflow in keyboard display toggling via `CTRL+K`
 
 ## [0.10.8] - 2024-08-26
