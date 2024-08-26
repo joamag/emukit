@@ -16,7 +16,10 @@ import {
     infoVisibleState,
     debugVisibleState,
     keyboardVisibleState,
-    visibleSectionsState
+    visibleSectionsState,
+    mutedState,
+    pausedState,
+    fastState
 } from "./atoms/index.ts";
 import {
     Button,
@@ -100,9 +103,9 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     backgrounds = ["264653"],
     onBackground
 }) => {
-    const [paused, setPaused] = useState(false);
-    const [muted, setMuted] = useState(false);
-    const [fast, setFast] = useState(false);
+    const [paused, setPaused] = useRecoilState(pausedState);
+    const [muted, setMuted] = useRecoilState(mutedState);
+    const [fast, setFast] = useRecoilState(fastState);
     const [fullscreenState, setFullscreenState] = useState(fullscreen);
     const [backgroundIndex, setBackgroundIndex] = useState(
         background ? Math.max(backgrounds.indexOf(background), 0) : 0
@@ -225,6 +228,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 break;
         }
     }, [
+        setFast,
         setKeyboardVisible,
         emulator,
         keyaction,
@@ -706,7 +710,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const onPauseClick = useCallback(() => {
         emulator.toggleRunning();
         setPaused(!paused);
-    }, [emulator, paused]);
+    }, [setPaused, emulator, paused]);
     const onResetClick = useCallback(() => {
         emulator.reset();
         emulator.logger.info(`Finished reset operation`);
@@ -725,7 +729,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             emulator.pauseAudio?.();
             setMuted(true);
         }
-    }, [emulator, muted]);
+    }, [setMuted, emulator, muted]);
     const onBenchmarkClick = useCallback(async () => {
         if (!emulator.benchmark) return;
         const result = await showModal(
@@ -1054,6 +1058,16 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             nativeFullscreen
         ]
     );
+    const header = useMemo(
+        () => (
+            <>
+                <ModalManager ref={modalManagerRef} />
+                <ToastManager ref={toastManagerRef} />
+                <Overlay text={"Drag to load ROM"} onFile={onFile} />
+            </>
+        ),
+        [onFile]
+    );
     const footer = useMemo(
         () => (
             <Footer color={getBackground()}>
@@ -1121,32 +1135,38 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         ),
         [emulator]
     );
+    const keyboardSection = useMemo(
+        () => (
+            <Section visible={keyboardVisible} separatorBottom={true}>
+                {hasFeature(Feature.KeyboardChip8) && (
+                    <KeyboardChip8 onKeyDown={onKeyDown} onKeyUp={onKeyUp} />
+                )}
+                {hasFeature(Feature.KeyboardGB) && (
+                    <KeyboardGB
+                        fullscreen={fullscreenState}
+                        onKeyDown={onKeyDown}
+                        onKeyUp={onKeyUp}
+                        onGamepad={onGamepad}
+                    />
+                )}
+            </Section>
+        ),
+        [
+            hasFeature,
+            onGamepad,
+            onKeyDown,
+            onKeyUp,
+            fullscreenState,
+            keyboardVisible
+        ]
+    );
 
     return (
         <div className="app" onClick={onAudioReady} onTouchStart={onAudioReady}>
-            <ModalManager ref={modalManagerRef} />
-            <ToastManager ref={toastManagerRef} />
-            <Overlay text={"Drag to load ROM"} onFile={onFile} />
+            {header}
             {footer}
             <PanelSplit left={displayContainer}>
-                {keyboardVisible && (
-                    <Section visible={keyboardVisible} separatorBottom={true}>
-                        {hasFeature(Feature.KeyboardChip8) && (
-                            <KeyboardChip8
-                                onKeyDown={onKeyDown}
-                                onKeyUp={onKeyUp}
-                            />
-                        )}
-                        {hasFeature(Feature.KeyboardGB) && (
-                            <KeyboardGB
-                                fullscreen={fullscreenState}
-                                onKeyDown={onKeyDown}
-                                onKeyUp={onKeyUp}
-                                onGamepad={onGamepad}
-                            />
-                        )}
-                    </Section>
-                )}
+                {keyboardVisible && keyboardSection}
                 {title}
                 {descriptionSection}
                 {debugVisible && (

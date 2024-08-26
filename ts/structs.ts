@@ -1241,10 +1241,14 @@ export const LOOP_MODES_M: { [key: string]: LoopMode } = {
 
 export const LOOP_MODES_S = ["auto", "settimeout", "animation"];
 
-export function loopModes(): string[] {
+export const loopModes = (): string[] => {
     return LOOP_MODES_S;
-}
+};
 
-export function getLoopMode(value: string): LoopMode {
+export const getLoopMode = (value: string): LoopMode => {
     return LOOP_MODES_M[value] ?? LoopMode.Auto;
-}
+};
+
+export const hasFeature = (emulator: Emulator, feature: Feature) => {
+    return emulator.features.includes(feature);
+};
