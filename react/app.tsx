@@ -1160,6 +1160,151 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             keyboardVisible
         ]
     );
+    const buttonsSection = useMemo(
+        () => (
+            <ButtonContainer>
+                <Button
+                    text={getPauseText()}
+                    image={getPauseIcon()}
+                    imageAlt="pause"
+                    enabled={paused}
+                    style={["simple", "border", "padded"]}
+                    onClick={onPauseClick}
+                />
+                <Button
+                    text={"Reset"}
+                    image={require("../res/reset.svg")}
+                    imageAlt="reset"
+                    style={["simple", "border", "padded"]}
+                    onClick={onResetClick}
+                />
+                <Button
+                    text={getSoundText()}
+                    image={getSoundIcon()}
+                    imageAlt="sound"
+                    enabled={muted}
+                    style={["simple", "border", "padded"]}
+                    onClick={onSoundClick}
+                />
+                {hasFeature(Feature.Benchmark) && emulator.benchmark && (
+                    <Button
+                        text={"Benchmark"}
+                        image={require("../res/bolt.svg")}
+                        imageAlt="benchmark"
+                        style={["simple", "border", "padded"]}
+                        onClick={onBenchmarkClick}
+                    />
+                )}
+                <Button
+                    text={"Fullscreen"}
+                    image={require("../res/maximise.svg")}
+                    imageAlt="maximise"
+                    style={["simple", "border", "padded"]}
+                    onClick={onFullscreenClick}
+                />
+                {hasFeature(Feature.Keyboard) && (
+                    <Button
+                        text={"Keyboard"}
+                        image={require("../res/dialpad.svg")}
+                        imageAlt="keyboard"
+                        enabled={keyboardVisible}
+                        style={["simple", "border", "padded"]}
+                        onClick={onKeyboardClick}
+                    />
+                )}
+                <Button
+                    text={"Information"}
+                    image={require("../res/info.svg")}
+                    imageAlt="information"
+                    enabled={infoVisible}
+                    style={["simple", "border", "padded"]}
+                    onClick={onInformationClick}
+                />
+                {hasFeature(Feature.Help) && (
+                    <Button
+                        text={"Help"}
+                        image={require("../res/help.svg")}
+                        imageAlt="help"
+                        style={["simple", "border", "padded"]}
+                        onClick={onHelpClick}
+                    />
+                )}
+                {hasFeature(Feature.Debug) && (
+                    <Button
+                        text={"Debug"}
+                        image={require("../res/bug.svg")}
+                        imageAlt="debug"
+                        enabled={debugVisible}
+                        style={["simple", "border", "padded"]}
+                        onClick={onDebugClick}
+                    />
+                )}
+                {hasFeature(Feature.Themes) && (
+                    <Button
+                        text={"Themes"}
+                        image={require("../res/marker.svg")}
+                        imageAlt="theme"
+                        style={["simple", "border", "padded"]}
+                        onClick={onThemeClick}
+                    />
+                )}
+                {hasFeature(Feature.Palettes) && emulator.changePalette && (
+                    <Button
+                        text={"Palette"}
+                        image={require("../res/brightness.svg")}
+                        imageAlt="palette"
+                        style={["simple", "border", "padded"]}
+                        onClick={onPaletteClick}
+                    />
+                )}
+                <Button
+                    text={"Load ROM"}
+                    image={require("../res/upload.svg")}
+                    imageAlt="upload"
+                    file={true}
+                    accept={emulator.romExts.map((e) => `.${e}`).join(",")}
+                    style={["simple", "border", "padded"]}
+                    onFile={onUploadFile}
+                />
+                {emulator.sections.map((section) => (
+                    <Button
+                        key={section.name}
+                        text={section.name}
+                        image={section.icon}
+                        enabled={visibleSections.includes(section.name)}
+                        onClick={() => onSectionClick(section.name)}
+                    />
+                ))}
+            </ButtonContainer>
+        ),
+        [
+            getPauseIcon,
+            getPauseText,
+            getSoundIcon,
+            getSoundText,
+            onBenchmarkClick,
+            onDebugClick,
+            onFullscreenClick,
+            onHelpClick,
+            onInformationClick,
+            onKeyboardClick,
+            onPaletteClick,
+            onPauseClick,
+            onResetClick,
+            onSectionClick,
+            onSoundClick,
+            onThemeClick,
+            onUploadFile,
+            hasFeature,
+            emulator,
+            debugVisible,
+            infoVisible,
+            keyboardVisible,
+            muted,
+            paused,
+            visibleSections
+        ]
+    );
 
     return (
         <div className="app" onClick={onAudioReady} onTouchStart={onAudioReady}>
@@ -1192,126 +1337,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                             <Section key={section.name}>{section.node}</Section>
                         )
                 )}
-                <Section>
-                    <ButtonContainer>
-                        <Button
-                            text={getPauseText()}
-                            image={getPauseIcon()}
-                            imageAlt="pause"
-                            enabled={paused}
-                            style={["simple", "border", "padded"]}
-                            onClick={onPauseClick}
-                        />
-                        <Button
-                            text={"Reset"}
-                            image={require("../res/reset.svg")}
-                            imageAlt="reset"
-                            style={["simple", "border", "padded"]}
-                            onClick={onResetClick}
-                        />
-                        <Button
-                            text={getSoundText()}
-                            image={getSoundIcon()}
-                            imageAlt="sound"
-                            enabled={muted}
-                            style={["simple", "border", "padded"]}
-                            onClick={onSoundClick}
-                        />
-                        {hasFeature(Feature.Benchmark) &&
-                            emulator.benchmark && (
-                                <Button
-                                    text={"Benchmark"}
-                                    image={require("../res/bolt.svg")}
-                                    imageAlt="benchmark"
-                                    style={["simple", "border", "padded"]}
-                                    onClick={onBenchmarkClick}
-                                />
-                            )}
-                        <Button
-                            text={"Fullscreen"}
-                            image={require("../res/maximise.svg")}
-                            imageAlt="maximise"
-                            style={["simple", "border", "padded"]}
-                            onClick={onFullscreenClick}
-                        />
-                        {hasFeature(Feature.Keyboard) && (
-                            <Button
-                                text={"Keyboard"}
-                                image={require("../res/dialpad.svg")}
-                                imageAlt="keyboard"
-                                enabled={keyboardVisible}
-                                style={["simple", "border", "padded"]}
-                                onClick={onKeyboardClick}
-                            />
-                        )}
-                        <Button
-                            text={"Information"}
-                            image={require("../res/info.svg")}
-                            imageAlt="information"
-                            enabled={infoVisible}
-                            style={["simple", "border", "padded"]}
-                            onClick={onInformationClick}
-                        />
-                        {hasFeature(Feature.Help) && (
-                            <Button
-                                text={"Help"}
-                                image={require("../res/help.svg")}
-                                imageAlt="help"
-                                style={["simple", "border", "padded"]}
-                                onClick={onHelpClick}
-                            />
-                        )}
-                        {hasFeature(Feature.Debug) && (
-                            <Button
-                                text={"Debug"}
-                                image={require("../res/bug.svg")}
-                                imageAlt="debug"
-                                enabled={debugVisible}
-                                style={["simple", "border", "padded"]}
-                                onClick={onDebugClick}
-                            />
-                        )}
-                        {hasFeature(Feature.Themes) && (
-                            <Button
-                                text={"Themes"}
-                                image={require("../res/marker.svg")}
-                                imageAlt="theme"
-                                style={["simple", "border", "padded"]}
-                                onClick={onThemeClick}
-                            />
-                        )}
-                        {hasFeature(Feature.Palettes) &&
-                            emulator.changePalette && (
-                                <Button
-                                    text={"Palette"}
-                                    image={require("../res/brightness.svg")}
-                                    imageAlt="palette"
-                                    style={["simple", "border", "padded"]}
-                                    onClick={onPaletteClick}
-                                />
-                            )}
-                        <Button
-                            text={"Load ROM"}
-                            image={require("../res/upload.svg")}
-                            imageAlt="upload"
-                            file={true}
-                            accept={emulator.romExts
-                                .map((e) => `.${e}`)
-                                .join(",")}
-                            style={["simple", "border", "padded"]}
-                            onFile={onUploadFile}
-                        />
-                        {emulator.sections.map((section) => (
-                            <Button
-                                key={section.name}
-                                text={section.name}
-                                image={section.icon}
-                                enabled={visibleSections.includes(section.name)}
-                                onClick={() => onSectionClick(section.name)}
-                            />
-                        ))}
-                    </ButtonContainer>
-                </Section>
+                <Section>{buttonsSection}</Section>
             </PanelSplit>
         </div>
     );
