@@ -1135,6 +1135,17 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         ),
         [emulator]
     );
+    const debugSection = useMemo(
+        () => (
+            <Section>
+                <Debug
+                    panels={emulator.debug.map((h) => h.node)}
+                    names={emulator.debug.map((h) => h.name)}
+                />
+            </Section>
+        ),
+        [emulator]
+    );
     const keyboardSection = useMemo(
         () => (
             <Section visible={keyboardVisible} separatorBottom={true}>
@@ -1169,14 +1180,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 {keyboardSection}
                 {title}
                 {descriptionSection}
-                {debugVisible && (
-                    <Section>
-                        <Debug
-                            panels={emulator.debug.map((h) => h.node)}
-                            names={emulator.debug.map((h) => h.name)}
-                        />
-                    </Section>
-                )}
+                {debugVisible && debugSection}
                 {infoVisible && (
                     <Section>
                         <PanelTab
