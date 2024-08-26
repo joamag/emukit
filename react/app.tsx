@@ -201,11 +201,11 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 setKeyaction(undefined);
                 break;
             case "Fullscreen":
-                setFullscreenState(!fullscreenState);
+                setFullscreenState((prev) => !prev);
                 setKeyaction(undefined);
                 break;
             case "Keyboard":
-                setKeyboardVisible(!keyboardVisible);
+                setKeyboardVisible((prev) => !prev);
                 setKeyaction(undefined);
                 break;
             case "Palette":
@@ -227,15 +227,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 }
                 break;
         }
-    }, [
-        setFast,
-        setKeyboardVisible,
-        emulator,
-        keyaction,
-        fast,
-        fullscreenState,
-        keyboardVisible
-    ]);
+    }, [setFast, setKeyboardVisible, emulator, keyaction, fast]);
     useEffect(
         () => {
             if (palette) {
