@@ -1166,7 +1166,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             {header}
             {footer}
             <PanelSplit left={displayContainer}>
-                {keyboardVisible && keyboardSection}
+                {keyboardSection}
                 {title}
                 {descriptionSection}
                 {debugVisible && (
