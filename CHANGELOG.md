@@ -13,12 +13,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* Better responsive approach with efficiency in mind
-* Started using [recoil](https://recoiljs.org/) for global state management
+*
 
 ### Fixed
 
 *
+
+## [0.10.8] - 2024-08-26
+
+### Changed
+
+* Better responsive approach with efficiency in mind
+* Started using [recoil](https://recoiljs.org/) for global state management
 
 ## [0.10.7] - 2024-08-08
 
