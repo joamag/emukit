@@ -383,212 +383,6 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         () => backgrounds[backgroundIndex],
         [backgrounds, backgroundIndex]
     );
-    const renderGeneralTab = () => (
-        <Info>
-            <Pair
-                key="button-engine"
-                name={"Engine"}
-                valueNode={
-                    <ButtonSwitch
-                        options={emulator.engines}
-                        value={emulator.engine || emulator.engines[0]}
-                        uppercase={true}
-                        size={"large"}
-                        style={["simple"]}
-                        onChange={onEngineChange}
-                    />
-                }
-            />
-            <Pair key="rom" name={"ROM"} value={romInfo.name ?? "-"} />
-            <Pair
-                key="rom-size"
-                name={"ROM Size"}
-                value={
-                    romInfo.size
-                        ? `${new Intl.NumberFormat().format(
-                              romInfo.size
-                          )} bytes`
-                        : "-"
-                }
-            />
-            <Pair
-                key="button-frequency"
-                name={"CPU Frequency"}
-                valueNode={
-                    <ButtonIncrement
-                        value={emulator.frequency / frequencyRatio}
-                        delta={
-                            (emulator.frequencySpecs.delta ?? FREQUENCY_DELTA) /
-                            frequencyRatio
-                        }
-                        min={0}
-                        suffix={emulator.frequencySpecs.unit ?? "Hz"}
-                        decimalPlaces={emulator.frequencySpecs.places ?? 0}
-                        onChange={onFrequencyChange}
-                        onReady={onFrequencyReady}
-                    />
-                }
-            />
-            {hasFeature(Feature.DisplayFrequency) && (
-                <Pair
-                    key="button-display-frequency"
-                    name={"Display Frequency"}
-                    valueNode={
-                        <ButtonIncrement
-                            value={
-                                emulator.displayFrequency /
-                                displayFrequencyRatio
-                            }
-                            delta={
-                                (emulator.frequencySpecs.displayDelta ??
-                                    DISPLAY_FREQUENCY_DELTA) /
-                                displayFrequencyRatio
-                            }
-                            min={0}
-                            suffix={emulator.frequencySpecs.displayUnit ?? "Hz"}
-                            decimalPlaces={
-                                emulator.frequencySpecs.displayPlaces ?? 0
-                            }
-                            onChange={onDisplayFrequencyChange}
-                        />
-                    }
-                />
-            )}
-            {hasFeature(Feature.LoopMode) && (
-                <Pair
-                    key="button-loop-mode"
-                    name={"Loop Mode"}
-                    valueNode={
-                        <ButtonSwitch
-                            options={loopModes()}
-                            value={"auto"}
-                            uppercase={true}
-                            size={"large"}
-                            style={["simple"]}
-                            onChange={onLoopChange}
-                        />
-                    }
-                />
-            )}
-            {hasFeature(Feature.BootRomInfo) && (
-                <Pair
-                    key="boot-rom"
-                    name={"Boot ROM"}
-                    value={
-                        romInfo.extra?.bootRom
-                            ? `${romInfo.extra?.bootRom}`
-                            : "-"
-                    }
-                />
-            )}
-            {hasFeature(Feature.RomTypeInfo) && (
-                <Pair
-                    key="rom-type"
-                    name={"ROM Type"}
-                    value={
-                        romInfo.extra?.romType
-                            ? `${romInfo.extra?.romType}`
-                            : "-"
-                    }
-                />
-            )}
-            <SpeedSection emulator={emulator} />
-        </Info>
-    );
-    const renderDetailsTab = () => (
-        <Info>
-            <Pair
-                key="emukit"
-                name={"EmuKit"}
-                value={info.version}
-                valueHref={
-                    "https://github.com/joamag/emukit/blob/master/CHANGELOG.md"
-                }
-            />
-            {hasFeature(Feature.Themes) && (
-                <Pair
-                    key="theme"
-                    name={"Theme"}
-                    value={`#${getBackground()}`}
-                />
-            )}
-            {hasFeature(Feature.Palettes) && (
-                <Pair key="palette" name={"Palette"} value={paletteName} />
-            )}
-            {emulator.compilerString && (
-                <Pair
-                    key="compiler"
-                    name={"Compiler"}
-                    value={emulator.compilerString}
-                />
-            )}
-            {emulator.compilationString && (
-                <Pair
-                    key="compilation"
-                    name={"Compilation"}
-                    value={emulator.compilationString}
-                />
-            )}
-            {emulator.wasmEngine && (
-                <Pair
-                    key="wasm-engine"
-                    name={"WASM Engine"}
-                    value={emulator.wasmEngine}
-                />
-            )}
-        </Info>
-    );
-    const renderSaveStatesTab = () =>
-        hasSaveStatesTab() ? (
-            <>
-                <Info>
-                    {saveStateEntries.length > 0 ? (
-                        saveStateEntries.map(([index, saveSate]) => (
-                            <Fragment key={`#${index}`}>
-                                <PairState
-                                    index={saveSate.index}
-                                    thumbnail={saveSate.thumbnail}
-                                    thumbnailSize={thumbnailSize}
-                                    saveState={saveSate}
-                                    onLoadClick={onLoadStateClick}
-                                    onDeleteClick={onDeleteStateClick}
-                                    onInfoClick={onInfoStateClick}
-                                    onDownloadClick={onDownloadStateClick}
-                                />
-                                <Separator
-                                    marginTop={12}
-                                    marginBottom={12}
-                                    thickness={1}
-                                    color="transparent"
-                                />
-                            </Fragment>
-                        ))
-                    ) : (
-                        <Paragraph style={["no-margin-top"]}>
-                            There're currently no save states for this ROM!
-                            <br />
-                            Press Save State to capture the current machine
-                            state into local storage.
-                        </Paragraph>
-                    )}
-                </Info>
-                <div>
-                    <Button text={"Save State"} onClick={onSaveStateClick} />
-                </div>
-            </>
-        ) : null;
-    const renderControllersTab = () =>
-        hasControllersTab() ? (
-            <Info style={["small"]}>
-                {Object.entries(gamepads).map(([index, gamepad]) => (
-                    <Pair
-                        key={`#${index}`}
-                        name={`#${index}`}
-                        value={gamepad.id}
-                    />
-                ))}
-            </Info>
-        ) : null;
     const hasFeature = useCallback(
         (feature: Feature) => {
             return emulator.features.includes(feature);
@@ -605,10 +399,10 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     );
     const getTabs = () => {
         const tabs = [];
-        tabs.push(renderGeneralTab());
-        tabs.push(renderDetailsTab());
-        hasSaveStatesTab() && tabs.push(renderSaveStatesTab());
-        hasControllersTab() && tabs.push(renderControllersTab());
+        tabs.push(generalTab);
+        tabs.push(detailsTab);
+        hasSaveStatesTab() && tabs.push(saveStatesTab);
+        hasControllersTab() && tabs.push(renderControllersTab);
         return tabs;
     };
     const getTabNames = () => {
@@ -1162,6 +956,249 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             fullscreenState,
             keyboardVisible
         ]
+    );
+    const generalTab = useMemo(
+        () => (
+            <Info>
+                <Pair
+                    key="button-engine"
+                    name={"Engine"}
+                    valueNode={
+                        <ButtonSwitch
+                            options={emulator.engines}
+                            value={emulator.engine || emulator.engines[0]}
+                            uppercase={true}
+                            size={"large"}
+                            style={["simple"]}
+                            onChange={onEngineChange}
+                        />
+                    }
+                />
+                <Pair key="rom" name={"ROM"} value={romInfo.name ?? "-"} />
+                <Pair
+                    key="rom-size"
+                    name={"ROM Size"}
+                    value={
+                        romInfo.size
+                            ? `${new Intl.NumberFormat().format(
+                                  romInfo.size
+                              )} bytes`
+                            : "-"
+                    }
+                />
+                <Pair
+                    key="button-frequency"
+                    name={"CPU Frequency"}
+                    valueNode={
+                        <ButtonIncrement
+                            value={emulator.frequency / frequencyRatio}
+                            delta={
+                                (emulator.frequencySpecs.delta ??
+                                    FREQUENCY_DELTA) / frequencyRatio
+                            }
+                            min={0}
+                            suffix={emulator.frequencySpecs.unit ?? "Hz"}
+                            decimalPlaces={emulator.frequencySpecs.places ?? 0}
+                            onChange={onFrequencyChange}
+                            onReady={onFrequencyReady}
+                        />
+                    }
+                />
+                {hasFeature(Feature.DisplayFrequency) && (
+                    <Pair
+                        key="button-display-frequency"
+                        name={"Display Frequency"}
+                        valueNode={
+                            <ButtonIncrement
+                                value={
+                                    emulator.displayFrequency /
+                                    displayFrequencyRatio
+                                }
+                                delta={
+                                    (emulator.frequencySpecs.displayDelta ??
+                                        DISPLAY_FREQUENCY_DELTA) /
+                                    displayFrequencyRatio
+                                }
+                                min={0}
+                                suffix={
+                                    emulator.frequencySpecs.displayUnit ?? "Hz"
+                                }
+                                decimalPlaces={
+                                    emulator.frequencySpecs.displayPlaces ?? 0
+                                }
+                                onChange={onDisplayFrequencyChange}
+                            />
+                        }
+                    />
+                )}
+                {hasFeature(Feature.LoopMode) && (
+                    <Pair
+                        key="button-loop-mode"
+                        name={"Loop Mode"}
+                        valueNode={
+                            <ButtonSwitch
+                                options={loopModes()}
+                                value={"auto"}
+                                uppercase={true}
+                                size={"large"}
+                                style={["simple"]}
+                                onChange={onLoopChange}
+                            />
+                        }
+                    />
+                )}
+                {hasFeature(Feature.BootRomInfo) && (
+                    <Pair
+                        key="boot-rom"
+                        name={"Boot ROM"}
+                        value={
+                            romInfo.extra?.bootRom
+                                ? `${romInfo.extra?.bootRom}`
+                                : "-"
+                        }
+                    />
+                )}
+                {hasFeature(Feature.RomTypeInfo) && (
+                    <Pair
+                        key="rom-type"
+                        name={"ROM Type"}
+                        value={
+                            romInfo.extra?.romType
+                                ? `${romInfo.extra?.romType}`
+                                : "-"
+                        }
+                    />
+                )}
+                <SpeedSection emulator={emulator} />
+            </Info>
+        ),
+        [
+            hasFeature,
+            onDisplayFrequencyChange,
+            onEngineChange,
+            onFrequencyChange,
+            onFrequencyReady,
+            onLoopChange,
+            emulator,
+            displayFrequencyRatio,
+            frequencyRatio,
+            romInfo
+        ]
+    );
+    const detailsTab = useMemo(
+        () => (
+            <Info>
+                <Pair
+                    key="emukit"
+                    name={"EmuKit"}
+                    value={info.version}
+                    valueHref={
+                        "https://github.com/joamag/emukit/blob/master/CHANGELOG.md"
+                    }
+                />
+                {hasFeature(Feature.Themes) && (
+                    <Pair
+                        key="theme"
+                        name={"Theme"}
+                        value={`#${getBackground()}`}
+                    />
+                )}
+                {hasFeature(Feature.Palettes) && (
+                    <Pair key="palette" name={"Palette"} value={paletteName} />
+                )}
+                {emulator.compilerString && (
+                    <Pair
+                        key="compiler"
+                        name={"Compiler"}
+                        value={emulator.compilerString}
+                    />
+                )}
+                {emulator.compilationString && (
+                    <Pair
+                        key="compilation"
+                        name={"Compilation"}
+                        value={emulator.compilationString}
+                    />
+                )}
+                {emulator.wasmEngine && (
+                    <Pair
+                        key="wasm-engine"
+                        name={"WASM Engine"}
+                        value={emulator.wasmEngine}
+                    />
+                )}
+            </Info>
+        ),
+        [getBackground, hasFeature, emulator, paletteName]
+    );
+    const saveStatesTab = useMemo(
+        () =>
+            hasSaveStatesTab() ? (
+                <>
+                    <Info>
+                        {saveStateEntries.length > 0 ? (
+                            saveStateEntries.map(([index, saveSate]) => (
+                                <Fragment key={`#${index}`}>
+                                    <PairState
+                                        index={saveSate.index}
+                                        thumbnail={saveSate.thumbnail}
+                                        thumbnailSize={thumbnailSize}
+                                        saveState={saveSate}
+                                        onLoadClick={onLoadStateClick}
+                                        onDeleteClick={onDeleteStateClick}
+                                        onInfoClick={onInfoStateClick}
+                                        onDownloadClick={onDownloadStateClick}
+                                    />
+                                    <Separator
+                                        marginTop={12}
+                                        marginBottom={12}
+                                        thickness={1}
+                                        color="transparent"
+                                    />
+                                </Fragment>
+                            ))
+                        ) : (
+                            <Paragraph style={["no-margin-top"]}>
+                                There're currently no save states for this ROM!
+                                <br />
+                                Press Save State to capture the current machine
+                                state into local storage.
+                            </Paragraph>
+                        )}
+                    </Info>
+                    <div>
+                        <Button
+                            text={"Save State"}
+                            onClick={onSaveStateClick}
+                        />
+                    </div>
+                </>
+            ) : null,
+        [
+            hasSaveStatesTab,
+            onDeleteStateClick,
+            onDownloadStateClick,
+            onInfoStateClick,
+            onLoadStateClick,
+            onSaveStateClick,
+            saveStateEntries,
+            thumbnailSize
+        ]
+    );
+    const renderControllersTab = useMemo(
+        () =>
+            hasControllersTab() ? (
+                <Info style={["small"]}>
+                    {Object.entries(gamepads).map(([index, gamepad]) => (
+                        <Pair
+                            key={`#${index}`}
+                            name={`#${index}`}
+                            value={gamepad.id}
+                        />
+                    ))}
+                </Info>
+            ) : null,
+        [hasControllersTab, gamepads]
     );
 
     return (
