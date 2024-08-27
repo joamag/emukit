@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from "react";
+import React, { FC, ReactNode, useMemo } from "react";
 
 import "./info.css";
 
@@ -19,8 +19,8 @@ type InfoProps = {
  * @returns The info component with the associated pairs.
  */
 export const Info: FC<InfoProps> = ({ children, style = [] }) => {
-    const classes = () => ["info", ...style].join(" ");
-    return <dl className={classes()}>{children}</dl>;
+    const classes = useMemo(() => ["info", ...style].join(" "), [style]);
+    return <dl className={classes}>{children}</dl>;
 };
 
 export default Info;

@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useMemo, useState } from "react";
 import { isAndroid } from "../../../ts/index.ts";
 
 import "./keyboard-gb.css";
@@ -94,8 +94,10 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
     onKeyUp,
     onGamepad
 }) => {
-    const containerClasses = () =>
-        ["keyboard-container", fullscreen ? "fullscreen" : ""].join(" ");
+    const containerClasses = useMemo(
+        () => ["keyboard-container", fullscreen ? "fullscreen" : ""].join(" "),
+        [fullscreen]
+    );
     const [pressed, setPressed] = useState({
         ArrowUp: false,
         ArrowDown: false,
@@ -106,13 +108,16 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
         A: false,
         B: false
     });
-    const classes = () =>
-        [
-            "keyboard",
-            "keyboard-gb",
-            fullscreen ? "fullscreen" : "",
-            ...style
-        ].join(" ");
+    const classes = useMemo(
+        () =>
+            [
+                "keyboard",
+                "keyboard-gb",
+                fullscreen ? "fullscreen" : "",
+                ...style
+            ].join(" "),
+        [fullscreen, style]
+    );
     useEffect(() => {
         if (!physical) return;
         const getGamepadType = (gamepad: globalThis.Gamepad): GamepadType => {
@@ -299,9 +304,9 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
         );
     };
     return (
-        <div className={containerClasses()}>
+        <div className={containerClasses}>
             <div
-                className={classes()}
+                className={classes}
                 onTouchStart={(e) => e.preventDefault()}
                 onTouchEnd={(e) => e.preventDefault()}
             >

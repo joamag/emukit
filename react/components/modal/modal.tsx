@@ -1,4 +1,11 @@
-import React, { FC, ReactNode, useCallback, useEffect, useRef } from "react";
+import React, {
+    FC,
+    ReactNode,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef
+} from "react";
 import Button from "../button/button.tsx";
 
 import "./modal.css";
@@ -29,8 +36,10 @@ export const Modal: FC<ModalProps> = ({
     onConfirm,
     onCancel
 }) => {
-    const classes = () =>
-        ["modal", visible ? "visible" : "", ...style].join(" ");
+    const classes = useMemo(
+        () => ["modal", visible ? "visible" : "", ...style].join(" "),
+        [visible, style]
+    );
     text =
         text ??
         (contents ? undefined : "Do you confirm the following operation?");
@@ -66,7 +75,7 @@ export const Modal: FC<ModalProps> = ({
         [overlayClose]
     );
     return (
-        <div className={classes()} onClick={onCancel}>
+        <div className={classes} onClick={onCancel}>
             <div
                 ref={modalRef}
                 className="modal-window"

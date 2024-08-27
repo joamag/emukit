@@ -1,4 +1,4 @@
-import React, { ReactNode, FC } from "react";
+import React, { ReactNode, FC, useMemo } from "react";
 
 import "./paragraph.css";
 
@@ -15,8 +15,8 @@ export const Paragraph: FC<ParagraphProps> = ({
     text,
     style = []
 }) => {
-    const classes = () => ["paragraph", ...style].join(" ");
-    return <p className={classes()}>{children ?? text}</p>;
+    const classes = useMemo(() => ["paragraph", ...style].join(" "), [style]);
+    return <p className={classes}>{children ?? text}</p>;
 };
 
 export default Paragraph;

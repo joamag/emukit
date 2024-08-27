@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useMemo } from "react";
 
 import Pair from "../pair/pair.tsx";
 import Info from "../info/info.tsx";
@@ -18,7 +18,7 @@ export const SaveInfo: FC<SaveInfoProps> = ({
     emulator,
     style = []
 }) => {
-    const classes = () => ["save-info", ...style].join(" ");
+    const classes = useMemo(() => ["save-info", ...style].join(" "), [style]);
     const tabs = [SaveInfoMain({ saveState, emulator })];
     const tabNames = ["Main"];
     if (saveState.thumbnail !== undefined) {
@@ -26,7 +26,7 @@ export const SaveInfo: FC<SaveInfoProps> = ({
         tabNames.push("Thumbnail");
     }
     return (
-        <div className={classes()}>
+        <div className={classes}>
             <PanelTab tabs={tabs} tabNames={tabNames} flex={true} />
         </div>
     );

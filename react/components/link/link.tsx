@@ -1,4 +1,4 @@
-import React, { ReactNode, FC } from "react";
+import React, { ReactNode, FC, useMemo } from "react";
 
 import "./link.css";
 
@@ -19,9 +19,12 @@ export const Link: FC<LinkProps> = ({
     style = [],
     onClick
 }) => {
-    const classes = () => ["link", onClick ? "click" : "", ...style].join(" ");
+    const classes = useMemo(
+        () => ["link", onClick ? "click" : "", ...style].join(" "),
+        [onClick, style]
+    );
     return (
-        <a className={classes()} href={href} target={target} onClick={onClick}>
+        <a className={classes} href={href} target={target} onClick={onClick}>
             {children ?? text}
         </a>
     );

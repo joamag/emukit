@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useMemo } from "react";
 
 import "./separator.css";
 
@@ -21,12 +21,12 @@ export const Separator: FC<SeparatorProps> = ({
     clear = true,
     style = []
 }) => {
-    const classes = () => ["separator", ...style].join(" ");
+    const classes = useMemo(() => ["separator", ...style].join(" "), [style]);
     return (
         <>
             {clear && <div className="separator-clear"></div>}
             <div
-                className={classes()}
+                className={classes}
                 style={{
                     marginTop: marginTop,
                     marginBottom: marginBottom,

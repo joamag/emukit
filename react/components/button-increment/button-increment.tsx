@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useMemo, useState } from "react";
 import Button, { ButtonSize } from "../button/button.tsx";
 
 import "./button-increment.css";
@@ -35,7 +35,10 @@ export const ButtonIncrement: FC<ButtonIncrementProps> = ({
     onReady
 }) => {
     const [valueState, setValue] = useState(value);
-    const classes = () => ["button-increment", size, ...style].join(" ");
+    const classes = useMemo(
+        () => ["button-increment", size, ...style].join(" "),
+        [size, style]
+    );
     useEffect(() => {
         onReady?.((value) => setValue(value));
     }, [onReady]);
@@ -60,7 +63,7 @@ export const ButtonIncrement: FC<ButtonIncrementProps> = ({
         if (onChange) onChange(valueNew);
     };
     return (
-        <span className={classes()} onClick={onClick}>
+        <span className={classes} onClick={onClick}>
             <Button
                 text={"-"}
                 size={size}

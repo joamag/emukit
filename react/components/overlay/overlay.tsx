@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useMemo, useState } from "react";
 
 import "./overlay.css";
 
@@ -15,8 +15,10 @@ type OverlayProps = {
 
 export const Overlay: FC<OverlayProps> = ({ text, style = [], onFile }) => {
     const [visible, setVisible] = useState(false);
-    const classes = () =>
-        ["overlay", visible ? "visible" : "", ...style].join(" ");
+    const classes = useMemo(
+        () => ["overlay", visible ? "visible" : "", ...style].join(" "),
+        [visible, style]
+    );
     useEffect(() => {
         const isFile = (event: DragEvent) => {
             // run a series of validations to determine if the event
@@ -84,7 +86,7 @@ export const Overlay: FC<OverlayProps> = ({ text, style = [], onFile }) => {
         };
     }, [onFile]);
     return (
-        <div className={classes()}>
+        <div className={classes}>
             <div className="overlay-container">
                 {text && <div className="overlay-text">{text}</div>}
                 <div className="overlay-image">

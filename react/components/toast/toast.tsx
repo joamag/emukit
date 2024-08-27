@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useMemo } from "react";
 
 import "./toast.css";
 
@@ -19,15 +19,18 @@ export const Toast: FC<ToastProps> = ({
     style = [],
     onCancel
 }) => {
-    const classes = () =>
-        [
-            "toast",
-            error ? "error" : "",
-            visible ? "visible" : "",
-            ...style
-        ].join(" ");
+    const classes = useMemo(
+        () =>
+            [
+                "toast",
+                error ? "error" : "",
+                visible ? "visible" : "",
+                ...style
+            ].join(" "),
+        [error, visible, style]
+    );
     return (
-        <div className={classes()}>
+        <div className={classes}>
             <div className="toast-text" onClick={onCancel}>
                 {text}
             </div>

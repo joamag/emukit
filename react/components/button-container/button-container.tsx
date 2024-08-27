@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from "react";
+import React, { FC, ReactNode, useMemo } from "react";
 
 import "./button-container.css";
 
@@ -11,8 +11,11 @@ export const ButtonContainer: FC<ButtonContainerProps> = ({
     children,
     style = []
 }) => {
-    const classes = () => ["button-container", ...style].join(" ");
-    return <div className={classes()}>{children}</div>;
+    const classes = useMemo(
+        () => ["button-container", ...style].join(" "),
+        [style]
+    );
+    return <div className={classes}>{children}</div>;
 };
 
 export default ButtonContainer;

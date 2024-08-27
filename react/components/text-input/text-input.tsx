@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useMemo } from "react";
 
 import "./text-input.css";
 
@@ -19,10 +19,13 @@ export const TextInput: FC<TextInputProps> = ({
     style = [],
     onChange
 }) => {
-    const classes = () => ["text-input", size, ...style].join(" ");
+    const classes = useMemo(
+        () => ["text-input", size, ...style].join(" "),
+        [size, style]
+    );
     return (
         <input
-            className={classes()}
+            className={classes}
             type={type}
             value={value}
             placeholder={placeholder}

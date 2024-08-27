@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from "react";
+import React, { FC, ReactNode, useMemo } from "react";
 
 import "./panel-split.css";
 
@@ -15,9 +15,9 @@ export const PanelSplit: FC<PanelSplitProps> = ({
     right,
     style = []
 }) => {
-    const classes = () => ["panel-split", ...style].join(" ");
+    const classes = useMemo(() => ["panel-split", ...style].join(" "), [style]);
     return (
-        <div className={classes()}>
+        <div className={classes}>
             <div className="side-left">{left}</div>
             <div className="side-right">{children ?? right}</div>
         </div>

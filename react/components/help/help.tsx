@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from "react";
+import React, { FC, ReactNode, useMemo } from "react";
 import PanelTab from "../panel-tab/panel-tab.tsx";
 
 import "./help.css";
@@ -10,9 +10,9 @@ type HelpProps = {
 };
 
 export const Help: FC<HelpProps> = ({ panels, names, style = [] }) => {
-    const classes = () => ["help", ...style].join(" ");
+    const classes = useMemo(() => ["help", ...style].join(" "), [style]);
     return (
-        <div className={classes()}>
+        <div className={classes}>
             <PanelTab tabs={panels} tabNames={names} flex={true} />
         </div>
     );

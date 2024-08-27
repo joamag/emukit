@@ -1,4 +1,4 @@
-import React, { FC, useState, useRef, useEffect } from "react";
+import React, { FC, useState, useRef, useEffect, useMemo } from "react";
 import { PixelFormat } from "../../../ts/index.ts";
 
 import "./display.css";
@@ -66,8 +66,13 @@ export const Display: FC<DisplayProps> = ({
         options.scale = window.devicePixelRatio ? window.devicePixelRatio : 1;
     }
 
-    const classes = () =>
-        ["display", fullscreen ? "fullscreen" : null, size, ...style].join(" ");
+    const classes = useMemo(
+        () =>
+            ["display", fullscreen ? "fullscreen" : null, size, ...style].join(
+                " "
+            ),
+        [fullscreen, size, style]
+    );
 
     const [width, setWidth] = useState<number>();
     const [height, setHeight] = useState<number>();
@@ -153,7 +158,7 @@ export const Display: FC<DisplayProps> = ({
     }
 
     return (
-        <div className={classes()}>
+        <div className={classes}>
             <span
                 className="magnify-button display-minimize"
                 onClick={onMinimize}

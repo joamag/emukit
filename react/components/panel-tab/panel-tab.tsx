@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useState } from "react";
+import React, { FC, ReactNode, useMemo, useState } from "react";
 
 import "./panel-tab.css";
 
@@ -19,10 +19,13 @@ export const PanelTab: FC<PanelTabProps> = ({
     flex = false,
     style = []
 }) => {
-    const classes = () => ["panel-tab", flex ? "flex" : "", ...style].join(" ");
+    const classes = useMemo(
+        () => ["panel-tab", flex ? "flex" : "", ...style].join(" "),
+        [flex, style]
+    );
     const [tabIndexState, setTabIndexState] = useState(tabIndex);
     return (
-        <div className={classes()}>
+        <div className={classes}>
             {selectors && (
                 <div className="tab-selectors">
                     {tabNames.map((tabName, tabIndex) => {

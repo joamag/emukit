@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect, useMemo, useState } from "react";
 
 import "./keyboard-chip8.css";
 
@@ -68,7 +68,10 @@ export const KeyboardChip8: FC<KeyboardChip8Props> = ({
     onKeyDown,
     onKeyUp
 }) => {
-    const classes = () => ["keyboard", "keyboard-chip8", ...style].join(" ");
+    const classes = useMemo(
+        () => ["keyboard", "keyboard-chip8", ...style].join(" "),
+        [style]
+    );
     const [pressed, setPressed] = useState({
         "1": false,
         "2": false,
@@ -170,7 +173,7 @@ export const KeyboardChip8: FC<KeyboardChip8Props> = ({
         );
     };
     return (
-        <div className={classes()}>
+        <div className={classes}>
             <div className="keyboard-line">
                 {["1", "2", "3", "4"].map((k) => renderKey(k as KeyNames))}
             </div>

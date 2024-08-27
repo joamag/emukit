@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React, { FC, useMemo } from "react";
 import { Link } from "../link/link.tsx";
 
 import "./title.css";
@@ -18,9 +18,9 @@ export const Title: FC<TitleProps> = ({
     iconSrc,
     style = []
 }) => {
-    const classes = () => ["title", ...style].join(" ");
+    const classes = useMemo(() => ["title", ...style].join(" "), [style]);
     return (
-        <h1 className={classes()}>
+        <h1 className={classes}>
             {text}
             {version &&
                 (versionUrl ? (

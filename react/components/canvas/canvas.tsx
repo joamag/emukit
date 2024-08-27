@@ -1,4 +1,4 @@
-import React, { FC, RefObject, useEffect } from "react";
+import React, { FC, RefObject, useEffect, useMemo } from "react";
 
 import "./canvas.css";
 
@@ -38,7 +38,7 @@ export const Canvas: FC<CanvasProps> = ({
     style = [],
     onCanvas
 }) => {
-    const classes = () => ["canvas", ...style].join(" ");
+    const classes = useMemo(() => ["canvas", ...style].join(" "), [style]);
     useEffect(() => {
         if (canvasRef.current && init) {
             const structure = initCanvas(
@@ -63,7 +63,7 @@ export const Canvas: FC<CanvasProps> = ({
     return (
         <canvas
             ref={canvasRef}
-            className={classes()}
+            className={classes}
             style={{
                 width: scaledWidth ?? width * scale,
                 imageRendering: imageRendering

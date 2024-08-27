@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from "react";
+import React, { FC, ReactNode, useMemo } from "react";
 
 import "./section.css";
 
@@ -17,10 +17,12 @@ export const Section: FC<SectionProps> = ({
     separatorBottom = false,
     style = []
 }) => {
-    const classes = () =>
-        ["section", visible ? "visible" : "", ...style].join(" ");
+    const classes = useMemo(
+        () => ["section", visible ? "visible" : "", ...style].join(" "),
+        [visible, style]
+    );
     return (
-        <div className={classes()}>
+        <div className={classes}>
             {separator && <div className="separator"></div>}
             <div className="section-contents">{children}</div>
             {separatorBottom && <div className="separator"></div>}

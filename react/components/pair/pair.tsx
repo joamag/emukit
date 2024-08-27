@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useCallback } from "react";
+import React, { FC, ReactNode, useCallback, useMemo } from "react";
 import Link from "../link/link.tsx";
 
 import "./pair.css";
@@ -32,13 +32,16 @@ export const Pair: FC<PairProps> = ({
     onNameClick,
     onValueClick
 }) => {
-    const classes = () =>
-        [
-            "pair",
-            onNameClick ? "name-click" : "",
-            onValueClick ? "value-click" : "",
-            ...style
-        ].join(" ");
+    const classes = useMemo(
+        () =>
+            [
+                "pair",
+                onNameClick ? "name-click" : "",
+                onValueClick ? "value-click" : "",
+                ...style
+            ].join(" "),
+        [onNameClick, onValueClick, style]
+    );
     const _onNameClick = useCallback(
         () => (onNameClick ? onNameClick() : undefined),
         [onNameClick]
@@ -49,7 +52,7 @@ export const Pair: FC<PairProps> = ({
     );
     return (
         <>
-            <dt className={classes()} onClick={_onNameClick}>
+            <dt className={classes} onClick={_onNameClick}>
                 {nameNode ??
                     (nameHref && (
                         <Link href={nameHref} target={nameTarget ?? "_blank"}>
@@ -59,7 +62,7 @@ export const Pair: FC<PairProps> = ({
                     name ??
                     ""}
             </dt>
-            <dd className={classes()} onClick={_onValueClick}>
+            <dd className={classes} onClick={_onValueClick}>
                 {valueNode ??
                     (valueHref && (
                         <Link href={valueHref} target={valueTarget ?? "_blank"}>

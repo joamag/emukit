@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from "react";
+import React, { FC, ReactNode, useMemo } from "react";
 
 import "./footer.css";
 
@@ -13,9 +13,9 @@ export const Footer: FC<FooterProps> = ({
     color = "ffffff",
     style = []
 }) => {
-    const classes = () => ["footer", ...style].join(" ");
+    const classes = useMemo(() => ["footer", ...style].join(" "), [style]);
     return (
-        <div className={classes()}>
+        <div className={classes}>
             <div
                 className="footer-background"
                 style={{ backgroundColor: `#${color}f2` }}

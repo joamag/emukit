@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useCallback, useRef } from "react";
+import React, { ChangeEvent, FC, useCallback, useMemo, useRef } from "react";
 
 import "./button.css";
 
@@ -43,14 +43,17 @@ export const Button: FC<ButtonProps> = ({
     onClick,
     onFile
 }) => {
-    const classes = () =>
-        [
-            "button",
-            size,
-            enabled ? "enabled" : "",
-            file ? "file" : "",
-            ...style
-        ].join(" ");
+    const classes = useMemo(
+        () =>
+            [
+                "button",
+                size,
+                enabled ? "enabled" : "",
+                file ? "file" : "",
+                ...style
+            ].join(" "),
+        [size, enabled, file, style]
+    );
     const fileRef = useRef<HTMLInputElement>(null);
     const onFileChange = useCallback(
         (event: ChangeEvent<HTMLInputElement>) => {
@@ -78,7 +81,7 @@ export const Button: FC<ButtonProps> = ({
     );
     const renderSimple = () => (
         <span
-            className={classes()}
+            className={classes}
             onClick={onClick}
             onKeyDown={onKeyDown}
             tabIndex={focusable ? 0 : undefined}
@@ -88,7 +91,7 @@ export const Button: FC<ButtonProps> = ({
     );
     const renderComplex = () => (
         <span
-            className={classes()}
+            className={classes}
             onClick={onClick}
             onMouseDown={onMouseDown}
             onMouseUp={onMouseUp}

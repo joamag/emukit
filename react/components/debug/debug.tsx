@@ -1,4 +1,4 @@
-import React, { FC, ReactNode } from "react";
+import React, { FC, ReactNode, useMemo } from "react";
 import PanelTab from "../panel-tab/panel-tab.tsx";
 
 import "./debug.css";
@@ -10,9 +10,9 @@ type DebugProps = {
 };
 
 export const Debug: FC<DebugProps> = ({ panels, names, style = [] }) => {
-    const classes = () => ["debug", ...style].join(" ");
+    const classes = useMemo(() => ["debug", ...style].join(" "), [style]);
     return (
-        <div className={classes()}>
+        <div className={classes}>
             <PanelTab tabs={panels} tabNames={names} />
         </div>
     );
