@@ -7,12 +7,6 @@ module.exports = {
         "@typescript-eslint/no-empty-function": "off",
         "react-hooks/rules-of-hooks": "error",
         "react-hooks/exhaustive-deps": "warn",
-        "no-constant-condition": [
-            "error",
-            {
-                checkLoops: false
-            }
-        ],
         "import/order": [
             "error",
             {
@@ -25,6 +19,12 @@ module.exports = {
                     "index"
                 ],
                 "newlines-between": "always"
+            }
+        ],
+        "no-constant-condition": [
+            "error",
+            {
+                checkLoops: false
             }
         ],
         semi: ["error", "always"]
