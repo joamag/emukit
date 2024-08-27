@@ -12,15 +12,33 @@ import React, {
 import ReactDOM from "react-dom/client";
 import { RecoilRoot, useRecoilState } from "recoil";
 
+import info from "../package.json";
 import {
-    infoVisibleState,
+    AudioChunk,
+    AudioState,
+    DISPLAY_FREQUENCY_DELTA,
+    downloadFromBuffer,
+    Emulator,
+    Feature,
+    Frequency,
+    FREQUENCY_DELTA,
+    frequencyRatios,
+    getLoopMode,
+    loopModes,
+    PixelFormat,
+    RomInfo,
+    SaveState
+} from "../ts/index.ts";
+
+import {
     debugVisibleState,
+    fastState,
+    fullscreenState as fullscreenStateRecoil,
+    infoVisibleState,
     keyboardVisibleState,
-    visibleSectionsState,
     mutedState,
     pausedState,
-    fastState,
-    fullscreenState as fullscreenStateRecoil
+    visibleSectionsState
 } from "./atoms/index.ts";
 import {
     Button,
@@ -53,26 +71,8 @@ import {
     ToastManager,
     ToastManagerHandle
 } from "./components/index.ts";
-import {
-    downloadFromBuffer,
-    AudioChunk,
-    AudioState,
-    Emulator,
-    Feature,
-    Frequency,
-    FREQUENCY_DELTA,
-    frequencyRatios,
-    PixelFormat,
-    RomInfo,
-    SaveState,
-    getLoopMode,
-    loopModes,
-    DISPLAY_FREQUENCY_DELTA
-} from "../ts/index.ts";
 
 import "./app.css";
-
-import info from "../package.json";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const require: any;

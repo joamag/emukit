@@ -5,6 +5,7 @@ import React, {
     useRef,
     useState
 } from "react";
+
 import Toast from "../toast/toast.tsx";
 
 type ToastManagerProps = {

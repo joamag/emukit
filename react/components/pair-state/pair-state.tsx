@@ -1,7 +1,8 @@
 import React, { FC, useCallback, useMemo } from "react";
-import Pair, { PairStyle } from "../pair/pair.tsx";
-import Link from "../link/link.tsx";
+
 import { rgbToDataUrl, SaveState } from "../../../ts/index.ts";
+import Link from "../link/link.tsx";
+import Pair, { PairStyle } from "../pair/pair.tsx";
 
 import "./pair-state.css";
 

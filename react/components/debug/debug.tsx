@@ -1,4 +1,5 @@
 import React, { FC, ReactNode, useMemo } from "react";
+
 import PanelTab from "../panel-tab/panel-tab.tsx";
 
 import "./debug.css";

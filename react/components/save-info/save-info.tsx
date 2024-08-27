@@ -1,9 +1,9 @@
 import React, { FC, useMemo } from "react";
 
-import Pair from "../pair/pair.tsx";
-import Info from "../info/info.tsx";
-import PanelTab from "../panel-tab/panel-tab.tsx";
 import { Emulator, rgbToDataUrl, SaveState } from "../../../ts/index.ts";
+import Info from "../info/info.tsx";
+import Pair from "../pair/pair.tsx";
+import PanelTab from "../panel-tab/panel-tab.tsx";
 
 import "./save-info.css";
 

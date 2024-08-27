@@ -6,6 +6,7 @@ import React, {
     useMemo,
     useRef
 } from "react";
+
 import Button from "../button/button.tsx";
 
 import "./modal.css";

@@ -1,4 +1,5 @@
 import React, { FC, useMemo } from "react";
+
 import { Link } from "../link/link.tsx";
 
 import "./title.css";

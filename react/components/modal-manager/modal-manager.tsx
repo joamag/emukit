@@ -6,6 +6,7 @@ import React, {
     useRef,
     useState
 } from "react";
+
 import Modal from "../modal/modal.tsx";
 
 type ModalManagerProps = {
