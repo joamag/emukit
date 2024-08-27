@@ -19,7 +19,8 @@ import {
     visibleSectionsState,
     mutedState,
     pausedState,
-    fastState
+    fastState,
+    fullscreenState as fullscreenStateRecoil
 } from "./atoms/index.ts";
 import {
     Button,
@@ -106,7 +107,9 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     const [paused, setPaused] = useRecoilState(pausedState);
     const [muted, setMuted] = useRecoilState(mutedState);
     const [fast, setFast] = useRecoilState(fastState);
-    const [fullscreenState, setFullscreenState] = useState(fullscreen);
+    const [fullscreenState, setFullscreenState] = useRecoilState(
+        fullscreenStateRecoil
+    );
     const [backgroundIndex, setBackgroundIndex] = useState(
         background ? Math.max(backgrounds.indexOf(background), 0) : 0
     );
@@ -164,9 +167,17 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     );
 
     useEffect(() => {
+        setFullscreenState(fullscreen);
         setKeyboardVisible(isTouchDevice() || keyboard);
         setDebugVisible(debug);
-    }, [setKeyboardVisible, setDebugVisible, keyboard, debug]);
+    }, [
+        setFullscreenState,
+        setKeyboardVisible,
+        setDebugVisible,
+        fullscreen,
+        keyboard,
+        debug
+    ]);
     useEffect(
         () => {
             const background = getBackground();
@@ -227,7 +238,14 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 }
                 break;
         }
-    }, [setFast, setKeyboardVisible, emulator, keyaction, fast]);
+    }, [
+        setFullscreenState,
+        setFast,
+        setKeyboardVisible,
+        emulator,
+        keyaction,
+        fast
+    ]);
     useEffect(
         () => {
             if (palette) {
@@ -536,7 +554,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     }, [showModal, showToast, emulator]);
     const onFullscreenClick = useCallback(() => {
         setFullscreenState(!fullscreenState);
-    }, [fullscreenState]);
+    }, [setFullscreenState, fullscreenState]);
     const onKeyboardClick = useCallback(() => {
         setKeyboardVisible(!keyboardVisible);
     }, [setKeyboardVisible, keyboardVisible]);
@@ -676,7 +694,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     );
     const onMinimize = useCallback(() => {
         setFullscreenState(!fullscreenState);
-    }, [fullscreenState]);
+    }, [setFullscreenState, fullscreenState]);
     const onKeyDown = useCallback(
         (key: string) => {
             emulator.keyPress(key);

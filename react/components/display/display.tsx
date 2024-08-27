@@ -140,22 +140,26 @@ export const Display: FC<DisplayProps> = ({
         };
     }, [fullscreen, nativeFullscreen]);
 
-    if (onDrawHandler) {
-        onDrawHandler((pixels, format) => {
-            if (!canvasContentsRef.current) return;
-            updateCanvas(canvasContentsRef.current, pixels, format);
-        });
-    }
-
-    if (onClearHandler) {
-        onClearHandler(async (color, image, imageScale) => {
-            if (!canvasContentsRef.current) return;
-            await clearCanvas(canvasContentsRef.current, color, {
-                image: image,
-                imageScale: imageScale
+    useEffect(() => {
+        if (onDrawHandler) {
+            onDrawHandler((pixels, format) => {
+                if (!canvasContentsRef.current) return;
+                updateCanvas(canvasContentsRef.current, pixels, format);
             });
-        });
-    }
+        }
+    }, [onDrawHandler]);
+
+    useEffect(() => {
+        if (onClearHandler) {
+            onClearHandler(async (color, image, imageScale) => {
+                if (!canvasContentsRef.current) return;
+                await clearCanvas(canvasContentsRef.current, color, {
+                    image: image,
+                    imageScale: imageScale
+                });
+            });
+        }
+    }, [onClearHandler]);
 
     return (
         <div className={classes}>

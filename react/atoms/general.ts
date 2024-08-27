@@ -14,3 +14,8 @@ export const fastState = atom<boolean>({
     key: "fast",
     default: false
 });
+
+export const fullscreenState = atom<boolean>({
+    key: "fullscreen",
+    default: false
+});
