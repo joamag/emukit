@@ -500,7 +500,7 @@ export interface Emulator extends ObservableI {
      *
      * @returns The serialized state of the emulator.
      */
-    serializeState?(): Uint8Array;
+    serializeState?(): Promise<Uint8Array>;
 
     /**
      * Deserializes the sate data buffer, loading the contents
@@ -509,7 +509,7 @@ export interface Emulator extends ObservableI {
      * @param data The saved state data buffer, that is going
      * to be loaded into the emulator instance.
      */
-    unserializeState?(data: Uint8Array): void;
+    unserializeState?(data: Uint8Array): Promise<void>;
 
     /**
      * Builds the state of the emulator from the given data
@@ -520,7 +520,7 @@ export interface Emulator extends ObservableI {
      * @param data The saved state data buffer, that is going
      * to be used in the building of the state.
      */
-    buildState?(index: number, data: Uint8Array): SaveState;
+    buildState?(index: number, data: Uint8Array): Promise<SaveState>;
 
     /**
      * Saves the current state of the emulator in the given
@@ -531,7 +531,7 @@ export interface Emulator extends ObservableI {
      *
      * @param index The index of the state to be saved.
      */
-    saveState?(index: number): void;
+    saveState?(index: number): Promise<void>;
 
     /**
      * Loads the state of the emulator from the given index,
@@ -543,7 +543,7 @@ export interface Emulator extends ObservableI {
      *
      * @param index The index of the state to be loaded.
      */
-    loadState?(index: number): void;
+    loadState?(index: number): Promise<void>;
 
     /**
      * Deletes the state of the emulator for the given index.
@@ -554,7 +554,7 @@ export interface Emulator extends ObservableI {
      *
      * @param index The index of the state to be delete.
      */
-    deleteState?(index: number): void;
+    deleteState?(index: number): Promise<void>;
 
     /**
      * Obtains the state of the emulator at the given index.
@@ -568,7 +568,7 @@ export interface Emulator extends ObservableI {
      * @returns State of the emulator at the given index.
      * @see {@link SaveState}
      */
-    getState?(index: number): SaveState;
+    getState?(index: number): Promise<SaveState>;
 
     /**
      * Obtains the raw data of the state at the given index.
@@ -576,7 +576,7 @@ export interface Emulator extends ObservableI {
      * @param index Index of the state to be obtained.
      * @returns Raw data of the state at the given index.
      */
-    getStateData?(index: number): Uint8Array;
+    getStateData?(index: number): Promise<Uint8Array>;
 
     /**
      * List the complete set of states available in the
@@ -588,7 +588,7 @@ export interface Emulator extends ObservableI {
      *
      * @returns The list of states available in the emulator.
      */
-    listStates?(): number[];
+    listStates?(): Promise<number[]>;
 
     pauseVideo?(): void;
 
@@ -815,47 +815,47 @@ export class EmulatorBase extends Observable {
         return romData;
     }
 
-    serializeState(): Uint8Array {
+    async serializeState(): Promise<Uint8Array> {
         throw new Error("Unable to serialize state");
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    unserializeState(_data: Uint8Array) {
+    async unserializeState(_data: Uint8Array) {
         throw new Error("Unable to unserialize state");
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    buildState(_index: number, _data: Uint8Array): SaveState {
+    async buildState(_index: number, _data: Uint8Array): Promise<SaveState> {
         throw new Error("Unable to build state");
     }
 
-    saveState(index: number) {
+    async saveState(index: number) {
         if (!window.localStorage) {
             throw new Error("Unable to save state");
         }
-        const data = this.serializeState();
+        const data = await this.serializeState();
         const dataB64 = bufferToBase64(data);
         localStorage.setItem(`${this.romInfo.name}-s${index}`, dataB64);
     }
 
-    loadState(index: number) {
-        const data = this.getStateData(index);
-        this.unserializeState(data);
+    async loadState(index: number) {
+        const data = await this.getStateData(index);
+        await this.unserializeState(data);
     }
 
-    deleteState(index: number) {
+    async deleteState(index: number) {
         if (!window.localStorage) {
             throw new Error("Unable to delete state");
         }
         localStorage.removeItem(`${this.romInfo.name}-s${index}`);
     }
 
-    getState(index: number): SaveState {
-        const data = this.getStateData(index);
-        return this.buildState(index, data);
+    async getState(index: number): Promise<SaveState> {
+        const data = await this.getStateData(index);
+        return await this.buildState(index, data);
     }
 
-    getStateData(index: number): Uint8Array {
+    async getStateData(index: number): Promise<Uint8Array> {
         if (!window.localStorage) {
             throw new Error("Unable to get state");
         }
@@ -865,7 +865,7 @@ export class EmulatorBase extends Observable {
         return data;
     }
 
-    listStates(): number[] {
+    async listStates(): Promise<number[]> {
         if (!window.localStorage) {
             throw new Error("Unable to list states");
         }

@@ -380,11 +380,17 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
      * update the UI with the new save states.
      * This operation is considered expensive and should used with care.
      */
-    const refreshSaveStates = useCallback(() => {
+    const refreshSaveStates = useCallback(async () => {
+        if (emulator.listStates === undefined) {
+            return [];
+        }
         const saveStates = Object.fromEntries(
-            emulator
-                .listStates?.()
-                .map((index) => [index, emulator.getState!(index)]) ?? []
+            await Promise.all(
+                (await emulator.listStates()).map(async (index) => [
+                    index,
+                    await emulator.getState!(index)
+                ]) ?? []
+            )
         );
         setSaveStates(saveStates);
     }, [emulator]);
@@ -586,25 +592,25 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         },
         [setVisibleSections, visibleSections]
     );
-    const onSaveStateClick = useCallback(() => {
+    const onSaveStateClick = useCallback(async () => {
         for (let index = 0; index < 10; index++) {
             if (saveStates[index] === undefined) {
-                emulator.saveState?.(index);
+                await emulator.saveState?.(index);
                 refreshSaveStates();
                 break;
             }
         }
     }, [refreshSaveStates, emulator, saveStates]);
     const onLoadStateClick = useCallback(
-        (saveState?: SaveState) => {
-            emulator.loadState?.(saveState!.index);
+        async (saveState?: SaveState) => {
+            await emulator.loadState?.(saveState!.index);
             showToast(`Loaded save state #${saveState!.index} successfully!`);
         },
         [showToast, emulator]
     );
     const onDownloadStateClick = useCallback(
         async (saveState?: SaveState) => {
-            const data = emulator.getStateData!(saveState!.index);
+            const data = await emulator.getStateData!(saveState!.index);
             downloadFromBuffer(
                 data,
                 `${emulator.romInfo.name}.s${saveState!.index}`
@@ -625,8 +631,8 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 `Are you sure you want to delete save state #${saveState!.index}?\nThis operation is not reversible!`
             );
             if (!result) return;
-            emulator.deleteState?.(saveState!.index);
-            refreshSaveStates();
+            await emulator.deleteState?.(saveState!.index);
+            await refreshSaveStates();
             showToast(`Deleted save state #${saveState!.index} successfully!`);
         },
         [showModal, showToast, refreshSaveStates, emulator]
