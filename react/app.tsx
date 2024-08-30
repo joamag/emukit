@@ -1147,7 +1147,14 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 )}
             </Info>
         ),
-        [getBackground, hasFeature, emulator, paletteName]
+        [
+            hasFeature,
+            getBackground,
+            paletteName,
+            emulator.compilerString,
+            emulator.compilationString,
+            emulator.wasmEngine
+        ]
     );
     const saveStatesTab = useMemo(
         () =>

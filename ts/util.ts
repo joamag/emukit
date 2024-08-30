@@ -99,3 +99,30 @@ export const downloadFromBuffer = (
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
 };
+
+/**
+ * Compares two versions in the format `major.minor.patch`
+ * and returns if the first version is greater or equal to the second.
+ *
+ * @param first First version to compare.
+ * @param second Second (reference) version to be used in comparison.
+ * @returns If the first version is greater or equal to the second.
+ */
+export const compareVersions = (first: string, second: string): boolean => {
+    const parseVersion = (version: string): number[] => {
+        return version.split(".").map(Number);
+    };
+
+    const [major1, minor1, patch1] = parseVersion(first);
+    const [major2, minor2, patch2] = parseVersion(second);
+
+    if (major1 > major2) return true;
+    if (major1 < major2) return false;
+
+    if (minor1 > minor2) return true;
+    if (minor1 < minor2) return false;
+
+    if (patch1 >= patch2) return true;
+
+    return false;
+};
