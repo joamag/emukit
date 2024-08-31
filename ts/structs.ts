@@ -1054,7 +1054,7 @@ export class EmulatorLogic extends EmulatorBase {
         // of the hard reset operation, this should be enough for most
         // of the cases, but may be overridden by the concrete emulator
         // implementation if a more specific (hard) behavior is required
-        this.reset();
+        await this.reset();
     }
 
     async handleError(err: Error) {
