@@ -1237,15 +1237,17 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                             text={"Save State"}
                             onClick={onSaveStateClick}
                         />
-                        <Button
-                            text={"Load State"}
-                            image={require("../res/upload.svg")}
-                            imageAlt="upload"
-                            file={true}
-                            accept={stateExts}
-                            style={["simple", "border", "padded"]}
-                            onFile={onUploadState}
-                        />
+                        {stateExts.length > 0 && (
+                            <Button
+                                text={"Load State"}
+                                image={require("../res/upload.svg")}
+                                imageAlt="upload"
+                                file={true}
+                                accept={stateExts}
+                                style={["simple", "border", "padded"]}
+                                onFile={onUploadState}
+                            />
+                        )}
                     </ButtonContainer>
                 </>
             ) : null,
