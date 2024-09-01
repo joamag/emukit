@@ -1204,8 +1204,10 @@ export class EmulatorLogic extends EmulatorBase {
 
             // calculates the amount of time until the next draw operation
             // this is the amount of time that is going to be pending
-            const afterTime = EmulatorLogic.now();
-            const pendingTime = Math.max(this.nextTickTime - afterTime, 0);
+            const pendingTime = Math.max(
+                this.nextTickTime - EmulatorLogic.now(),
+                0
+            );
 
             // triggers the animation frame event so that any listener "knows"
             // that a new frame render loop has been executed
@@ -1221,7 +1223,6 @@ export class EmulatorLogic extends EmulatorBase {
 
     private async loopAnimationFrame(useTimeParam = false) {
         const step = async (time: DOMHighResTimeStamp) => {
-            time = useTimeParam ? time : EmulatorLogic.now();
             let ticks = 0;
             if (this.loopMode !== LoopMode.AnimationFrame) {
                 this.loop();
@@ -1229,13 +1230,13 @@ export class EmulatorLogic extends EmulatorBase {
             }
             if (!this.paused) {
                 let remainingTicks = MAX_TICKS_ANIMATION_FRAME;
-                const now = time;
+                const now = useTimeParam ? time : EmulatorLogic.now();
                 while (now >= this.nextTickTime) {
                     if (remainingTicks === 0) {
-                        this.nextTickTime = time;
+                        this.nextTickTime = now;
                         break;
                     }
-                    await this.internalTick(time);
+                    await this.internalTick(now);
                     remainingTicks--;
                     ticks++;
                 }
