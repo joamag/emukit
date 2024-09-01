@@ -226,6 +226,10 @@ export type Handlers = {
     ) => Promise<void | undefined>;
 };
 
+export type Validation = {
+    title?: string;
+};
+
 export interface ObservableI {
     bind(event: string, callback: Callback<this>): void;
     unbind(event: string, callback: Callback<this>): void;
@@ -613,6 +617,15 @@ export interface Emulator extends ObservableI {
      */
     listStates?(): Promise<number[]>;
 
+    /**
+     * Validates the provided data buffer making sure that the
+     * data is compliant with the provided params.
+     *
+     * @param data The data buffer that is going to be validated.
+     * @param validation Validation parameters to be used.
+     */
+    validateState?(data: Uint8Array, validation: Validation): Promise<void>;
+
     pauseVideo?(): void;
 
     resumeVideo?(): void;
@@ -860,12 +873,15 @@ export class EmulatorBase extends Observable {
         throw new Error("Unable to build state");
     }
 
-    async saveState(index: number, data?: Uint8Array) {
+    async saveState(index: number, data?: Uint8Array, safe = true) {
         if (!window.localStorage) {
             throw new Error("Unable to save state");
         }
         if (data === undefined) {
             data = await this.serializeState();
+        }
+        if (safe) {
+            await this.validateState(data, { title: this.romInfo.name });
         }
         const dataB64 = bufferToBase64(data);
         localStorage.setItem(`${this.romInfo.name}-s${index}`, dataB64);
@@ -911,6 +927,9 @@ export class EmulatorBase extends Observable {
         }
         return states;
     }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async validateState(data: Uint8Array, validation: Validation) {}
 }
 
 /**
