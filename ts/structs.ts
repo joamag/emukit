@@ -1165,8 +1165,9 @@ export class EmulatorLogic extends EmulatorBase {
         }
     }
 
-    private async loopAnimationFrame() {
+    private async loopAnimationFrame(useTimeParam = false) {
         const step = async (time: DOMHighResTimeStamp) => {
+            time = useTimeParam ? time : EmulatorLogic.now();
             if (this.loopMode !== LoopMode.AnimationFrame) {
                 this.loop();
                 return;
@@ -1177,7 +1178,6 @@ export class EmulatorLogic extends EmulatorBase {
                 const now = time;
                 while (now >= this.nextTickTime) {
                     if (remainingTicks === 0) {
-                        this.nextTickTime = time;
                         break;
                     }
                     await this.internalTick(time);
