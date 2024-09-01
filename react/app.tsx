@@ -165,6 +165,10 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         }),
         [emulator]
     );
+    const romExts = useMemo(
+        () => emulator.romExts.map((e) => `.${e}`).join(","),
+        [emulator.romExts]
+    );
 
     useEffect(() => {
         setFullscreenState(fullscreen);
@@ -873,10 +877,14 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             <>
                 <ModalManager ref={modalManagerRef} />
                 <ToastManager ref={toastManagerRef} />
-                <Overlay text={"Drag to load ROM"} onFile={onFile} />
+                <Overlay
+                    text={"Drag to load ROM"}
+                    accept={romExts}
+                    onFile={onFile}
+                />
             </>
         ),
-        [onFile]
+        [onFile, romExts]
     );
     const footer = useMemo(
         () => (
@@ -1359,9 +1367,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                             image={require("../res/upload.svg")}
                             imageAlt="upload"
                             file={true}
-                            accept={emulator.romExts
-                                .map((e) => `.${e}`)
-                                .join(",")}
+                            accept={romExts}
                             style={["simple", "border", "padded"]}
                             onFile={onUploadFile}
                         />

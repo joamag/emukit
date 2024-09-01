@@ -1,5 +1,7 @@
 import React, { FC, useEffect, useMemo, useState } from "react";
 
+import { fileExtension } from "../../../ts/index.ts";
+
 import "./overlay.css";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -9,11 +11,17 @@ export type OverlayStyle = string;
 
 type OverlayProps = {
     text?: string;
+    accept?: string;
     style?: OverlayStyle[];
     onFile?: (file: File) => void;
 };
 
-export const Overlay: FC<OverlayProps> = ({ text, style = [], onFile }) => {
+export const Overlay: FC<OverlayProps> = ({
+    text,
+    accept,
+    style = [],
+    onFile
+}) => {
     const [visible, setVisible] = useState(false);
     const classes = useMemo(
         () => ["overlay", visible ? "visible" : "", ...style].join(" "),
@@ -56,7 +64,10 @@ export const Overlay: FC<OverlayProps> = ({ text, style = [], onFile }) => {
             setVisible(false);
 
             const file = event.dataTransfer.files[0];
-            onFile?.(file);
+            const extension = fileExtension(file.name);
+            if (accept === undefined || accept.includes(`.${extension}`)) {
+                onFile?.(file);
+            }
 
             event.preventDefault();
             event.stopPropagation();
@@ -84,7 +95,7 @@ export const Overlay: FC<OverlayProps> = ({ text, style = [], onFile }) => {
             document.removeEventListener("dragenter", onDragEnter);
             document.removeEventListener("dragleave", onDragLeave);
         };
-    }, [onFile]);
+    }, [onFile, accept]);
     return (
         <div className={classes}>
             <div className="overlay-container">

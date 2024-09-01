@@ -301,10 +301,16 @@ export interface Emulator extends ObservableI {
     get engine(): string | null;
 
     /**
-     * The complete set of file extensions that this emulator
-     * supports.
+     * The complete set of ROM file extensions that this
+     * emulator supports.
      */
     get romExts(): string[];
+
+    /**
+     * The complete set of save state file extensions that
+     * this emulator supports.
+     */
+    get stateExts(): string[];
 
     /**
      * The dimensions of the screen for the device that is
@@ -706,6 +712,10 @@ export class EmulatorBase extends Observable {
     }
 
     get debug(): DebugPanel[] {
+        return [];
+    }
+
+    get stateExts(): string[] {
         return [];
     }
 

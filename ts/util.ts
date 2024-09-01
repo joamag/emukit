@@ -126,3 +126,14 @@ export const compareVersions = (first: string, second: string): boolean => {
 
     return false;
 };
+
+/**
+ * Returns the extension of a file from its filename.
+ *
+ * @param filename The name of the file.
+ * @returns The extension of the file.
+ */
+export const fileExtension = (filename: string): string => {
+    const lastDotIndex = filename.lastIndexOf(".");
+    return lastDotIndex !== -1 ? filename.substring(lastDotIndex + 1) : "";
+};
