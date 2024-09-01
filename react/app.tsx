@@ -1528,7 +1528,7 @@ export const SpeedSection: FC<SpeedSectionProps> = ({ emulator }) => {
                     value={`${Intl.NumberFormat(undefined, {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2
-                    }).format(skippedTicks)}`}
+                    }).format(skippedTicks)} TPS`}
                 />
             )}
             {hasFeature(Feature.EmulationSpeed) && (
