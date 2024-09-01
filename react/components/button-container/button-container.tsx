@@ -2,9 +2,11 @@ import React, { FC, ReactNode, useMemo } from "react";
 
 import "./button-container.css";
 
+type ButtonContainerStyle = "simple" | "full";
+
 type ButtonContainerProps = {
     children: ReactNode;
-    style?: string[];
+    style?: ButtonContainerStyle[];
 };
 
 export const ButtonContainer: FC<ButtonContainerProps> = ({

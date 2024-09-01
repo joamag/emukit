@@ -536,8 +536,11 @@ export interface Emulator extends ObservableI {
      * emulator class.
      *
      * @param index The index of the state to be saved.
+     * @param data The data of the state to be saved, if not
+     * provided the current state of the emulator will be
+     * used.
      */
-    saveState?(index: number): Promise<void>;
+    saveState?(index: number, data?: Uint8Array): Promise<void>;
 
     /**
      * Loads the state of the emulator from the given index,
@@ -839,11 +842,13 @@ export class EmulatorBase extends Observable {
         throw new Error("Unable to build state");
     }
 
-    async saveState(index: number) {
+    async saveState(index: number, data?: Uint8Array) {
         if (!window.localStorage) {
             throw new Error("Unable to save state");
         }
-        const data = await this.serializeState();
+        if (data === undefined) {
+            data = await this.serializeState();
+        }
         const dataB64 = bufferToBase64(data);
         localStorage.setItem(`${this.romInfo.name}-s${index}`, dataB64);
     }

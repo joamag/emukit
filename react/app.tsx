@@ -169,6 +169,10 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         () => emulator.romExts.map((e) => `.${e}`).join(","),
         [emulator.romExts]
     );
+    const stateExts = useMemo(
+        () => emulator.stateExts.map((e) => `.${e}`).join(","),
+        [emulator.stateExts]
+    );
 
     useEffect(() => {
         setFullscreenState(fullscreen);
@@ -641,7 +645,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         },
         [showModal, showToast, refreshSaveStates, emulator]
     );
-    const onUploadFile = useCallback(
+    const onUploadRom = useCallback(
         async (file: File) => {
             const romData = await emulator.buildRomData(file);
             try {
@@ -660,6 +664,29 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             }
         },
         [showToast, emulator]
+    );
+    const onUploadState = useCallback(
+        async (file: File) => {
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                const data = new Uint8Array(arrayBuffer);
+                for (let index = 0; index < 10; index++) {
+                    if (saveStates[index] === undefined) {
+                        await emulator.saveState?.(index, data);
+                        refreshSaveStates();
+                        break;
+                    }
+                }
+                showToast(`Loaded ${file.name} state successfully!`);
+                emulator.logger.info(`Loaded ${file.name} state successfully`);
+            } catch (err) {
+                showToast(`Failed to load ${file.name} state!`, true);
+                emulator.logger.error(
+                    `Failed to load ${file.name} state (${err})`
+                );
+            }
+        },
+        [showToast, refreshSaveStates, saveStates, emulator]
     );
     const onEngineChange = useCallback(
         async (engine: string) => {
@@ -1205,12 +1232,21 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                             </Paragraph>
                         )}
                     </Info>
-                    <div>
+                    <ButtonContainer style={["simple"]}>
                         <Button
                             text={"Save State"}
                             onClick={onSaveStateClick}
                         />
-                    </div>
+                        <Button
+                            text={"Load State"}
+                            image={require("../res/upload.svg")}
+                            imageAlt="upload"
+                            file={true}
+                            accept={stateExts}
+                            style={["simple", "border", "padded"]}
+                            onFile={onUploadState}
+                        />
+                    </ButtonContainer>
                 </>
             ) : null,
         [
@@ -1220,8 +1256,10 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             onInfoStateClick,
             onLoadStateClick,
             onSaveStateClick,
+            onUploadState,
             saveStateEntries,
-            thumbnailSize
+            thumbnailSize,
+            stateExts
         ]
     );
     const renderControllersTab = useMemo(
@@ -1369,7 +1407,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                             file={true}
                             accept={romExts}
                             style={["simple", "border", "padded"]}
-                            onFile={onUploadFile}
+                            onFile={onUploadRom}
                         />
                         {emulator.sections.map((section) => (
                             <Button
