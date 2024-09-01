@@ -148,6 +148,14 @@ export type TickInfo = {
 };
 
 /**
+ * Represents the information about the animation frame
+ * operation, this information may be used for debugging.
+ */
+export type AnimationFrameInfo = {
+    ticks?: number;
+};
+
+/**
  * Enumeration to be used to describe the set of
  * features that a certain emulator supports, this
  * is going to condition its runtime execution.
@@ -166,6 +174,7 @@ export enum Feature {
     Framerate,
     Cyclerate,
     Animationrate,
+    SkippedTicks,
     EmulationSpeed,
     BootRomInfo,
     RomTypeInfo,
@@ -406,6 +415,11 @@ export interface Emulator extends ObservableI {
      * The current animation framerate of the running emulator.
      */
     get animationrate(): number;
+
+    /**
+     * The current rate of skipped ticks of the running emulator.
+     */
+    get skippedTicks(): number;
 
     /**
      * The current emulation speed, as in `cyclerate` / `logicFrequency`.
@@ -772,6 +786,10 @@ export class EmulatorBase extends Observable {
         return 0;
     }
 
+    get skippedTicks(): number {
+        return 0;
+    }
+
     get emulationSpeed(): number {
         return 100.0;
     }
@@ -910,14 +928,17 @@ export class EmulatorLogic extends EmulatorBase {
     protected idleFrequency = IDLE_HZ;
 
     private fps = 0;
-    private frameStart: number = EmulatorLogic.now();
+    private frameStart = EmulatorLogic.now();
     private frameCount = 0;
     private cps = 0;
-    private cycleStart: number = EmulatorLogic.now();
+    private cycleStart = EmulatorLogic.now();
     private cycleCount = 0;
     private afps = 0;
-    private animationFrameStart: number = EmulatorLogic.now();
+    private animationFrameStart = EmulatorLogic.now();
     private animationFrameCount = 0;
+    private skipped = 0;
+    private skippedTicksStart = EmulatorLogic.now();
+    private skippedTicksCount = 0;
 
     private _loopMode = LoopMode.Auto;
 
@@ -931,6 +952,10 @@ export class EmulatorLogic extends EmulatorBase {
 
     get animationrate(): number {
         return this.afps;
+    }
+
+    get skippedTicks(): number {
+        return this.skipped;
     }
 
     get emulationSpeed(): number {
@@ -993,9 +1018,15 @@ export class EmulatorLogic extends EmulatorBase {
                 const deltaCps = (currentTime - this.cycleStart) / 1000;
                 const deltaAfps =
                     (currentTime - this.animationFrameStart) / 1000;
+                const deltaSkipped =
+                    (currentTime - this.skippedTicksStart) / 1000;
                 this.fps = Math.round(this.frameCount / deltaFps);
                 this.cps = Math.round(this.cycleCount / deltaCps);
                 this.afps = Math.round(this.animationFrameCount / deltaAfps);
+                console.info(this.skippedTicksCount);
+                this.skipped =
+                    Math.round((this.skippedTicksCount / deltaSkipped) * 100) /
+                    100;
                 this.resetTimeCounters();
             }
         });
@@ -1005,8 +1036,11 @@ export class EmulatorLogic extends EmulatorBase {
             this.cycleCount += tickInfo.cycles ?? 0;
         });
 
-        this.bind("animation-frame", () => {
+        this.bind("animation-frame", (_owner, params: unknown) => {
+            const animationFrameInfo = params as AnimationFrameInfo;
+            const ticks = animationFrameInfo.ticks ?? 0;
             this.animationFrameCount++;
+            this.skippedTicksCount += Math.max(ticks - 1, 0);
         });
 
         // registers for the visibility change event so that the
@@ -1137,7 +1171,7 @@ export class EmulatorLogic extends EmulatorBase {
             // in case the machine is paused we must delay the execution
             // a little bit until the paused state is recovered
             if (this.paused) {
-                this.trigger("animation-frame");
+                this.trigger("animation-frame", { ticks: 0 });
                 await new Promise((resolve) => {
                     setTimeout(resolve, 1000 / this.idleFrequency);
                 });
@@ -1155,7 +1189,7 @@ export class EmulatorLogic extends EmulatorBase {
 
             // triggers the animation frame event so that any listener "knows"
             // that a new frame render loop has been executed
-            this.trigger("animation-frame");
+            this.trigger("animation-frame", { ticks: 1 });
 
             // waits the required time until until the next tick operation
             // should be executed - this should control the flow of render
@@ -1168,23 +1202,26 @@ export class EmulatorLogic extends EmulatorBase {
     private async loopAnimationFrame(useTimeParam = false) {
         const step = async (time: DOMHighResTimeStamp) => {
             time = useTimeParam ? time : EmulatorLogic.now();
+            let ticks = 0;
             if (this.loopMode !== LoopMode.AnimationFrame) {
                 this.loop();
                 return;
             }
-            window.requestAnimationFrame(step);
             if (!this.paused) {
                 let remainingTicks = MAX_TICKS_ANIMATION_FRAME;
                 const now = time;
                 while (now >= this.nextTickTime) {
                     if (remainingTicks === 0) {
+                        this.nextTickTime = time;
                         break;
                     }
                     await this.internalTick(time);
                     remainingTicks--;
+                    ticks++;
                 }
             }
-            this.trigger("animation-frame");
+            this.trigger("animation-frame", { ticks: ticks });
+            window.requestAnimationFrame(step);
         };
         window.requestAnimationFrame(step);
         await new Promise(() => {});
@@ -1230,6 +1267,7 @@ export class EmulatorLogic extends EmulatorBase {
         this.resetFpsCounters();
         this.resetCpsCounters();
         this.resetAfpsCounters();
+        this.resetSkippedCounters();
     }
 
     private resetFpsCounters() {
@@ -1245,6 +1283,11 @@ export class EmulatorLogic extends EmulatorBase {
     private resetAfpsCounters() {
         this.animationFrameCount = 0;
         this.animationFrameStart = EmulatorLogic.now();
+    }
+
+    private resetSkippedCounters() {
+        this.skippedTicksCount = 0;
+        this.skippedTicksStart = EmulatorLogic.now();
     }
 }
 

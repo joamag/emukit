@@ -1481,6 +1481,7 @@ export const SpeedSection: FC<SpeedSectionProps> = ({ emulator }) => {
     const [framerate, setFramerate] = useState(0);
     const [cyclerate, setCyclerate] = useState(0);
     const [animationrate, setAnimationrate] = useState(0);
+    const [skippedTicks, setSkippedTicks] = useState(0);
     const [emulationSpeed, setEmulationSpeed] = useState(0);
     const hasFeature = useCallback(
         (feature: Feature) => {
@@ -1493,6 +1494,7 @@ export const SpeedSection: FC<SpeedSectionProps> = ({ emulator }) => {
             setFramerate(emulator.framerate);
             setCyclerate(emulator.cyclerate);
             setAnimationrate(emulator.animationrate);
+            setSkippedTicks(emulator.skippedTicks);
             setEmulationSpeed(emulator.emulationSpeed);
         });
     }, [emulator]);
@@ -1517,6 +1519,16 @@ export const SpeedSection: FC<SpeedSectionProps> = ({ emulator }) => {
                     key="animationrate"
                     name={"Animationrate"}
                     value={`${Intl.NumberFormat().format(animationrate)} Hz`}
+                />
+            )}
+            {hasFeature(Feature.SkippedTicks) && (
+                <Pair
+                    key="skipped-ticks"
+                    name={"Skipped Ticks"}
+                    value={`${Intl.NumberFormat(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                    }).format(skippedTicks)}`}
                 />
             )}
             {hasFeature(Feature.EmulationSpeed) && (
