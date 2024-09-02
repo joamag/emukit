@@ -157,6 +157,16 @@ export type AnimationFrameInfo = {
 };
 
 /**
+ * Represents the parameters that are going to be used
+ * in the tick operation, this parameters may be used to
+ * control the behavior of the tick operation.
+ */
+export type TickParams = {
+    mode: TickMode;
+    elapsedTime?: number;
+};
+
+/**
  * Enumeration to be used to describe the set of
  * features that a certain emulator supports, this
  * is going to condition its runtime execution.
@@ -204,7 +214,17 @@ export enum PixelFormat {
 export enum LoopMode {
     Auto = 1,
     SetTimeout = 2,
-    AnimationFrame = 3
+    AnimationFrame = 3,
+    AnimationDesynced = 4
+}
+
+/**
+ * Enumeration that describes the multiple tick modes
+ * that are available for the emulator tick operation.
+ */
+export enum TickMode {
+    Synced = 1,
+    Desynced = 2
 }
 
 export const frequencyRatios = {
@@ -943,6 +963,7 @@ export class EmulatorBase extends Observable {
 export class EmulatorLogic extends EmulatorBase {
     protected paused = false;
     protected nextTickTime = 0;
+    protected previousTickTime = 0;
     protected logicFrequency = LOGIC_HZ;
     protected visualFrequency = VISUAL_HZ;
     protected idleFrequency = IDLE_HZ;
@@ -994,7 +1015,7 @@ export class EmulatorLogic extends EmulatorBase {
             value =
                 window.requestAnimationFrame === undefined
                     ? LoopMode.SetTimeout
-                    : LoopMode.AnimationFrame;
+                    : LoopMode.AnimationDesynced;
         }
         this._loopMode = value;
     }
@@ -1017,6 +1038,7 @@ export class EmulatorLogic extends EmulatorBase {
         romUrl?: string;
         loopMode?: LoopMode;
     }) {
+        this.previousTickTime = EmulatorLogic.now();
         this.loopMode = loopMode;
 
         // boots the emulator subsystem with the initial
@@ -1043,7 +1065,6 @@ export class EmulatorLogic extends EmulatorBase {
                 this.fps = Math.round(this.frameCount / deltaFps);
                 this.cps = Math.round(this.cycleCount / deltaCps);
                 this.afps = Math.round(this.animationFrameCount / deltaAfps);
-                console.info(this.skippedTicksCount);
                 this.skipped =
                     Math.round((this.skippedTicksCount / deltaSkipped) * 100) /
                     100;
@@ -1114,7 +1135,8 @@ export class EmulatorLogic extends EmulatorBase {
         this.resetTimeCounters();
     }
 
-    async tick() {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    async tick(params: TickParams) {
         throw new Error("Not implemented");
     }
 
@@ -1173,6 +1195,9 @@ export class EmulatorLogic extends EmulatorBase {
                 case LoopMode.AnimationFrame:
                     await this.loopAnimationFrame();
                     break;
+                case LoopMode.AnimationDesynced:
+                    await this.loopAnimationDesynced();
+                    break;
                 default:
                     throw new Error("Invalid loop mode");
             }
@@ -1221,13 +1246,14 @@ export class EmulatorLogic extends EmulatorBase {
         }
     }
 
-    private async loopAnimationFrame(useTimeParam = false) {
+    private async loopAnimationFrame(useTimeParam = true) {
         const step = async (time: DOMHighResTimeStamp) => {
             let ticks = 0;
             if (this.loopMode !== LoopMode.AnimationFrame) {
                 this.loop();
                 return;
             }
+            window.requestAnimationFrame(step);
             if (!this.paused) {
                 let remainingTicks = MAX_TICKS_ANIMATION_FRAME;
                 const now = useTimeParam ? time : EmulatorLogic.now();
@@ -1242,19 +1268,41 @@ export class EmulatorLogic extends EmulatorBase {
                 }
             }
             this.trigger("animation-frame", { ticks: ticks });
-            window.requestAnimationFrame(step);
         };
         window.requestAnimationFrame(step);
         await new Promise(() => {});
     }
 
-    private async internalTick(time?: DOMHighResTimeStamp) {
+    private async loopAnimationDesynced(useTimeParam = true) {
+        const step = async (time: DOMHighResTimeStamp) => {
+            if (this.loopMode !== LoopMode.AnimationDesynced) {
+                this.loop();
+                return;
+            }
+            window.requestAnimationFrame(step);
+            if (!this.paused) {
+                const now = useTimeParam ? time : EmulatorLogic.now();
+                await this.internalTick(now, TickMode.Desynced);
+            }
+            this.trigger("animation-frame", { ticks: 1 });
+        };
+        window.requestAnimationFrame(step);
+        await new Promise(() => {});
+    }
+
+    private async internalTick(time?: DOMHighResTimeStamp, mode?: TickMode) {
         // obtains the current time, this value is going
         // to be used to compute the need for tick computation
+        // also uses it to calculate the elapsed time since the
+        // last tick operation
         const beforeTime = time ?? EmulatorLogic.now();
+        const elapsedTime = beforeTime - this.previousTickTime;
 
         try {
-            await this.tick();
+            await this.tick({
+                mode: mode ?? TickMode.Synced,
+                elapsedTime: elapsedTime
+            });
         } catch (err) {
             await this.handleError(err);
         }
@@ -1282,6 +1330,11 @@ export class EmulatorLogic extends EmulatorBase {
         // that have elapsed since the last operation, this way this value
         // can better be used to control the game loop
         this.nextTickTime += (1000 / this.visualFrequency) * ticks;
+
+        // saves the time used before the tick operation as the previous
+        // tick time, required to calculate the elapsed time in the next
+        // tick operation
+        this.previousTickTime = beforeTime;
     }
 
     private resetTimeCounters() {
@@ -1316,10 +1369,11 @@ export const LOOP_MODES_M: { [key: string]: LoopMode } = {
     auto: LoopMode.Auto,
     settimeout: LoopMode.SetTimeout,
     animation: LoopMode.AnimationFrame,
-    animationframe: LoopMode.AnimationFrame
+    animationframe: LoopMode.AnimationFrame,
+    desynced: LoopMode.AnimationDesynced
 };
 
-export const LOOP_MODES_S = ["auto", "settimeout", "animation"];
+export const LOOP_MODES_S = ["auto", "settimeout", "animation", "desynced"];
 
 export const loopModes = (): string[] => {
     return LOOP_MODES_S;

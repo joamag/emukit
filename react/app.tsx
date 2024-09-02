@@ -355,6 +355,8 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 showToast: showToast
             };
 
+            refreshRom();
+
             return () => {
                 document.removeEventListener("fullscreenchange", onFullChange);
                 document.removeEventListener(
