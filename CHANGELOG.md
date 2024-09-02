@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+*
+
+### Changed
+
+*
+
+### Fixed
+
+*
+
+## [0.10.13] - 2024-09-02
+
+### Added
+
 * Skipped ticks log support
 * Support for state validation
 * Support for desync mode of visual execution
@@ -16,10 +30,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 * State related operation to async
-
-### Fixed
-
-*
 
 ## [0.10.12] - 2024-08-31
 
