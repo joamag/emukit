@@ -157,6 +157,14 @@ export type AnimationFrameInfo = {
 };
 
 /**
+ * Represents the information about the frame operation,
+ * this information may be used for debugging.
+ */
+export type FrameInfo = {
+    count?: number;
+};
+
+/**
  * Represents the parameters that are going to be used
  * in the tick operation, this parameters may be used to
  * control the behavior of the tick operation.
@@ -1049,12 +1057,14 @@ export class EmulatorLogic extends EmulatorBase {
         // binds the frame event to the current instance of the
         // emulator logic, this event is going to be used to
         // calculate the number of frames per second (FPS)
-        this.bind("frame", () => {
+        this.bind("frame", (_owner, params: unknown) => {
+            const frameInfo = params as FrameInfo;
+
             // increments the current frame count (as new frame exists)
             // and in case the target number of frames for FPS control
             // has been reached calculates the number of FPS and
             // flushes the value to the screen
-            this.frameCount++;
+            this.frameCount += frameInfo.count ?? 1;
             if (this.frameCount >= this.visualFrequency * FPS_SAMPLE_RATE) {
                 const currentTime = EmulatorLogic.now();
                 const deltaFps = (currentTime - this.frameStart) / 1000;
