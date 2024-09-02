@@ -163,6 +163,8 @@ export type AnimationFrameInfo = {
  */
 export type TickParams = {
     mode: TickMode;
+    cycles: number;
+    visualRatio: number;
     elapsedTime?: number;
 };
 
@@ -1291,6 +1293,8 @@ export class EmulatorLogic extends EmulatorBase {
     }
 
     private async internalTick(time?: DOMHighResTimeStamp, mode?: TickMode) {
+        mode = mode ?? TickMode.Synced;
+
         // obtains the current time, this value is going
         // to be used to compute the need for tick computation
         // also uses it to calculate the elapsed time since the
@@ -1298,9 +1302,35 @@ export class EmulatorLogic extends EmulatorBase {
         const beforeTime = time ?? EmulatorLogic.now();
         const elapsedTime = beforeTime - this.previousTickTime;
 
+        // calculates the visual ratio of the current tick operation
+        // this value represents the ration between the expected visual
+        // frequency elapsed time and the actual elapsed time, in case
+        // the synced mode is set this value is considered to be 1.0 as
+        // a "perfect" tick scheduling frequency is expected
+        const visualRatio =
+            mode === TickMode.Desynced
+                ? elapsedTime / 1000 / (1 / this.visualFrequency)
+                : 1.0;
+
+        // calculates the number of cycles that are going to be
+        // processed in the current tick operation, this value is
+        // calculated using the logic and visual frequencies and
+        // the elapsed time (in case desynced is set)
+        let cycles = 0;
+        switch (mode) {
+            case TickMode.Synced:
+                cycles = Math.round(this.logicFrequency / this.visualFrequency);
+                break;
+            case TickMode.Desynced:
+                cycles = Math.round(this.logicFrequency * (elapsedTime / 1000));
+                break;
+        }
+
         try {
             await this.tick({
-                mode: mode ?? TickMode.Synced,
+                mode: mode,
+                cycles: cycles,
+                visualRatio: visualRatio,
                 elapsedTime: elapsedTime
             });
         } catch (err) {
