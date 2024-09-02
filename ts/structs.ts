@@ -1058,7 +1058,7 @@ export class EmulatorLogic extends EmulatorBase {
         // emulator logic, this event is going to be used to
         // calculate the number of frames per second (FPS)
         this.bind("frame", (_owner, params: unknown) => {
-            const frameInfo = params as FrameInfo;
+            const frameInfo = (params ?? {}) as FrameInfo;
 
             // increments the current frame count (as new frame exists)
             // and in case the target number of frames for FPS control
@@ -1084,12 +1084,12 @@ export class EmulatorLogic extends EmulatorBase {
         });
 
         this.bind("tick", (_owner, params: unknown) => {
-            const tickInfo = params as TickInfo;
+            const tickInfo = (params ?? {}) as TickInfo;
             this.cycleCount += tickInfo.cycles ?? 0;
         });
 
         this.bind("animation-frame", (_owner, params: unknown) => {
-            const animationFrameInfo = params as AnimationFrameInfo;
+            const animationFrameInfo = (params ?? {}) as AnimationFrameInfo;
             const ticks = animationFrameInfo.ticks ?? 0;
             this.animationFrameCount++;
             this.skippedTicksCount += Math.max(ticks - 1, 0);
@@ -1099,6 +1099,8 @@ export class EmulatorLogic extends EmulatorBase {
         // whenever we get focus on the emulator tab we reset
         // the counters so that the FPS and CPS are accurate
         this.bind("visible", () => {
+            this.nextTickTime = EmulatorLogic.now();
+            this.previousTickTime = EmulatorLogic.now();
             this.resetTimeCounters();
         });
 
