@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-*
+* Small first time loading issue with desynced mode
 
 ## [0.10.13] - 2024-09-02
 

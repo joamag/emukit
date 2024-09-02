@@ -1040,7 +1040,6 @@ export class EmulatorLogic extends EmulatorBase {
         romUrl?: string;
         loopMode?: LoopMode;
     }) {
-        this.previousTickTime = EmulatorLogic.now();
         this.loopMode = loopMode;
 
         // boots the emulator subsystem with the initial
@@ -1129,6 +1128,7 @@ export class EmulatorLogic extends EmulatorBase {
     async resume() {
         this.paused = false;
         this.nextTickTime = EmulatorLogic.now();
+        this.previousTickTime = EmulatorLogic.now();
         this.resetTimeCounters();
     }
 
@@ -1297,9 +1297,12 @@ export class EmulatorLogic extends EmulatorBase {
 
         // obtains the current time, this value is going
         // to be used to compute the need for tick computation
-        // also uses it to calculate the elapsed time since the
-        // last tick operation
         const beforeTime = time ?? EmulatorLogic.now();
+
+        // bootstraps the previous tick time in case it's the
+        // first tick operation, and then uses it to calculate
+        // the elapsed time useful for the desynced mode
+        if (this.previousTickTime === 0) this.previousTickTime = beforeTime;
         const elapsedTime = beforeTime - this.previousTickTime;
 
         // calculates the visual ratio of the current tick operation
