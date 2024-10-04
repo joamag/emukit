@@ -9,6 +9,7 @@ export type PairStyle = "name-click" | "value-click";
 type PairProps = {
     name?: string;
     value?: string;
+    title?: string;
     nameNode?: ReactNode;
     valueNode?: ReactNode;
     nameHref?: string;
@@ -23,6 +24,7 @@ type PairProps = {
 export const Pair: FC<PairProps> = ({
     name,
     value,
+    title,
     nameNode,
     valueNode,
     nameHref,
@@ -37,6 +39,7 @@ export const Pair: FC<PairProps> = ({
         () =>
             [
                 "pair",
+                title ? "with-title" : "",
                 onNameClick ? "name-click" : "",
                 onValueClick ? "value-click" : "",
                 ...style
@@ -53,7 +56,7 @@ export const Pair: FC<PairProps> = ({
     );
     return (
         <>
-            <dt className={classes} onClick={_onNameClick}>
+            <dt className={classes} onClick={_onNameClick} title={title}>
                 {nameNode ??
                     (nameHref && (
                         <Link href={nameHref} target={nameTarget ?? "_blank"}>
