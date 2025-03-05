@@ -1237,6 +1237,8 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                     <ButtonContainer style={["simple"]}>
                         <Button
                             text={"Save State"}
+                            image={require("../res/download.svg")}
+                            imageAlt="download"
                             onClick={onSaveStateClick}
                         />
                         {stateExts.length > 0 && (
