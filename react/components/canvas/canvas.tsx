@@ -48,7 +48,9 @@ export const Canvas: FC<CanvasProps> = ({
                 canvasRef.current,
                 smoothing
             );
-            structure && onCanvas?.(structure);
+            if (structure) {
+                onCanvas?.(structure);
+            }
         }
     }, [
         onCanvas,

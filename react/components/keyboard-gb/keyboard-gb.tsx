@@ -152,7 +152,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
             const gamepadType = getGamepadType(gamepad);
             const isValid = SUPPORTED_PADS.includes(gamepadType);
 
-            onGamepad &&
+            if (onGamepad) {
                 onGamepad(
                     {
                         index: gamepad.index,
@@ -161,6 +161,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
                     },
                     isValid
                 );
+            }
 
             let keySolver: Record<number, string> = {};
             switch (gamepadType) {
@@ -215,7 +216,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
             const gamepadType = getGamepadType(gamepad);
             const isValid = SUPPORTED_PADS.includes(gamepadType);
 
-            onGamepad &&
+            if (onGamepad) {
                 onGamepad(
                     {
                         index: gamepad.index,
@@ -225,6 +226,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
                     isValid,
                     false
                 );
+            }
         };
         document.addEventListener("keydown", _onKeyDown);
         document.addEventListener("keyup", _onKeyUp);
@@ -290,7 +292,9 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
                 }}
                 onTouchStart={(event) => {
                     setPressed((prev) => ({ ...prev, [keyCode]: true }));
-                    vibrate && window?.navigator?.vibrate?.(vibrate);
+                    if (vibrate) {
+                        window?.navigator?.vibrate?.(vibrate);
+                    }
                     onKeyDown?.(keyName ?? key);
                     event.preventDefault();
                 }}

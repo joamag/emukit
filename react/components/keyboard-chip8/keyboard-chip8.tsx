@@ -158,7 +158,9 @@ export const KeyboardChip8: FC<KeyboardChip8Props> = ({
                 }}
                 onTouchStart={(event) => {
                     setPressed((prev) => ({ ...prev, [key]: true }));
-                    vibrate && window?.navigator?.vibrate?.(vibrate);
+                    if (vibrate) {
+                        window?.navigator?.vibrate?.(vibrate);
+                    }
                     onKeyDown?.(key);
                     event.preventDefault();
                 }}

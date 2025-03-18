@@ -435,16 +435,24 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         const tabs = [];
         tabs.push(generalTab);
         tabs.push(detailsTab);
-        hasSaveStatesTab() && tabs.push(saveStatesTab);
-        hasControllersTab() && tabs.push(renderControllersTab);
+        if (hasSaveStatesTab()) {
+            tabs.push(saveStatesTab);
+        }
+        if (hasControllersTab()) {
+            tabs.push(renderControllersTab);
+        }
         return tabs;
     };
     const getTabNames = () => {
         const tabNames = [];
         tabNames.push("General");
         tabNames.push("Details");
-        hasSaveStatesTab() && tabNames.push("Save States");
-        hasControllersTab() && tabNames.push("Controllers");
+        if (hasSaveStatesTab()) {
+            tabNames.push("Save States");
+        }
+        if (hasControllersTab()) {
+            tabNames.push("Controllers");
+        }
         return tabNames;
     };
 
