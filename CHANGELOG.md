@@ -13,11 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-* Bumped some packages
+*
 
 ### Fixed
 
 *
+
+## [0.10.17] - 2025-03-18
+
+### Changed
+
+* Bumped some packages
 
 ## [0.10.16] - 2025-03-18
 
