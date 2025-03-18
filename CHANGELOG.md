@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 *
 
+## [0.10.16] - 2025-03-18
+
+### Added
+
+* Support for the new download button
+
 ## [0.10.15] - 2024-09-02
 
 ### Fixed
