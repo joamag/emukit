@@ -44,7 +44,7 @@ export const Pair: FC<PairProps> = ({
                 onValueClick ? "value-click" : "",
                 ...style
             ].join(" "),
-        [onNameClick, onValueClick, style]
+        [onNameClick, onValueClick, title, style]
     );
     const _onNameClick = useCallback(
         () => (onNameClick ? onNameClick() : undefined),
