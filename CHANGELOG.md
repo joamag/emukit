@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 *
 
+## [0.10.21] - 2025-03-18
+
+### Fixed
+
+* Debumped react
+
 ## [0.10.20] - 2025-03-18
 
 ### Fixed
