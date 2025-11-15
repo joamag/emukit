@@ -13,7 +13,7 @@
     -ms-user-select: none;
     -moz-user-select: none;
     -khtml-user-select: none;
-    -webkit-user-select: none;
+    -webkit-user-select: none !important;
 }
 
 .keyboard-chip8 > .keyboard-line {
