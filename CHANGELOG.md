@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+*
+
+## [0.10.22] - 2025-10-15
+
+### Fixed
+
 * Issue with CSS `user-select` property not working in some browsers (parcel related)
 
 ## [0.10.21] - 2025-03-18
