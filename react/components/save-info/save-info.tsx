@@ -44,7 +44,7 @@ export const SaveInfoMain: FC<SaveInfoTabProps> = ({ saveState }) => (
                 <Pair key="model" name="Model" value={saveState.model} />
             )}
             {saveState.title && (
-                <Pair key="model" name="Title" value={saveState.title} />
+                <Pair key="title" name="Title" value={saveState.title} />
             )}
             {saveState.format && (
                 <Pair key="format" name="Format" value={saveState.format} />
