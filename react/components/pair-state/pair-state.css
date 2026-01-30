@@ -41,6 +41,11 @@ dd.pair-state {
     background: #000000;
     border: 1px solid #ffffff;
     border-radius: 6px 6px 6px 6px;
+    -o-border-radius: 6px 6px 6px 6px;
+    -ms-border-radius: 6px 6px 6px 6px;
+    -moz-border-radius: 6px 6px 6px 6px;
+    -khtml-border-radius: 6px 6px 6px 6px;
+    -webkit-border-radius: 6px 6px 6px 6px;
     image-rendering: pixelated;
     padding: 5px 5px 5px 5px;
     width: 100px;
