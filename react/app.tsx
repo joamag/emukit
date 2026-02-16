@@ -178,10 +178,17 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         setFullscreenState(fullscreen);
         setKeyboardVisible(isTouchDevice() || keyboard);
         setDebugVisible(debug);
+        setInfoVisible(emulator.defaultInfoVisible);
+        if (emulator.defaultSections.length > 0) {
+            setVisibleSections(emulator.defaultSections);
+        }
     }, [
         setFullscreenState,
         setKeyboardVisible,
         setDebugVisible,
+        setInfoVisible,
+        setVisibleSections,
+        emulator,
         fullscreen,
         keyboard,
         debug
