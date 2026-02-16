@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 *
 
+## [0.10.23] - 2026-02-16
+
+### Changed
+
+* Support for fine control over the initial panels being shown
+
 ## [0.10.22] - 2025-10-15
 
 ### Fixed
