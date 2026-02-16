@@ -321,18 +321,6 @@ export interface Emulator extends ObservableI {
     get sections(): SectionInfo[];
 
     /**
-     * The names of the sections that should be visible
-     * by default when the emulator starts.
-     */
-    get defaultSections(): string[];
-
-    /**
-     * Whether the information panel should be visible
-     * by default when the emulator starts.
-     */
-    get defaultInfoVisible(): boolean;
-
-    /**
      * The multiple panels that are going to be presented to
      * support the end-user as part of the help process.
      */
@@ -778,14 +766,6 @@ export class EmulatorBase extends Observable {
 
     get sections(): SectionInfo[] {
         return [];
-    }
-
-    get defaultSections(): string[] {
-        return [];
-    }
-
-    get defaultInfoVisible(): boolean {
-        return true;
     }
 
     get help(): HelpPanel[] {

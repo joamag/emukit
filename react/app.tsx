@@ -12,7 +12,7 @@ import React, {
 import ReactDOM from "react-dom/client";
 import { RecoilRoot, useRecoilState } from "recoil";
 
-import info from "../package.json";
+import infoPackage from "../package.json";
 import {
     AudioChunk,
     AudioState,
@@ -80,8 +80,10 @@ declare const require: any;
 type EmulatorAppProps = {
     emulator: Emulator;
     fullscreen?: boolean;
+    info?: boolean;
     debug?: boolean;
     keyboard?: boolean;
+    sections?: string[];
     palette?: string;
     nativeFullscreen?: boolean;
     background?: string;
@@ -96,8 +98,10 @@ const isTouchDevice = () => {
 export const EmulatorApp: FC<EmulatorAppProps> = ({
     emulator,
     fullscreen = false,
+    info = true,
     debug = false,
     keyboard = false,
+    sections = [],
     palette,
     nativeFullscreen = true,
     background,
@@ -178,9 +182,9 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         setFullscreenState(fullscreen);
         setKeyboardVisible(isTouchDevice() || keyboard);
         setDebugVisible(debug);
-        setInfoVisible(emulator.defaultInfoVisible);
-        if (emulator.defaultSections.length > 0) {
-            setVisibleSections(emulator.defaultSections);
+        setInfoVisible(info);
+        if (sections.length > 0) {
+            setVisibleSections(sections);
         }
     }, [
         setFullscreenState,
@@ -188,10 +192,11 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
         setDebugVisible,
         setInfoVisible,
         setVisibleSections,
-        emulator,
         fullscreen,
         keyboard,
-        debug
+        info,
+        debug,
+        sections
     ]);
     useEffect(
         () => {
@@ -1167,7 +1172,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 <Pair
                     key="emukit"
                     name={"EmuKit"}
-                    value={info.version}
+                    value={infoPackage.version}
                     valueHref={
                         "https://github.com/joamag/emukit/blob/master/CHANGELOG.md"
                     }
@@ -1454,6 +1459,8 @@ export const startApp = (
         fullscreen = false,
         debug = false,
         keyboard = false,
+        info = true,
+        sections = [],
         palette,
         background,
         backgrounds
@@ -1463,6 +1470,8 @@ export const startApp = (
         fullscreen?: boolean;
         debug?: boolean;
         keyboard?: boolean;
+        info?: boolean;
+        sections?: string[];
         palette?: string;
         background?: string;
         backgrounds?: string[];
@@ -1479,6 +1488,8 @@ export const startApp = (
                 fullscreen={fullscreen}
                 debug={debug}
                 keyboard={keyboard}
+                info={info}
+                sections={sections}
                 palette={palette}
                 background={background}
                 backgrounds={backgrounds}
