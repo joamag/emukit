@@ -992,8 +992,12 @@ export class EmulatorLogic extends EmulatorBase {
     private skippedTicksStart = EmulatorLogic.now();
     private skippedTicksCount = 0;
 
-    private _loopMode = LoopMode.Auto;
-
+    /**
+     * The handler for the visibility change event, this is
+     * used to reset the time counters whenever the emulator
+     * gets focus again, avoiding the FPS and CPS to be
+     * incorrectly calculated.
+     */
     private visibilityChangeHandler: (() => void) | null = null;
 
     /**
@@ -1008,6 +1012,8 @@ export class EmulatorLogic extends EmulatorBase {
      * having to wait for another frame to be scheduled.
      */
     private animationFrameResolve: (() => void) | null = null;
+
+    private _loopMode = LoopMode.Auto;
 
     get framerate(): number {
         return this.fps;
