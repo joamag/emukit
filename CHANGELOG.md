@@ -9,11 +9,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Headless `emukit/logic` entry point exposing the emulator logic without any React dependency
+*
 
 ### Changed
 
 *
+
+### Fixed
+
+*
+
+## [0.10.24] - 2026-07-27
+
+### Added
+
+* Headless `emukit/logic` entry point exposing the emulator logic without any React dependency
 
 ### Fixed
 
