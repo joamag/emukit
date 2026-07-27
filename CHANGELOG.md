@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+*
+
+## [0.10.25] - 2026-07-27
+
+### Fixed
+
 * Type error in `downloadFromBuffer()` that prevented consumers from compiling the package with TypeScript 5.7 or newer
 
 ## [0.10.24] - 2026-07-27
