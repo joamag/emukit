@@ -10,6 +10,19 @@ const { EmulatorLogic, LoopMode } = require("../../ts/structs.ts");
 let listeners = [];
 
 /**
+ * The set of animation frame callbacks that have been scheduled
+ * against the window stub, they are never executed so that a
+ * document that suspends the scheduling of frames is simulated.
+ */
+let frames = [];
+
+/**
+ * The set of animation frame identifiers that have been cancelled
+ * against the window stub.
+ */
+let cancelled = [];
+
+/**
  * Waits the provided amount of milliseconds, allowing the emulator
  * loop to run for a deterministic amount of time.
  *
@@ -26,16 +39,20 @@ const sleep = (timeout) =>
  * tick operations that have been performed, allowing the verification
  * of the main loop execution.
  *
+ * @param {Function} boot The boot operation to be run by the emulator,
+ * defaults to an immediately resolved one.
  * @returns {object} The emulator instance to be used in testing.
  */
-const buildEmulator = () => {
+const buildEmulator = (boot = async () => {}) => {
     class TestEmulator extends EmulatorLogic {
         constructor() {
             super();
             this.tickCount = 0;
         }
 
-        async boot() {}
+        async boot() {
+            await boot();
+        }
 
         async tick() {
             this.tickCount++;
@@ -47,6 +64,17 @@ const buildEmulator = () => {
 describe("EmulatorLogic", function () {
     beforeEach(() => {
         listeners = [];
+        frames = [];
+        cancelled = [];
+        global.window = {
+            requestAnimationFrame: (callback) => {
+                frames.push(callback);
+                return frames.length;
+            },
+            cancelAnimationFrame: (handle) => {
+                cancelled.push(handle);
+            }
+        };
         global.document = {
             visibilityState: "visible",
             addEventListener: (event, callback) => {
@@ -63,6 +91,7 @@ describe("EmulatorLogic", function () {
 
     afterEach(() => {
         delete global.document;
+        delete global.window;
     });
 
     describe("#start()", function () {
@@ -83,6 +112,35 @@ describe("EmulatorLogic", function () {
             assert.strictEqual(listeners[0][0], "visibilitychange");
             await emulator.stop();
             await start;
+        });
+
+        it("should not register the visibility listener once stopped", async () => {
+            let bootResolve = null;
+            const emulator = buildEmulator(
+                () =>
+                    new Promise((resolve) => {
+                        bootResolve = resolve;
+                    })
+            );
+            const start = emulator.start({ loopMode: LoopMode.SetTimeout });
+            await sleep(20);
+            assert.strictEqual(listeners.length, 0);
+            await emulator.stop();
+            bootResolve();
+            await start;
+            assert.strictEqual(listeners.length, 0);
+            assert.strictEqual(emulator.tickCount, 0);
+        });
+
+        it("should be able to reset the running state on a boot error", async () => {
+            const emulator = buildEmulator(async () => {
+                throw new Error("Unable to boot");
+            });
+            await assert.rejects(
+                emulator.start({ loopMode: LoopMode.SetTimeout })
+            );
+            assert.strictEqual(listeners.length, 0);
+            assert.strictEqual(emulator.tickCount, 0);
         });
     });
 
@@ -107,6 +165,30 @@ describe("EmulatorLogic", function () {
             await emulator.stop();
             await start;
             assert.strictEqual(listeners.length, 0);
+        });
+
+        it("should be able to settle the animation loop without a frame", async () => {
+            const emulator = buildEmulator();
+            const start = emulator.start({
+                loopMode: LoopMode.AnimationFrame
+            });
+            await sleep(50);
+            assert.strictEqual(frames.length, 1);
+            await emulator.stop();
+            await start;
+            assert.strictEqual(frames.length, 1);
+        });
+
+        it("should be able to cancel the pending animation frame", async () => {
+            const emulator = buildEmulator();
+            const start = emulator.start({
+                loopMode: LoopMode.AnimationFrame
+            });
+            await sleep(50);
+            await emulator.stop();
+            await start;
+            assert.strictEqual(cancelled.length, 1);
+            assert.strictEqual(cancelled[0], 1);
         });
 
         it("should be able to stop an emulator that never started", async () => {
