@@ -89,7 +89,9 @@ export const downloadFromBuffer = (
     filename: string,
     type = "application/octet-stream"
 ) => {
-    const blob = new Blob([buffer], { type: type });
+    // copies the buffer so that it's backed by its own array buffer,
+    // as a typed array backed by a shared one is not a valid blob part
+    const blob = new Blob([buffer.slice()], { type: type });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("download", filename);
