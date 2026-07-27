@@ -1,7 +1,6 @@
 const assert = require("assert");
 
-let EmulatorLogic = null;
-let LoopMode = null;
+const { EmulatorLogic, LoopMode } = require("../../ts/structs.ts");
 
 /**
  * The set of visibility change listeners that have been registered
@@ -46,10 +45,6 @@ const buildEmulator = () => {
 };
 
 describe("EmulatorLogic", function () {
-    before(async () => {
-        ({ EmulatorLogic, LoopMode } = await import("../../ts/structs.ts"));
-    });
-
     beforeEach(() => {
         listeners = [];
         global.document = {
