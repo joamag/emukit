@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-*
+* Headless `emukit/logic` entry point exposing the emulator logic without any React dependency
 
 ### Changed
 
@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-*
+* `EmulatorLogic.stop()` now terminates the main loop and releases the visibility change listener, instead of being a no-op
 
 ## [0.10.23] - 2026-02-16
 

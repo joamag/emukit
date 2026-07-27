@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { Logger, logger } from "./logging.ts";
 import { base64ToBuffer, bufferToBase64 } from "./util.ts";
@@ -971,6 +971,7 @@ export class EmulatorBase extends Observable {
  * and avoid implementing the main game loop logic.
  */
 export class EmulatorLogic extends EmulatorBase {
+    protected running = false;
     protected paused = false;
     protected nextTickTime = 0;
     protected previousTickTime = 0;
@@ -992,6 +993,21 @@ export class EmulatorLogic extends EmulatorBase {
     private skippedTicksCount = 0;
 
     private _loopMode = LoopMode.Auto;
+
+    private visibilityChangeHandler: (() => void) | null = null;
+
+    /**
+     * The identifier of the animation frame that is currently
+     * scheduled, allowing its cancellation on the stop operation.
+     */
+    private animationFrameHandle: number | null = null;
+
+    /**
+     * The resolve function of the animation frame loop that is
+     * currently running, allowing the loop to be settled without
+     * having to wait for another frame to be scheduled.
+     */
+    private animationFrameResolve: (() => void) | null = null;
 
     get framerate(): number {
         return this.fps;
@@ -1049,10 +1065,24 @@ export class EmulatorLogic extends EmulatorBase {
         loopMode?: LoopMode;
     }) {
         this.loopMode = loopMode;
+        this.running = true;
 
         // boots the emulator subsystem with the initial
-        // ROM retrieved from a remote data source
-        await this.boot({ loadRom: true, romPath: romUrl ?? undefined });
+        // ROM retrieved from a remote data source, resetting the
+        // running state in case the boot operation fails
+        try {
+            await this.boot({ loadRom: true, romPath: romUrl ?? undefined });
+        } catch (err) {
+            this.running = false;
+            throw err;
+        }
+
+        // in case the emulator has been stopped while the boot
+        // operation was still pending then returns the control flow
+        // immediately, avoiding the registration of the listeners
+        if (!this.running) {
+            return;
+        }
 
         // binds the frame event to the current instance of the
         // emulator logic, this event is going to be used to
@@ -1105,20 +1135,52 @@ export class EmulatorLogic extends EmulatorBase {
         });
 
         // pipes some of the native visibility change events
-        // into the internal event system
-        document.addEventListener("visibilitychange", () => {
+        // into the internal event system, keeping a reference to the
+        // handler so that it can be released on the stop operation
+        this.visibilityChangeHandler = () => {
             if (document.visibilityState === "visible") {
                 this.trigger("visible");
             }
             if (document.visibilityState === "hidden") {
                 this.trigger("hidden");
             }
-        });
+        };
+        document.addEventListener(
+            "visibilitychange",
+            this.visibilityChangeHandler
+        );
 
         await this.loop();
     }
 
-    async stop() {}
+    /**
+     * Stops the main loop execution of the emulator, releasing the
+     * event listeners that have been registered as part of the
+     * `start()` operation.
+     *
+     * The set timeout loop is only effectively terminated on its next
+     * scheduled iteration, while the animation frame ones are settled
+     * immediately, as a hidden document would otherwise suspend the
+     * scheduling of new frames indefinitely.
+     */
+    async stop() {
+        this.running = false;
+        if (this.animationFrameHandle !== null) {
+            window.cancelAnimationFrame(this.animationFrameHandle);
+            this.animationFrameHandle = null;
+        }
+        if (this.animationFrameResolve) {
+            this.animationFrameResolve();
+            this.animationFrameResolve = null;
+        }
+        if (this.visibilityChangeHandler) {
+            document.removeEventListener(
+                "visibilitychange",
+                this.visibilityChangeHandler
+            );
+            this.visibilityChangeHandler = null;
+        }
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     async boot(options: unknown) {
@@ -1201,7 +1263,7 @@ export class EmulatorLogic extends EmulatorBase {
     }
 
     private async loop() {
-        while (true) {
+        while (this.running) {
             switch (this.loopMode) {
                 case LoopMode.SetTimeout:
                     await this.loopSetTimeout();
@@ -1221,7 +1283,7 @@ export class EmulatorLogic extends EmulatorBase {
     private async loopSetTimeout() {
         // runs the sequence as an infinite loop, running
         // the associated CPU cycles accordingly
-        while (true) {
+        while (this.running) {
             // breaks the loop in case the loop mode has changed
             if (this.loopMode !== LoopMode.SetTimeout) {
                 break;
@@ -1261,47 +1323,94 @@ export class EmulatorLogic extends EmulatorBase {
     }
 
     private async loopAnimationFrame(useTimeParam = true) {
-        const step = async (time: DOMHighResTimeStamp) => {
-            let ticks = 0;
-            if (this.loopMode !== LoopMode.AnimationFrame) {
-                this.loop();
-                return;
-            }
-            window.requestAnimationFrame(step);
-            if (!this.paused) {
-                let remainingTicks = MAX_TICKS_ANIMATION_FRAME;
-                const now = useTimeParam ? time : EmulatorLogic.now();
-                while (now >= this.nextTickTime) {
-                    if (remainingTicks === 0) {
-                        this.nextTickTime = now;
-                        break;
-                    }
-                    await this.internalTick(now);
-                    remainingTicks--;
-                    ticks++;
+        await new Promise<void>((resolve) => {
+            this.animationFrameResolve = resolve;
+            const step = async (time: DOMHighResTimeStamp) => {
+                let ticks = 0;
+
+                this.animationFrameHandle = null;
+
+                // returns the control flow to the main loop in case the
+                // emulator has been stopped or the loop mode has changed
+                if (
+                    !this.running ||
+                    this.loopMode !== LoopMode.AnimationFrame
+                ) {
+                    this.settleAnimationFrame();
+                    return;
                 }
-            }
-            this.trigger("animation-frame", { ticks: ticks });
-        };
-        window.requestAnimationFrame(step);
-        await new Promise(() => {});
+                this.animationFrameHandle = window.requestAnimationFrame(step);
+                if (!this.paused) {
+                    let remainingTicks = MAX_TICKS_ANIMATION_FRAME;
+                    const now = useTimeParam ? time : EmulatorLogic.now();
+                    while (now >= this.nextTickTime) {
+                        if (remainingTicks === 0) {
+                            this.nextTickTime = now;
+                            break;
+                        }
+                        await this.internalTick(now);
+                        remainingTicks--;
+                        ticks++;
+                    }
+                }
+                this.trigger("animation-frame", { ticks: ticks });
+
+                // settles the loop in case the emulator has been stopped
+                // while the tick operations were being executed, so that
+                // the caller is only released once the work is complete
+                if (!this.running) {
+                    this.settleAnimationFrame();
+                }
+            };
+            this.animationFrameHandle = window.requestAnimationFrame(step);
+        });
     }
 
     private async loopAnimationDesynced(useTimeParam = true) {
-        const step = async (time: DOMHighResTimeStamp) => {
-            if (this.loopMode !== LoopMode.AnimationDesynced) {
-                this.loop();
-                return;
-            }
-            window.requestAnimationFrame(step);
-            if (!this.paused) {
-                const now = useTimeParam ? time : EmulatorLogic.now();
-                await this.internalTick(now, TickMode.Desynced);
-            }
-            this.trigger("animation-frame", { ticks: 1 });
-        };
-        window.requestAnimationFrame(step);
-        await new Promise(() => {});
+        await new Promise<void>((resolve) => {
+            this.animationFrameResolve = resolve;
+            const step = async (time: DOMHighResTimeStamp) => {
+                this.animationFrameHandle = null;
+
+                // returns the control flow to the main loop in case the
+                // emulator has been stopped or the loop mode has changed
+                if (
+                    !this.running ||
+                    this.loopMode !== LoopMode.AnimationDesynced
+                ) {
+                    this.settleAnimationFrame();
+                    return;
+                }
+                this.animationFrameHandle = window.requestAnimationFrame(step);
+                if (!this.paused) {
+                    const now = useTimeParam ? time : EmulatorLogic.now();
+                    await this.internalTick(now, TickMode.Desynced);
+                }
+                this.trigger("animation-frame", { ticks: 1 });
+
+                // settles the loop in case the emulator has been stopped
+                // while the tick operation was being executed, so that
+                // the caller is only released once the work is complete
+                if (!this.running) {
+                    this.settleAnimationFrame();
+                }
+            };
+            this.animationFrameHandle = window.requestAnimationFrame(step);
+        });
+    }
+
+    /**
+     * Settles the animation frame loop that is currently running,
+     * releasing the caller that is waiting on it.
+     *
+     * The resolve function is cleared in the process, so that the
+     * loop is only ever settled once.
+     */
+    private settleAnimationFrame() {
+        if (!this.animationFrameResolve) return;
+        const resolve = this.animationFrameResolve;
+        this.animationFrameResolve = null;
+        resolve();
     }
 
     private async internalTick(time?: DOMHighResTimeStamp, mode?: TickMode) {

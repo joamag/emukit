@@ -11,7 +11,7 @@
         "lint": "eslint .",
         "pretty": "prettier --config .prettierrc \"./**/*.{js,ts,tsx,json}\" --write",
         "test": "npm run test:mocha",
-        "test:mocha": "mocha --recursive test"
+        "test:mocha": "mocha --require tsx/cjs --recursive test"
     },
     "source": "index.ts",
     "peerDependencies": {
@@ -35,6 +35,7 @@
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
         "recoil": "^0.7.7",
+        "tsx": "^4.19.3",
         "typescript": "^5.8.2"
     }
 }
