@@ -98,6 +98,45 @@
     background-color: #50cb93;
 }
 
+.keyboard-gb > .shoulders {
+    margin: 0px 18px 18px 18px;
+    overflow: hidden;
+}
+
+@media only screen and (max-width: 600px) {
+    .keyboard-gb > .shoulders {
+        margin: 0px 12px 12px 12px;
+    }
+}
+
+.keyboard-gb > .shoulders > .key {
+    font-size: 14px;
+    font-weight: 900;
+    height: 30px;
+    line-height: 26px;
+    min-width: 100px;
+}
+
+.keyboard-gb > .shoulders > .key.l {
+    border-radius: 18px 5px 5px 5px;
+    -o-border-radius: 18px 5px 5px 5px;
+    -ms-border-radius: 18px 5px 5px 5px;
+    -moz-border-radius: 18px 5px 5px 5px;
+    -khtml-border-radius: 18px 5px 5px 5px;
+    -webkit-border-radius: 18px 5px 5px 5px;
+    float: left;
+}
+
+.keyboard-gb > .shoulders > .key.r {
+    border-radius: 5px 18px 5px 5px;
+    -o-border-radius: 5px 18px 5px 5px;
+    -ms-border-radius: 5px 18px 5px 5px;
+    -moz-border-radius: 5px 18px 5px 5px;
+    -khtml-border-radius: 5px 18px 5px 5px;
+    -webkit-border-radius: 5px 18px 5px 5px;
+    float: right;
+}
+
 .keyboard-gb > .dpad {
     float: left;
     text-align: center;
