@@ -148,9 +148,6 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
     const shouldersRef = useRef(shoulders);
     const heldRef = useRef<Record<string, boolean>>({});
     useEffect(() => {
-        if (!physical) return;
-        const keys = shoulders ? { ...KEYS, ...KEYS_SHOULDERS } : KEYS;
-
         // the polling of the game pads connected before a change of the
         // shoulders follows the latest value, while the shoulder keys
         // held when they get disabled are released, as the mapping that
@@ -164,6 +161,9 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
                 onKeyUp?.(keyCode);
             });
         }
+
+        if (!physical) return;
+        const keys = shoulders ? { ...KEYS, ...KEYS_SHOULDERS } : KEYS;
 
         const getGamepadType = (gamepad: globalThis.Gamepad): GamepadType => {
             let gamepadType = GamepadType.Unknown;
@@ -221,6 +221,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
                 return keySolver;
             };
             let keySolver = getKeySolver();
+            let keySolverShoulders = shouldersRef.current;
 
             const buttonStates: Record<number, boolean> = {};
 
@@ -228,7 +229,16 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
                 const _gamepad = navigator.getGamepads()[gamepad.index];
                 if (!_gamepad) return;
 
-                keySolver = getKeySolver();
+                // once the shoulders change the mapping is resolved again
+                // and the shoulder buttons start over as released, as their
+                // keys have been released (or never pressed) meanwhile
+                if (keySolverShoulders !== shouldersRef.current) {
+                    keySolver = getKeySolver();
+                    keySolverShoulders = shouldersRef.current;
+                    Object.keys(KEYS_STANDARD_SHOULDERS).forEach((index) => {
+                        buttonStates[Number(index)] = false;
+                    });
+                }
 
                 handleButton(100, _gamepad.axes[0] < -0.5);
                 handleButton(101, _gamepad.axes[0] > 0.5);

@@ -234,6 +234,16 @@ describe("KeyboardGB", function () {
             ]);
         });
 
+        it("should release the shoulder keys when the physical keys are disabled", () => {
+            render({ shoulders: true });
+            dispatch("keydown", { key: "q", preventDefault: () => {} });
+            render({ physical: false });
+            assert.deepStrictEqual(events, [
+                ["down", "L"],
+                ["up", "L"]
+            ]);
+        });
+
         it("should not map the shoulder buttons of the gamepad by default", () => {
             render();
             dispatch("gamepadconnected", {
@@ -295,6 +305,42 @@ describe("KeyboardGB", function () {
                 ["up", "L"]
             ]);
             buttons[4] = false;
+            poll();
+            assert.deepStrictEqual(events, [
+                ["down", "L"],
+                ["up", "L"]
+            ]);
+        });
+
+        it("should press again the shoulder buttons of the gamepad held while the shoulders are enabled again", () => {
+            render({ shoulders: true });
+            dispatch("gamepadconnected", {
+                gamepad: { index: 0, id: "Gamepad", mapping: "standard" }
+            });
+            buttons[4] = true;
+            poll();
+            render();
+            poll();
+            render({ shoulders: true });
+            poll();
+            assert.deepStrictEqual(events, [
+                ["down", "L"],
+                ["up", "L"],
+                ["down", "L"]
+            ]);
+        });
+
+        it("should not release again the shoulder buttons of the gamepad released while the shoulders are disabled", () => {
+            render({ shoulders: true });
+            dispatch("gamepadconnected", {
+                gamepad: { index: 0, id: "Gamepad", mapping: "standard" }
+            });
+            buttons[4] = true;
+            poll();
+            render();
+            buttons[4] = false;
+            poll();
+            render({ shoulders: true });
             poll();
             assert.deepStrictEqual(events, [
                 ["down", "L"],
