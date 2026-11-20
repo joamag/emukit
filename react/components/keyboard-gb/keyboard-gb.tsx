@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo, useState } from "react";
+import React, { FC, useEffect, useMemo, useRef, useState } from "react";
 
 import { isAndroid } from "../../../ts/index.ts";
 
@@ -145,9 +145,26 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
             ].join(" "),
         [fullscreen, style]
     );
+    const shouldersRef = useRef(shoulders);
+    const heldRef = useRef<Record<string, boolean>>({});
     useEffect(() => {
         if (!physical) return;
         const keys = shoulders ? { ...KEYS, ...KEYS_SHOULDERS } : KEYS;
+
+        // the polling of the game pads connected before a change of the
+        // shoulders follows the latest value, while the shoulder keys
+        // held when they get disabled are released, as the mapping that
+        // would release them is gone
+        shouldersRef.current = shoulders;
+        if (!shoulders) {
+            ["L", "R"].forEach((keyCode) => {
+                if (!heldRef.current[keyCode]) return;
+                heldRef.current[keyCode] = false;
+                setPressed((prev) => ({ ...prev, [keyCode]: false }));
+                onKeyUp?.(keyCode);
+            });
+        }
+
         const getGamepadType = (gamepad: globalThis.Gamepad): GamepadType => {
             let gamepadType = GamepadType.Unknown;
             const isStandard = gamepad.mapping === "standard";
@@ -159,6 +176,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
             const isPrevent = PREVENT_KEYS[event.key] ?? false;
             if (isPrevent) event.preventDefault();
             if (keyCode !== undefined) {
+                heldRef.current[keyCode] = true;
                 setPressed((prev) => ({ ...prev, [keyCode]: true }));
                 onKeyDown?.(keyCode);
                 return;
@@ -169,6 +187,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
             const isPrevent = PREVENT_KEYS[event.key] ?? false;
             if (isPrevent) event.preventDefault();
             if (keyCode !== undefined) {
+                heldRef.current[keyCode] = false;
                 setPressed((prev) => ({ ...prev, [keyCode]: false }));
                 onKeyUp?.(keyCode);
                 return;
@@ -190,20 +209,26 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
                 );
             }
 
-            let keySolver: Record<number, string> = {};
-            switch (gamepadType) {
-                case GamepadType.Standard:
-                    keySolver = shoulders
-                        ? { ...KEYS_STANDARD, ...KEYS_STANDARD_SHOULDERS }
-                        : KEYS_STANDARD;
-                    break;
-            }
+            const getKeySolver = () => {
+                let keySolver: Record<number, string> = {};
+                switch (gamepadType) {
+                    case GamepadType.Standard:
+                        keySolver = shouldersRef.current
+                            ? { ...KEYS_STANDARD, ...KEYS_STANDARD_SHOULDERS }
+                            : KEYS_STANDARD;
+                        break;
+                }
+                return keySolver;
+            };
+            let keySolver = getKeySolver();
 
             const buttonStates: Record<number, boolean> = {};
 
             const updateStatus = () => {
                 const _gamepad = navigator.getGamepads()[gamepad.index];
                 if (!_gamepad) return;
+
+                keySolver = getKeySolver();
 
                 handleButton(100, _gamepad.axes[0] < -0.5);
                 handleButton(101, _gamepad.axes[0] > 0.5);
@@ -226,11 +251,13 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
                 const keyUp = !pressed && state;
 
                 if (keyDown) {
+                    heldRef.current[keyCode] = true;
                     setPressed((prev) => ({ ...prev, [keyCode]: true }));
                     onKeyDown?.(keyCode);
                 }
 
                 if (keyUp) {
+                    heldRef.current[keyCode] = false;
                     setPressed((prev) => ({ ...prev, [keyCode]: false }));
                     onKeyUp?.(keyCode);
                 }

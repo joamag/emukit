@@ -17,6 +17,7 @@ const {
 const hooks = {
     useEffect: React.useEffect,
     useMemo: React.useMemo,
+    useRef: React.useRef,
     useState: React.useState
 };
 
@@ -55,18 +56,40 @@ let buttons = [];
 let events = [];
 
 /**
+ * The refs of the keyboard component, kept across renders as
+ * React does, in the order of their creation.
+ */
+let refs = [];
+
+/**
+ * The index of the next ref to be used by the current render.
+ */
+let refIndex = 0;
+
+/**
+ * The cleanup functions of the effects of the last render, run
+ * before the effects of the next render.
+ */
+let cleanups = [];
+
+/**
  * Renders the keyboard component with the provided props, running
- * its effects and recording the key events that are triggered.
+ * its effects (once the ones of the previous render are cleaned up)
+ * and recording the key events that are triggered.
  *
  * @param {object} props The props to be used in the keyboard component.
  * @returns {object} The React element tree rendered by the component.
  */
-const render = (props = {}) =>
-    KeyboardGB({
+const render = (props = {}) => {
+    cleanups.forEach((cleanup) => cleanup?.());
+    cleanups = [];
+    refIndex = 0;
+    return KeyboardGB({
         onKeyDown: (key) => events.push(["down", key]),
         onKeyUp: (key) => events.push(["up", key]),
         ...props
     });
+};
 
 /**
  * Dispatches the provided event to the listeners that have been
@@ -110,16 +133,27 @@ describe("KeyboardGB", function () {
         frames = [];
         buttons = new Array(17).fill(false);
         events = [];
+        refs = [];
+        cleanups = [];
         React.useEffect = (callback) => {
-            callback();
+            cleanups.push(callback());
         };
         React.useMemo = (callback) => callback();
+        React.useRef = (initial) => {
+            if (refIndex === refs.length) refs.push({ current: initial });
+            return refs[refIndex++];
+        };
         React.useState = (initial) => [initial, () => {}];
         const target = {
             addEventListener: (event, callback) => {
                 listeners.push([event, callback]);
             },
-            removeEventListener: () => {}
+            removeEventListener: (event, callback) => {
+                listeners = listeners.filter(
+                    ([_event, _callback]) =>
+                        _event !== event || _callback !== callback
+                );
+            }
         };
         global.document = target;
         global.window = target;
@@ -180,6 +214,26 @@ describe("KeyboardGB", function () {
             ]);
         });
 
+        it("should release the shoulder keys when the shoulders are disabled", () => {
+            render({ shoulders: true });
+            dispatch("keydown", { key: "q", preventDefault: () => {} });
+            dispatch("keydown", { key: "a", preventDefault: () => {} });
+            render();
+            assert.deepStrictEqual(events, [
+                ["down", "L"],
+                ["down", "A"],
+                ["up", "L"]
+            ]);
+            dispatch("keyup", { key: "q", preventDefault: () => {} });
+            dispatch("keyup", { key: "a", preventDefault: () => {} });
+            assert.deepStrictEqual(events, [
+                ["down", "L"],
+                ["down", "A"],
+                ["up", "L"],
+                ["up", "A"]
+            ]);
+        });
+
         it("should not map the shoulder buttons of the gamepad by default", () => {
             render();
             dispatch("gamepadconnected", {
@@ -209,6 +263,42 @@ describe("KeyboardGB", function () {
                 ["up", "L"],
                 ["down", "R"],
                 ["up", "R"]
+            ]);
+        });
+
+        it("should follow the shoulders on an already connected gamepad", () => {
+            render();
+            dispatch("gamepadconnected", {
+                gamepad: { index: 0, id: "Gamepad", mapping: "standard" }
+            });
+            render({ shoulders: true });
+            buttons[4] = true;
+            poll();
+            buttons[4] = false;
+            poll();
+            assert.deepStrictEqual(events, [
+                ["down", "L"],
+                ["up", "L"]
+            ]);
+        });
+
+        it("should release the shoulder buttons of the gamepad when the shoulders are disabled", () => {
+            render({ shoulders: true });
+            dispatch("gamepadconnected", {
+                gamepad: { index: 0, id: "Gamepad", mapping: "standard" }
+            });
+            buttons[4] = true;
+            poll();
+            render();
+            assert.deepStrictEqual(events, [
+                ["down", "L"],
+                ["up", "L"]
+            ]);
+            buttons[4] = false;
+            poll();
+            assert.deepStrictEqual(events, [
+                ["down", "L"],
+                ["up", "L"]
             ]);
         });
 
