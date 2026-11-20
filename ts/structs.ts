@@ -191,7 +191,6 @@ export enum Feature {
     Keyboard,
     KeyboardChip8,
     KeyboardGB,
-    KeyboardGBA,
     DisplayFrequency,
     Framerate,
     Cyclerate,
@@ -200,7 +199,8 @@ export enum Feature {
     EmulationSpeed,
     BootRomInfo,
     RomTypeInfo,
-    SaveState
+    SaveState,
+    KeyboardGBA
 }
 
 export enum Frequency {
