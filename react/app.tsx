@@ -1019,9 +1019,11 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                 {hasFeature(Feature.KeyboardChip8) && (
                     <KeyboardChip8 onKeyDown={onKeyDown} onKeyUp={onKeyUp} />
                 )}
-                {hasFeature(Feature.KeyboardGB) && (
+                {(hasFeature(Feature.KeyboardGB) ||
+                    hasFeature(Feature.KeyboardGBA)) && (
                     <KeyboardGB
                         fullscreen={fullscreenState}
+                        shoulders={hasFeature(Feature.KeyboardGBA)}
                         onKeyDown={onKeyDown}
                         onKeyUp={onKeyUp}
                         onGamepad={onGamepad}

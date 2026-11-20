@@ -191,6 +191,7 @@ export enum Feature {
     Keyboard,
     KeyboardChip8,
     KeyboardGB,
+    KeyboardGBA,
     DisplayFrequency,
     Framerate,
     Cyclerate,
