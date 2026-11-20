@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Support for the Game Boy Advance L and R shoulder buttons on the keyboard, gamepad and on-screen pad
+*
 
 ### Changed
 
@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 *
+
+## [0.10.26] - 2026-11-20
+
+### Added
+
+* Support for the Game Boy Advance L and R shoulder buttons on the keyboard, gamepad and on-screen pad
 
 ## [0.10.25] - 2026-07-27
 
