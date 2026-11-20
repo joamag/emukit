@@ -1,6 +1,6 @@
 const assert = require("assert");
 
-const { EmulatorLogic, LoopMode } = require("../../ts/structs.ts");
+const { EmulatorLogic, Feature, LoopMode } = require("../../ts/structs.ts");
 
 /**
  * The set of visibility change listeners that have been registered
@@ -60,6 +60,16 @@ const buildEmulator = (boot = async () => {}) => {
     }
     return new TestEmulator();
 };
+
+describe("Feature", function () {
+    it("should keep the values of the existing features", () => {
+        assert.strictEqual(Feature.Help, 1);
+        assert.strictEqual(Feature.KeyboardGB, 9);
+        assert.strictEqual(Feature.DisplayFrequency, 10);
+        assert.strictEqual(Feature.SaveState, 18);
+        assert.strictEqual(Feature.KeyboardGBA, 19);
+    });
+});
 
 describe("EmulatorLogic", function () {
     beforeEach(() => {

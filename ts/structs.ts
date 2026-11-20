@@ -199,7 +199,8 @@ export enum Feature {
     EmulationSpeed,
     BootRomInfo,
     RomTypeInfo,
-    SaveState
+    SaveState,
+    KeyboardGBA
 }
 
 export enum Frequency {

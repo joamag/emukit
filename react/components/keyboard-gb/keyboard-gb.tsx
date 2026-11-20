@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useMemo, useState } from "react";
+import React, { FC, useEffect, useMemo, useRef, useState } from "react";
 
 import { isAndroid } from "../../../ts/index.ts";
 
@@ -12,7 +12,9 @@ type KeyNames =
     | "Start"
     | "Select"
     | "A"
-    | "B";
+    | "B"
+    | "L"
+    | "R";
 
 const KEYS: Record<string, KeyNames> = {
     ArrowUp: "ArrowUp",
@@ -25,6 +27,17 @@ const KEYS: Record<string, KeyNames> = {
     s: "B",
     A: "A",
     S: "B"
+};
+
+/**
+ * The keyboard keys of the shoulder buttons, only
+ * used when the shoulders are enabled (eg: GBA).
+ */
+const KEYS_SHOULDERS: Record<string, KeyNames> = {
+    q: "L",
+    w: "R",
+    Q: "L",
+    W: "R"
 };
 
 const KEYS_STANDARD: Record<number, KeyNames> = {
@@ -40,6 +53,15 @@ const KEYS_STANDARD: Record<number, KeyNames> = {
     8: "Select",
     1: "A",
     0: "B"
+};
+
+/**
+ * The standard game pad buttons of the shoulder buttons,
+ * only used when the shoulders are enabled (eg: GBA).
+ */
+const KEYS_STANDARD_SHOULDERS: Record<number, KeyNames> = {
+    4: "L",
+    5: "R"
 };
 
 const PREVENT_KEYS: Record<string, boolean> = {
@@ -68,6 +90,7 @@ type KeyboardGBProps = {
     focusable?: boolean;
     fullscreen?: boolean;
     physical?: boolean;
+    shoulders?: boolean;
     vibrate?: number;
     style?: string[];
     onKeyDown?: (key: string) => void;
@@ -89,6 +112,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
     focusable = true,
     fullscreen = false,
     physical = true,
+    shoulders = false,
     vibrate = 75,
     style = [],
     onKeyDown,
@@ -107,7 +131,9 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
         Start: false,
         Select: false,
         A: false,
-        B: false
+        B: false,
+        L: false,
+        R: false
     });
     const classes = useMemo(
         () =>
@@ -119,8 +145,26 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
             ].join(" "),
         [fullscreen, style]
     );
+    const shouldersRef = useRef(shoulders);
+    const heldRef = useRef<Record<string, boolean>>({});
     useEffect(() => {
+        // the polling of the game pads connected before a change of the
+        // shoulders follows the latest value, while the shoulder keys
+        // held when they get disabled are released, as the mapping that
+        // would release them is gone
+        shouldersRef.current = shoulders;
+        if (!shoulders) {
+            ["L", "R"].forEach((keyCode) => {
+                if (!heldRef.current[keyCode]) return;
+                heldRef.current[keyCode] = false;
+                setPressed((prev) => ({ ...prev, [keyCode]: false }));
+                onKeyUp?.(keyCode);
+            });
+        }
+
         if (!physical) return;
+        const keys = shoulders ? { ...KEYS, ...KEYS_SHOULDERS } : KEYS;
+
         const getGamepadType = (gamepad: globalThis.Gamepad): GamepadType => {
             let gamepadType = GamepadType.Unknown;
             const isStandard = gamepad.mapping === "standard";
@@ -128,20 +172,22 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
             return gamepadType;
         };
         const _onKeyDown = (event: KeyboardEvent) => {
-            const keyCode = KEYS[event.key];
+            const keyCode = keys[event.key];
             const isPrevent = PREVENT_KEYS[event.key] ?? false;
             if (isPrevent) event.preventDefault();
             if (keyCode !== undefined) {
+                heldRef.current[keyCode] = true;
                 setPressed((prev) => ({ ...prev, [keyCode]: true }));
                 onKeyDown?.(keyCode);
                 return;
             }
         };
         const _onKeyUp = (event: KeyboardEvent) => {
-            const keyCode = KEYS[event.key];
+            const keyCode = keys[event.key];
             const isPrevent = PREVENT_KEYS[event.key] ?? false;
             if (isPrevent) event.preventDefault();
             if (keyCode !== undefined) {
+                heldRef.current[keyCode] = false;
                 setPressed((prev) => ({ ...prev, [keyCode]: false }));
                 onKeyUp?.(keyCode);
                 return;
@@ -163,18 +209,36 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
                 );
             }
 
-            let keySolver: Record<number, string> = {};
-            switch (gamepadType) {
-                case GamepadType.Standard:
-                    keySolver = KEYS_STANDARD;
-                    break;
-            }
+            const getKeySolver = () => {
+                let keySolver: Record<number, string> = {};
+                switch (gamepadType) {
+                    case GamepadType.Standard:
+                        keySolver = shouldersRef.current
+                            ? { ...KEYS_STANDARD, ...KEYS_STANDARD_SHOULDERS }
+                            : KEYS_STANDARD;
+                        break;
+                }
+                return keySolver;
+            };
+            let keySolver = getKeySolver();
+            let keySolverShoulders = shouldersRef.current;
 
             const buttonStates: Record<number, boolean> = {};
 
             const updateStatus = () => {
                 const _gamepad = navigator.getGamepads()[gamepad.index];
                 if (!_gamepad) return;
+
+                // once the shoulders change the mapping is resolved again
+                // and the shoulder buttons start over as released, as their
+                // keys have been released (or never pressed) meanwhile
+                if (keySolverShoulders !== shouldersRef.current) {
+                    keySolver = getKeySolver();
+                    keySolverShoulders = shouldersRef.current;
+                    Object.keys(KEYS_STANDARD_SHOULDERS).forEach((index) => {
+                        buttonStates[Number(index)] = false;
+                    });
+                }
 
                 handleButton(100, _gamepad.axes[0] < -0.5);
                 handleButton(101, _gamepad.axes[0] > 0.5);
@@ -197,11 +261,13 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
                 const keyUp = !pressed && state;
 
                 if (keyDown) {
+                    heldRef.current[keyCode] = true;
                     setPressed((prev) => ({ ...prev, [keyCode]: true }));
                     onKeyDown?.(keyCode);
                 }
 
                 if (keyUp) {
+                    heldRef.current[keyCode] = false;
                     setPressed((prev) => ({ ...prev, [keyCode]: false }));
                     onKeyUp?.(keyCode);
                 }
@@ -241,7 +307,7 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
                 onGamepadDisconnected
             );
         };
-    }, [onGamepad, onKeyDown, onKeyUp, physical]);
+    }, [onGamepad, onKeyDown, onKeyUp, physical, shoulders]);
     const renderKey = (
         key: string,
         keyName?: KeyNames,
@@ -315,6 +381,12 @@ export const KeyboardGB: FC<KeyboardGBProps> = ({
                 onTouchStart={(e) => e.preventDefault()}
                 onTouchEnd={(e) => e.preventDefault()}
             >
+                {shoulders && (
+                    <div className="shoulders">
+                        {renderKey("L", "L", ["l"])}
+                        {renderKey("R", "R", ["r"])}
+                    </div>
+                )}
                 <div className="dpad">
                     <div className="dpad-top">
                         {renderKey(isAndroid() ? "▲" : "▲", "ArrowUp", ["up"])}
