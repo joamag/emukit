@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-*
+* Unit tests written in TypeScript, checked by the linter like the rest of the code - [#16](https://github.com/joamag/emukit/issues/16)
 
 ### Fixed
 
