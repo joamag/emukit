@@ -1,6 +1,14 @@
 import React, { FC, useEffect, useMemo, useRef, useState } from "react";
 
-import { PixelFormat } from "../../../ts/index.ts";
+import {
+    createRenderer,
+    destroyRenderer,
+    drawCanvas,
+    drawFrame,
+    PixelFormat,
+    Renderer,
+    Shader
+} from "../../../ts/index.ts";
 
 import "./display.css";
 
@@ -35,6 +43,7 @@ type DisplayProps = {
     fullscreen?: boolean;
     nativeFullscreen?: boolean;
     style?: string[];
+    shader?: Shader;
     onDrawHandler?: (caller: DrawHandler) => void;
     onClearHandler?: (caller: ClearHandler) => void;
     onMinimize?: () => void;
@@ -47,6 +56,7 @@ type CanvasContents = {
     canvasBufferCtx: CanvasRenderingContext2D;
     imageData: ImageData;
     videoBuffer: DataView;
+    renderer?: Renderer;
 };
 
 export const Display: FC<DisplayProps> = ({
@@ -55,6 +65,7 @@ export const Display: FC<DisplayProps> = ({
     fullscreen = false,
     nativeFullscreen = true,
     style = [],
+    shader,
     onDrawHandler,
     onClearHandler,
     onMinimize
@@ -86,14 +97,32 @@ export const Display: FC<DisplayProps> = ({
     });
 
     useEffect(() => {
-        if (canvasRef.current) {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const init = () => {
             canvasContentsRef.current = initCanvas(
                 options.logicWidth,
                 options.logicHeight,
-                canvasRef.current
+                canvas,
+                shader
             );
-        }
-    }, [canvasRef, options.logicWidth, options.logicHeight]);
+        };
+        init();
+        if (!canvasContentsRef.current?.renderer) return;
+
+        // the WebGL context of the canvas may be lost (eg: GPU reset),
+        // preventing the default behaviour makes the browser restore
+        // it, at which point the renderer is created again
+        const onContextLost = (event: Event) => event.preventDefault();
+        canvas.addEventListener("webglcontextlost", onContextLost);
+        canvas.addEventListener("webglcontextrestored", init);
+        return () => {
+            canvas.removeEventListener("webglcontextlost", onContextLost);
+            canvas.removeEventListener("webglcontextrestored", init);
+            const renderer = canvasContentsRef.current?.renderer;
+            if (renderer) destroyRenderer(renderer);
+        };
+    }, [canvasRef, options.logicWidth, options.logicHeight, shader]);
 
     useEffect(() => {
         const onResize = resizeRef.current;
@@ -176,6 +205,7 @@ export const Display: FC<DisplayProps> = ({
             </span>
             <div className="display-frame">
                 <canvas
+                    key={shader ? "webgl" : "2d"}
                     ref={canvasRef}
                     tabIndex={-1}
                     className="display-canvas"
@@ -191,8 +221,24 @@ export const Display: FC<DisplayProps> = ({
 const initCanvas = (
     width: number,
     height: number,
-    canvas: HTMLCanvasElement
+    canvas: HTMLCanvasElement,
+    shader?: Shader
 ): CanvasContents => {
+    // in case a shader is requested the frames are drawn with WebGL2,
+    // keeping the 2D drawing (used by the clear operation) in an
+    // off-screen canvas with the size of the visible one, falling back
+    // to the 2D drawing when WebGL2 is not available
+    const gl = shader ? canvas.getContext("webgl2") : null;
+    if (gl) {
+        const canvasScreen = document.createElement("canvas");
+        canvasScreen.width = canvas.width;
+        canvasScreen.height = canvas.height;
+        return {
+            ...initCanvas(width, height, canvasScreen),
+            renderer: createRenderer(gl, width, height, shader)
+        };
+    }
+
     // initializes the off-screen canvas that is going to be
     // used in the drawing process, this is used essentially for
     // performance reasons as it provides a way to draw pixels
@@ -239,6 +285,13 @@ const updateCanvas = (
     pixels: Uint8Array,
     format: PixelFormat = PixelFormat.RGB
 ) => {
+    // with WebGL the pixels are uploaded as they are, without
+    // any conversion, and drawn by the renderer
+    if (canvasContents.renderer) {
+        drawFrame(canvasContents.renderer, pixels, format);
+        return;
+    }
+
     let offset = 0;
     for (let index = 0; index < pixels.length; index += format) {
         const color =
@@ -275,6 +328,12 @@ const clearCanvas = async (
     // an image at the center of the screen properly scaled
     if (image) {
         await drawImageCanvas(canvasContents, image, imageScale);
+    }
+
+    // with WebGL the contents drawn in the off-screen canvas are
+    // then drawn in the visible one by the renderer
+    if (canvasContents.renderer) {
+        drawCanvas(canvasContents.renderer, canvasContents.canvas);
     }
 };
 
