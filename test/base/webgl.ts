@@ -32,7 +32,7 @@ type Call = [string, ...unknown[]];
 /**
  * A shader created by the WebGL2 context stub, with its source.
  */
-type StubShader = { type: unknown; source?: string };
+type StubShader = { type: unknown; source: string };
 
 /**
  * A program created by the WebGL2 context stub, with the shaders
@@ -108,7 +108,7 @@ const createContext = ({
         ),
         compileShader: record("compileShader"),
         getShaderParameter: (shader: StubShader) =>
-            !compile || !(shader.source ?? "").includes(compile),
+            !compile || !shader.source.includes(compile),
         getShaderInfoLog: () => "compile error",
         deleteShader: record("deleteShader"),
         createProgram: record("createProgram", (): StubProgram => ({
@@ -123,9 +123,7 @@ const createContext = ({
         linkProgram: record("linkProgram"),
         getProgramParameter: (program: StubProgram) =>
             !link ||
-            !program.shaders.some((shader) =>
-                (shader.source ?? "").includes(link)
-            ),
+            !program.shaders.some((shader) => shader.source.includes(link)),
         getProgramInfoLog: () => "link error",
         deleteProgram: record("deleteProgram"),
         getUniformLocation: (program: StubProgram, name: string) => ({

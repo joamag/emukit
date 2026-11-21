@@ -1,7 +1,7 @@
 import assert from "assert";
 import { createRequire } from "module";
 
-import { isValidElement, ReactElement, ReactNode } from "react";
+import { ReactElement, ReactNode } from "react";
 
 import type {
     ClearHandler,
@@ -283,9 +283,10 @@ const dispatch = (canvas: Canvas, name: string, event: object = {}) => {
  */
 const findCanvas = (element: ReactNode): ReactElement | undefined => {
     if (Array.isArray(element)) return element.map(findCanvas).find(Boolean);
-    if (!isValidElement(element)) return undefined;
-    if (element.type === "canvas") return element;
-    return findCanvas((element.props as { children?: ReactNode }).children);
+    if (!element || typeof element !== "object") return undefined;
+    const node = element as ReactElement<{ children?: ReactNode }>;
+    if (node.type === "canvas") return node;
+    return findCanvas(node.props.children);
 };
 
 /**
@@ -344,9 +345,9 @@ describe("Display", function () {
     describe("#Display()", function () {
         it("should use a different canvas for each kind of drawing", () => {
             const canvas = createCanvas(320, 288);
-            assert.strictEqual(findCanvas(render(canvas))?.key, "2d");
+            assert.strictEqual(findCanvas(render(canvas))!.key, "2d");
             assert.strictEqual(
-                findCanvas(render(canvas, { shader: SHADER }))?.key,
+                findCanvas(render(canvas, { shader: SHADER }))!.key,
                 "webgl"
             );
         });
@@ -502,7 +503,7 @@ describe("Display", function () {
         });
 
         it("should draw a pending clear with the renderer of a restored WebGL context", async () => {
-            let load = () => {};
+            let load = null as (() => void) | null;
             global.Image = class {
                 width = 64;
                 height = 32;
@@ -520,7 +521,7 @@ describe("Display", function () {
             // clear must then be shown by the new renderer
             dispatch(canvas, "webglcontextrestored");
             const programs = callsOf(calls, "useProgram").length;
-            load();
+            load!();
             await pending;
 
             // the image is shown with a program of the new renderer, never
@@ -680,7 +681,7 @@ describe("Display", function () {
         });
 
         it("should not draw a pending clear once its renderer is replaced", async () => {
-            let load = () => {};
+            let load = null as (() => void) | null;
             global.Image = class {
                 width = 64;
                 height = 32;
@@ -706,7 +707,7 @@ describe("Display", function () {
                 }
             });
             const draws = callsOf(calls, "drawArrays").length;
-            load();
+            load!();
             await pending;
             assert.strictEqual(callsOf(calls, "drawArrays").length, draws);
         });

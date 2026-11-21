@@ -1,7 +1,7 @@
 import assert from "assert";
 import { createRequire } from "module";
 
-import { isValidElement, ReactElement, ReactNode } from "react";
+import { ReactElement, ReactNode } from "react";
 
 const requireModule = createRequire(__filename);
 const React = requireModule("react") as Record<string, unknown>;
@@ -144,7 +144,7 @@ const dispatch = (name: string, event: object) => {
  * operation over the game pad stub.
  */
 const poll = () => {
-    (frames.shift() as FrameRequestCallback)(0);
+    (frames.shift() as () => void)();
 };
 
 /**
@@ -156,14 +156,10 @@ const poll = () => {
  */
 const findKeys = (element: ReactNode): ReactElement<KeyProps>[] => {
     if (Array.isArray(element)) return element.flatMap(findKeys);
-    if (!isValidElement(element)) return [];
-    const { className = "", children } = element.props as {
-        className?: string;
-        children?: ReactNode;
-    };
-    if (className.split(" ").includes("key")) {
-        return [element as ReactElement<KeyProps>];
-    }
+    if (!element || typeof element !== "object") return [];
+    const node = element as ReactElement<KeyProps>;
+    const { className = "", children } = node.props;
+    if (className.split(" ").includes("key")) return [node];
     return findKeys(children);
 };
 

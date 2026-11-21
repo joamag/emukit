@@ -122,7 +122,7 @@ describe("EmulatorLogic", function () {
         });
 
         it("should not register the visibility listener once stopped", async () => {
-            let bootResolve = () => {};
+            let bootResolve = null as (() => void) | null;
             const emulator = buildEmulator(
                 () =>
                     new Promise((resolve) => {
@@ -133,7 +133,7 @@ describe("EmulatorLogic", function () {
             await sleep(20);
             assert.strictEqual(listeners.length, 0);
             await emulator.stop();
-            bootResolve();
+            bootResolve!();
             await start;
             assert.strictEqual(listeners.length, 0);
             assert.strictEqual(emulator.tickCount, 0);
