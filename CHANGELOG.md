@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* Optional rendering of the display with WebGL2 shaders, falling back to the regular rendering when WebGL2 is not available
+*
 
 ### Changed
 
@@ -18,6 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 *
+
+## [0.10.27] - 2026-11-21
+
+### Added
+
+* Optional rendering of the display with WebGL2 shaders, falling back to the regular rendering when WebGL2 is not available
 
 ## [0.10.26] - 2026-11-20
 
