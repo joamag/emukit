@@ -436,6 +436,15 @@ describe("WebGL", function () {
             assert.strictEqual(renderer.format, PixelFormat.RGB);
             assert.strictEqual(callsOf("texImage2D")[0][3], "RGB8");
         });
+
+        it("should not draw with a destroyed renderer", () => {
+            const renderer = createRenderer(createContext(), 160, 144);
+            destroyRenderer(renderer);
+            calls = [];
+            drawFrame(renderer, new Uint8Array(160 * 144 * 3));
+            assert.deepStrictEqual(calls, []);
+            assert.strictEqual(renderer.format, undefined);
+        });
     });
 
     describe("#drawCanvas()", function () {
@@ -478,6 +487,14 @@ describe("WebGL", function () {
             assert.strictEqual(callsOf("texSubImage2D").length, 1);
             assert.deepStrictEqual(callsOf("texImage2D"), []);
         });
+
+        it("should not draw with a destroyed renderer", () => {
+            const renderer = createRenderer(createContext(), 160, 144);
+            destroyRenderer(renderer);
+            calls = [];
+            drawCanvas(renderer, { width: 320, height: 288 });
+            assert.deepStrictEqual(calls, []);
+        });
     });
 
     describe("#destroyRenderer()", function () {
@@ -504,6 +521,15 @@ describe("WebGL", function () {
             assert.deepStrictEqual(callsOf("deleteProgram"), [
                 ["deleteProgram", renderer.passthrough]
             ]);
+        });
+
+        it("should release the resources only once", () => {
+            const renderer = createRenderer(createContext(), 160, 144);
+            destroyRenderer(renderer);
+            assert.strictEqual(renderer.destroyed, true);
+            calls = [];
+            destroyRenderer(renderer);
+            assert.deepStrictEqual(calls, []);
         });
     });
 });

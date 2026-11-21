@@ -78,8 +78,10 @@ const createCanvas = (width = 0, height = 0, webgl = null) => {
         calls: [],
         listeners: [],
         context: null,
-        getContext: (type) => {
-            canvas.calls.push(["getContext", type]);
+        getContext: (type, options) => {
+            canvas.calls.push(
+                options ? ["getContext", type, options] : ["getContext", type]
+            );
             if (canvas.context) {
                 return canvas.context.type === type ? canvas.context : null;
             }
@@ -299,8 +301,11 @@ describe("Display", function () {
             const calls = [];
             const canvas = createCanvas(320, 288, createWebGL(calls));
             render(canvas, { shader: SHADER });
+
+            // the alpha must not be premultiplied, as the shaders draw
+            // colors with straight alpha
             assert.deepStrictEqual(callsOf(canvas.calls, "getContext"), [
-                ["getContext", "webgl2"]
+                ["getContext", "webgl2", { premultipliedAlpha: false }]
             ]);
 
             // the 2D drawing is kept in an off-screen canvas with the
@@ -324,7 +329,7 @@ describe("Display", function () {
             const canvas = createCanvas(320, 288);
             render(canvas, { shader: SHADER });
             assert.deepStrictEqual(callsOf(canvas.calls, "getContext"), [
-                ["getContext", "webgl2"],
+                ["getContext", "webgl2", { premultipliedAlpha: false }],
                 ["getContext", "2d"]
             ]);
 
@@ -354,26 +359,53 @@ describe("Display", function () {
             assert.strictEqual(prevented, true);
         });
 
-        it("should create the renderer again once the WebGL context is restored", () => {
+        it("should draw the last frame again once the WebGL context is restored", () => {
             const calls = [];
             const canvas = createCanvas(320, 288, createWebGL(calls));
             render(canvas, { shader: SHADER });
+            const last = new Uint8Array(160 * 144 * 3);
             draw(new Uint8Array(160 * 144 * 3), PixelFormat.RGB);
-            draw(new Uint8Array(160 * 144 * 3), PixelFormat.RGB);
+            draw(last, PixelFormat.RGB);
             assert.strictEqual(callsOf(calls, "texImage2D").length, 1);
             assert.strictEqual(callsOf(calls, "texSubImage2D").length, 1);
 
-            // the resources of the lost context are gone, so the frame
-            // texture must be allocated again by the new renderer
+            // the resources of the lost context are gone, so the renderer
+            // is created again (releasing the previous one) and the last
+            // frame drawn again, as no other frame may come (eg: paused)
             const programs = callsOf(calls, "createProgram").length;
             dispatch(canvas, "webglcontextrestored");
             assert.strictEqual(
                 callsOf(calls, "createProgram").length,
                 programs * 2
             );
+            assert.strictEqual(callsOf(calls, "deleteProgram").length, 2);
+            const uploads = callsOf(calls, "texImage2D");
+            assert.strictEqual(uploads.length, 2);
+            assert.strictEqual(uploads[1][9], last);
+            assert.strictEqual(callsOf(calls, "drawArrays").length, 3);
+
+            // the next frames are drawn by the new renderer
             draw(new Uint8Array(160 * 144 * 3), PixelFormat.RGB);
-            assert.strictEqual(callsOf(calls, "texImage2D").length, 2);
-            assert.strictEqual(callsOf(calls, "texSubImage2D").length, 1);
+            assert.strictEqual(callsOf(calls, "texSubImage2D").length, 2);
+        });
+
+        it("should draw the last clear again once the WebGL context is restored", async () => {
+            const calls = [];
+            const canvas = createCanvas(320, 288, createWebGL(calls));
+            render(canvas, { shader: SHADER });
+            const [screen] = created;
+            draw(new Uint8Array(160 * 144 * 3), PixelFormat.RGB);
+            await clear(0x112233ff);
+            calls.length = 0;
+
+            // the display was cleared after the last frame, so it is the
+            // contents of the clear that must be drawn again
+            dispatch(canvas, "webglcontextrestored");
+            const uploads = callsOf(calls, "texImage2D");
+            assert.strictEqual(uploads.length, 1);
+            assert.strictEqual(uploads[0][6], screen);
+            assert.deepStrictEqual(callsOf(calls, "texSubImage2D"), []);
+            assert.strictEqual(callsOf(calls, "drawArrays").length, 1);
         });
 
         it("should destroy the renderer when the display is drawn again", () => {
@@ -439,16 +471,70 @@ describe("Display", function () {
             calls.push = (call) => drawn.push(["webgl", call[0]]);
             await clear(0x112233ff, "image.png", 0.5);
 
-            // the image must be drawn (centered and scaled) in the off-screen
-            // canvas before its contents are drawn in the visible one
+            // the clear color is shown right away and the image (centered
+            // and scaled) is then drawn in the off-screen canvas, before its
+            // contents are shown again in the visible one
             const image = drawn.findIndex(
                 ([target, name]) => target === "screen" && name === "drawImage"
             );
-            const upload = drawn.findIndex(
-                ([target, name]) => target === "webgl" && name === "texImage2D"
-            );
+            const uploads = drawn
+                .map(([target, name], index) =>
+                    target === "webgl" && name === "texImage2D" ? index : -1
+                )
+                .filter((index) => index >= 0);
             assert.ok(image >= 0);
-            assert.ok(upload > image);
+            assert.strictEqual(uploads.length, 2);
+            assert.ok(uploads[0] < image);
+            assert.ok(uploads[1] > image);
+        });
+
+        it("should show the clear color with WebGL before the image loads", () => {
+            global.Image = class {
+                set src(value) {}
+            };
+            const calls = [];
+            const canvas = createCanvas(320, 288, createWebGL(calls));
+            render(canvas, { shader: SHADER });
+            const [screen] = created;
+
+            // the image never loads (eg: missing), still the clear color
+            // must be shown instead of the last frame
+            clear(0x112233ff, "missing.png");
+            const uploads = callsOf(calls, "texImage2D");
+            assert.strictEqual(uploads.length, 1);
+            assert.strictEqual(uploads[0][6], screen);
+            assert.strictEqual(callsOf(calls, "drawArrays").length, 1);
+        });
+
+        it("should not draw a pending clear once its renderer is replaced", async () => {
+            let load = null;
+            global.Image = class {
+                width = 64;
+                height = 32;
+                set src(value) {
+                    load = () => this.onload();
+                }
+            };
+            const calls = [];
+            const canvas = createCanvas(320, 288, createWebGL(calls));
+            render(canvas, { shader: SHADER });
+            const pending = clear(0x112233ff, "image.png");
+
+            // the display is drawn again with a different size, replacing
+            // (and destroying) the renderer while the image is loading
+            render(canvas, {
+                shader: SHADER,
+                options: {
+                    width: 480,
+                    height: 320,
+                    logicWidth: 240,
+                    logicHeight: 160
+                }
+            });
+            const draws = callsOf(calls, "drawArrays").length;
+            load();
+            await pending;
+            assert.strictEqual(callsOf(calls, "drawArrays").length, draws);
         });
     });
 });

@@ -57,6 +57,7 @@ type CanvasContents = {
     imageData: ImageData;
     videoBuffer: DataView;
     renderer?: Renderer;
+    frame?: { pixels: Uint8Array; format: PixelFormat };
 };
 
 export const Display: FC<DisplayProps> = ({
@@ -112,13 +113,24 @@ export const Display: FC<DisplayProps> = ({
 
         // the WebGL context of the canvas may be lost (eg: GPU reset),
         // preventing the default behaviour makes the browser restore
-        // it, at which point the renderer is created again
+        // it, at which point the renderer is created again and the
+        // last contents of the display are drawn again
         const onContextLost = (event: Event) => event.preventDefault();
+        const onContextRestored = () => {
+            const previous = canvasContentsRef.current;
+            if (previous?.renderer) destroyRenderer(previous.renderer);
+            init();
+            const contents = canvasContentsRef.current;
+            if (previous && contents) redrawCanvas(contents, previous);
+        };
         canvas.addEventListener("webglcontextlost", onContextLost);
-        canvas.addEventListener("webglcontextrestored", init);
+        canvas.addEventListener("webglcontextrestored", onContextRestored);
         return () => {
             canvas.removeEventListener("webglcontextlost", onContextLost);
-            canvas.removeEventListener("webglcontextrestored", init);
+            canvas.removeEventListener(
+                "webglcontextrestored",
+                onContextRestored
+            );
             const renderer = canvasContentsRef.current?.renderer;
             if (renderer) destroyRenderer(renderer);
         };
@@ -227,8 +239,11 @@ const initCanvas = (
     // in case a shader is requested the frames are drawn with WebGL2,
     // keeping the 2D drawing (used by the clear operation) in an
     // off-screen canvas with the size of the visible one, falling back
-    // to the 2D drawing when WebGL2 is not available
-    const gl = shader ? canvas.getContext("webgl2") : null;
+    // to the 2D drawing when WebGL2 is not available, the alpha is not
+    // premultiplied as in the colors drawn by the shaders
+    const gl = shader
+        ? canvas.getContext("webgl2", { premultipliedAlpha: false })
+        : null;
     if (gl) {
         const canvasScreen = document.createElement("canvas");
         canvasScreen.width = canvas.width;
@@ -289,6 +304,7 @@ const updateCanvas = (
     // any conversion, and drawn by the renderer
     if (canvasContents.renderer) {
         drawFrame(canvasContents.renderer, pixels, format);
+        canvasContents.frame = { pixels: pixels, format: format };
         return;
     }
 
@@ -323,17 +339,39 @@ const clearCanvas = async (
         canvasContents.canvas.width,
         canvasContents.canvas.height
     );
+    canvasContents.frame = undefined;
+
+    // with WebGL the contents drawn in the off-screen canvas are
+    // drawn in the visible one by the renderer, right away as the
+    // image may never load and again once it is drawn
+    if (canvasContents.renderer) {
+        drawCanvas(canvasContents.renderer, canvasContents.canvas);
+    }
 
     // in case an image was requested then uses that to load
     // an image at the center of the screen properly scaled
     if (image) {
         await drawImageCanvas(canvasContents, image, imageScale);
+        if (canvasContents.renderer) {
+            drawCanvas(canvasContents.renderer, canvasContents.canvas);
+        }
     }
+};
 
-    // with WebGL the contents drawn in the off-screen canvas are
-    // then drawn in the visible one by the renderer
-    if (canvasContents.renderer) {
-        drawCanvas(canvasContents.renderer, canvasContents.canvas);
+const redrawCanvas = (
+    canvasContents: CanvasContents,
+    previous: CanvasContents
+) => {
+    // draws again the last frame or, in case the display was cleared
+    // afterwards, the contents of the previous off-screen canvas
+    if (previous.frame) {
+        updateCanvas(
+            canvasContents,
+            previous.frame.pixels,
+            previous.frame.format
+        );
+    } else if (canvasContents.renderer) {
+        drawCanvas(canvasContents.renderer, previous.canvas);
     }
 };
 

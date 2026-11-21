@@ -82,6 +82,7 @@ export type Renderer = {
     texture: WebGLTexture;
     canvasTexture: WebGLTexture;
     format?: PixelFormat;
+    destroyed?: boolean;
 };
 
 /**
@@ -177,6 +178,10 @@ export const drawFrame = (
     pixels: Uint8Array,
     format: PixelFormat = PixelFormat.RGB
 ) => {
+    // a destroyed renderer (eg: replaced while an operation was
+    // pending) must not draw, as its resources are gone
+    if (renderer.destroyed) return;
+
     const { gl, width, height } = renderer;
     const pixelFormat = format === PixelFormat.RGBA ? gl.RGBA : gl.RGB;
 
@@ -222,6 +227,8 @@ export const drawFrame = (
  * @param canvas The canvas whose contents are going to be drawn.
  */
 export const drawCanvas = (renderer: Renderer, canvas: HTMLCanvasElement) => {
+    if (renderer.destroyed) return;
+
     const { gl } = renderer;
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, renderer.canvasTexture);
@@ -236,12 +243,15 @@ export const drawCanvas = (renderer: Renderer, canvas: HTMLCanvasElement) => {
 };
 
 /**
- * Releases the WebGL2 resources of the renderer, that can no
- * longer be used afterwards.
+ * Releases the WebGL2 resources of the renderer, that no longer
+ * draws afterwards.
  *
  * @param renderer The renderer to be destroyed.
  */
 export const destroyRenderer = (renderer: Renderer) => {
+    if (renderer.destroyed) return;
+    renderer.destroyed = true;
+
     const { gl } = renderer;
     gl.deleteTexture(renderer.texture);
     gl.deleteTexture(renderer.canvasTexture);
