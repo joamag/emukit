@@ -100,28 +100,26 @@ export const Display: FC<DisplayProps> = ({
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-        const init = () => {
-            canvasContentsRef.current = initCanvas(
-                options.logicWidth,
-                options.logicHeight,
-                canvas,
-                shader
-            );
-        };
-        init();
-        if (!canvasContentsRef.current?.renderer) return;
+        canvasContentsRef.current = initCanvas(
+            options.logicWidth,
+            options.logicHeight,
+            canvas,
+            shader
+        );
+        if (!canvasContentsRef.current.renderer) return;
 
         // the WebGL context of the canvas may be lost (eg: GPU reset),
         // preventing the default behaviour makes the browser restore
-        // it, at which point the renderer is created again and the
-        // last contents of the display are drawn again
+        // it, at which point only the renderer is created again (the
+        // 2D drawing is kept) and the last contents are drawn again
         const onContextLost = (event: Event) => event.preventDefault();
         const onContextRestored = () => {
-            const previous = canvasContentsRef.current;
-            if (previous?.renderer) destroyRenderer(previous.renderer);
-            init();
             const contents = canvasContentsRef.current;
-            if (previous && contents) redrawCanvas(contents, previous);
+            if (!contents?.renderer) return;
+            const { gl, width, height } = contents.renderer;
+            destroyRenderer(contents.renderer);
+            contents.renderer = createRenderer(gl, width, height, shader);
+            redrawCanvas(contents);
         };
         canvas.addEventListener("webglcontextlost", onContextLost);
         canvas.addEventListener("webglcontextrestored", onContextRestored);
@@ -358,20 +356,17 @@ const clearCanvas = async (
     }
 };
 
-const redrawCanvas = (
-    canvasContents: CanvasContents,
-    previous: CanvasContents
-) => {
+const redrawCanvas = (canvasContents: CanvasContents) => {
     // draws again the last frame or, in case the display was cleared
-    // afterwards, the contents of the previous off-screen canvas
-    if (previous.frame) {
+    // afterwards, the contents of the off-screen canvas
+    if (canvasContents.frame) {
         updateCanvas(
             canvasContents,
-            previous.frame.pixels,
-            previous.frame.format
+            canvasContents.frame.pixels,
+            canvasContents.frame.format
         );
     } else if (canvasContents.renderer) {
-        drawCanvas(canvasContents.renderer, previous.canvas);
+        drawCanvas(canvasContents.renderer, canvasContents.canvas);
     }
 };
 

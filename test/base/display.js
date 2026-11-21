@@ -408,6 +408,61 @@ describe("Display", function () {
             assert.strictEqual(callsOf(calls, "drawArrays").length, 1);
         });
 
+        it("should draw the last clear again each time the WebGL context is restored", async () => {
+            const calls = [];
+            const canvas = createCanvas(320, 288, createWebGL(calls));
+            render(canvas, { shader: SHADER });
+            const [screen] = created;
+            await clear(0x112233ff);
+            const canvases = created.length;
+            calls.length = 0;
+
+            // the off-screen canvas of the clear is kept across the
+            // restorations, so the same contents are drawn every time
+            dispatch(canvas, "webglcontextrestored");
+            dispatch(canvas, "webglcontextrestored");
+            const uploads = callsOf(calls, "texImage2D");
+            assert.strictEqual(uploads.length, 2);
+            assert.strictEqual(uploads[0][6], screen);
+            assert.strictEqual(uploads[1][6], screen);
+            assert.strictEqual(created.length, canvases);
+        });
+
+        it("should draw a pending clear with the renderer of a restored WebGL context", async () => {
+            let load = null;
+            global.Image = class {
+                width = 64;
+                height = 32;
+                set src(value) {
+                    load = () => this.onload();
+                }
+            };
+            const calls = [];
+            const canvas = createCanvas(320, 288, createWebGL(calls));
+            render(canvas, { shader: SHADER });
+            const pending = clear(0x112233ff, "image.png");
+
+            // the context is restored while the image is loading, the
+            // clear must then be shown by the new renderer
+            dispatch(canvas, "webglcontextrestored");
+            const programs = callsOf(calls, "useProgram").length;
+            load();
+            await pending;
+
+            // the image is shown with a program of the new renderer, never
+            // with one of the destroyed renderer
+            const deleted = callsOf(calls, "deleteProgram").map(
+                ([, program]) => program
+            );
+            const [, program] = callsOf(calls, "useProgram").at(-1);
+            assert.strictEqual(
+                callsOf(calls, "useProgram").length,
+                programs + 1
+            );
+            assert.strictEqual(deleted.length, 2);
+            assert.ok(!deleted.includes(program));
+        });
+
         it("should destroy the renderer when the display is drawn again", () => {
             const calls = [];
             const canvas = createCanvas(320, 288, createWebGL(calls));
