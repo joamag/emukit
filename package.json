@@ -11,7 +11,7 @@
         "lint": "eslint .",
         "pretty": "prettier --config .prettierrc \"./**/*.{js,ts,tsx,json}\" --write",
         "test": "npm run test:mocha",
-        "test:mocha": "mocha --require tsx/cjs --recursive test"
+        "test:mocha": "mocha --require tsx/cjs --recursive --extension ts test"
     },
     "source": "index.ts",
     "peerDependencies": {
@@ -22,6 +22,8 @@
         "recoil": "^0.7.7"
     },
     "devDependencies": {
+        "@types/mocha": "^10.0.10",
+        "@types/node": "^26.1.2",
         "@types/react": "^18.3.18",
         "@types/react-dom": "^18.3.5",
         "@typescript-eslint/eslint-plugin": "^8.26.1",

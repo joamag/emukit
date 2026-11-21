@@ -1,13 +1,48 @@
-const assert = require("assert");
-const React = require("react");
+import assert from "assert";
+import { createRequire } from "module";
+
+import { ReactElement, ReactNode } from "react";
+
+const requireModule = createRequire(__filename);
+const React = requireModule("react") as Record<string, unknown>;
 
 // ignores the style sheets imported by the React components
 // as they are bundler specific and can not be loaded by node
-require.extensions[".css"] = () => {};
+const originalCss = requireModule.extensions[".css"];
+requireModule.extensions[".css"] = () => {};
+const { KeyboardGB } = requireModule(
+    "../../react/components/keyboard-gb/keyboard-gb.tsx"
+) as typeof import("../../react/components/keyboard-gb/keyboard-gb.tsx");
+if (originalCss) requireModule.extensions[".css"] = originalCss;
+else delete requireModule.extensions[".css"];
 
-const {
-    KeyboardGB
-} = require("../../react/components/keyboard-gb/keyboard-gb.tsx");
+/**
+ * The props of the keyboard component.
+ */
+type KeyboardGBProps = Parameters<typeof KeyboardGB>[0];
+
+/**
+ * The event passed to the handlers of an on screen key.
+ */
+type KeyEvent = { preventDefault: () => void };
+
+/**
+ * The props of an on screen key, as rendered by the keyboard.
+ */
+type KeyProps = {
+    className: string;
+    children: string;
+    onMouseDown: (event: KeyEvent) => void;
+    onMouseUp: (event: KeyEvent) => void;
+    onTouchStart: (event: KeyEvent) => void;
+    onTouchEnd: (event: KeyEvent) => void;
+};
+
+/**
+ * An event listener registered against the document and window
+ * stubs, with the name of its event.
+ */
+type Listener = [string, (event: object) => void];
 
 /**
  * The original React hooks, replaced during the tests so that
@@ -35,31 +70,31 @@ const navigatorDescriptor = Object.getOwnPropertyDescriptor(
  * the document and window stubs, used to simulate the events of
  * the physical keyboard and of the game pad.
  */
-let listeners = [];
+let listeners: Listener[] = [];
 
 /**
  * The set of animation frame callbacks that have been scheduled,
  * used to run the game pad polling loop on demand.
  */
-let frames = [];
+let frames: FrameRequestCallback[] = [];
 
 /**
  * The pressed state of the buttons of the game pad stub, indexed
  * by the button index of the standard mapping.
  */
-let buttons = [];
+let buttons: boolean[] = [];
 
 /**
  * The sequence of key down and key up events that have been
  * triggered by the keyboard component.
  */
-let events = [];
+let events: [string, string][] = [];
 
 /**
  * The refs of the keyboard component, kept across renders as
  * React does, in the order of their creation.
  */
-let refs = [];
+let refs: { current: unknown }[] = [];
 
 /**
  * The index of the next ref to be used by the current render.
@@ -70,17 +105,17 @@ let refIndex = 0;
  * The cleanup functions of the effects of the last render, run
  * before the effects of the next render.
  */
-let cleanups = [];
+let cleanups: (void | (() => void))[] = [];
 
 /**
  * Renders the keyboard component with the provided props, running
  * its effects (once the ones of the previous render are cleaned up)
  * and recording the key events that are triggered.
  *
- * @param {object} props The props to be used in the keyboard component.
- * @returns {object} The React element tree rendered by the component.
+ * @param props The props to be used in the keyboard component.
+ * @returns The React element tree rendered by the component.
  */
-const render = (props = {}) => {
+const render = (props: KeyboardGBProps = {}): ReactNode => {
     cleanups.forEach((cleanup) => cleanup?.());
     cleanups = [];
     refIndex = 0;
@@ -95,10 +130,10 @@ const render = (props = {}) => {
  * Dispatches the provided event to the listeners that have been
  * registered for the event with the provided name.
  *
- * @param {string} name The name of the event to be dispatched.
- * @param {object} event The event to be passed to the listeners.
+ * @param name The name of the event to be dispatched.
+ * @param event The event to be passed to the listeners.
  */
-const dispatch = (name, event) => {
+const dispatch = (name: string, event: object) => {
     listeners
         .filter(([_name]) => _name === name)
         .forEach(([, callback]) => callback(event));
@@ -109,21 +144,22 @@ const dispatch = (name, event) => {
  * operation over the game pad stub.
  */
 const poll = () => {
-    frames.shift()();
+    (frames.shift() as () => void)();
 };
 
 /**
  * Finds the on screen keys that are part of the provided
  * React element tree, in their rendering order.
  *
- * @param {object} element The React element tree to search.
- * @returns {Array} The sequence of key elements found.
+ * @param element The React element tree to search.
+ * @returns The sequence of key elements found.
  */
-const findKeys = (element) => {
+const findKeys = (element: ReactNode): ReactElement<KeyProps>[] => {
     if (Array.isArray(element)) return element.flatMap(findKeys);
     if (!element || typeof element !== "object") return [];
-    const { className = "", children } = element.props;
-    if (className.split(" ").includes("key")) return [element];
+    const node = element as ReactElement<KeyProps>;
+    const { className = "", children } = node.props;
+    if (className.split(" ").includes("key")) return [node];
     return findKeys(children);
 };
 
@@ -135,29 +171,29 @@ describe("KeyboardGB", function () {
         events = [];
         refs = [];
         cleanups = [];
-        React.useEffect = (callback) => {
+        React.useEffect = (callback: () => void | (() => void)) => {
             cleanups.push(callback());
         };
-        React.useMemo = (callback) => callback();
-        React.useRef = (initial) => {
+        React.useMemo = (callback: () => unknown) => callback();
+        React.useRef = (initial: unknown) => {
             if (refIndex === refs.length) refs.push({ current: initial });
             return refs[refIndex++];
         };
-        React.useState = (initial) => [initial, () => {}];
+        React.useState = (initial: unknown) => [initial, () => {}];
         const target = {
-            addEventListener: (event, callback) => {
+            addEventListener: (event: string, callback: Listener[1]) => {
                 listeners.push([event, callback]);
             },
-            removeEventListener: (event, callback) => {
+            removeEventListener: (event: string, callback: Listener[1]) => {
                 listeners = listeners.filter(
                     ([_event, _callback]) =>
                         _event !== event || _callback !== callback
                 );
             }
         };
-        global.document = target;
-        global.window = target;
-        global.requestAnimationFrame = (callback) => {
+        global.document = target as unknown as Document;
+        global.window = target as unknown as Window & typeof globalThis;
+        global.requestAnimationFrame = (callback: FrameRequestCallback) => {
             frames.push(callback);
             return frames.length;
         };
@@ -178,13 +214,14 @@ describe("KeyboardGB", function () {
 
     afterEach(() => {
         Object.assign(React, hooks);
-        delete global.document;
-        delete global.window;
-        delete global.requestAnimationFrame;
+        delete (globalThis as { document?: unknown }).document;
+        delete (globalThis as { window?: unknown }).window;
+        delete (globalThis as { requestAnimationFrame?: unknown })
+            .requestAnimationFrame;
         if (navigatorDescriptor) {
             Object.defineProperty(global, "navigator", navigatorDescriptor);
         } else {
-            delete global.navigator;
+            delete (globalThis as { navigator?: unknown }).navigator;
         }
     });
 

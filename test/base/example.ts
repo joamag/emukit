@@ -1,4 +1,4 @@
-const assert = require("assert");
+import assert from "assert";
 
 describe("Example", function () {
     describe("#example()", function () {

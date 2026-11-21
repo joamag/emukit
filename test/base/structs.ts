@@ -1,35 +1,35 @@
-const assert = require("assert");
+import assert from "assert";
 
-const { EmulatorLogic, Feature, LoopMode } = require("../../ts/structs.ts");
+import { EmulatorLogic, Feature, LoopMode } from "../../ts/structs.ts";
 
 /**
  * The set of visibility change listeners that have been registered
  * against the document stub, used to verify the release of the
  * listeners on the stop operation.
  */
-let listeners = [];
+let listeners: [string, () => void][] = [];
 
 /**
  * The set of animation frame callbacks that have been scheduled
  * against the window stub, they are never executed so that a
  * document that suspends the scheduling of frames is simulated.
  */
-let frames = [];
+let frames: FrameRequestCallback[] = [];
 
 /**
  * The set of animation frame identifiers that have been cancelled
  * against the window stub.
  */
-let cancelled = [];
+let cancelled: number[] = [];
 
 /**
  * Waits the provided amount of milliseconds, allowing the emulator
  * loop to run for a deterministic amount of time.
  *
- * @param {number} timeout The number of milliseconds to wait for.
- * @returns {Promise} The promise to be resolved once the wait is over.
+ * @param timeout The number of milliseconds to wait for.
+ * @returns The promise to be resolved once the wait is over.
  */
-const sleep = (timeout) =>
+const sleep = (timeout: number): Promise<void> =>
     new Promise((resolve) => {
         setTimeout(resolve, timeout);
     });
@@ -39,16 +39,13 @@ const sleep = (timeout) =>
  * tick operations that have been performed, allowing the verification
  * of the main loop execution.
  *
- * @param {Function} boot The boot operation to be run by the emulator,
+ * @param boot The boot operation to be run by the emulator,
  * defaults to an immediately resolved one.
- * @returns {object} The emulator instance to be used in testing.
+ * @returns The emulator instance to be used in testing.
  */
-const buildEmulator = (boot = async () => {}) => {
+const buildEmulator = (boot: () => Promise<void> = async () => {}) => {
     class TestEmulator extends EmulatorLogic {
-        constructor() {
-            super();
-            this.tickCount = 0;
-        }
+        tickCount = 0;
 
         async boot() {
             await boot();
@@ -77,31 +74,31 @@ describe("EmulatorLogic", function () {
         frames = [];
         cancelled = [];
         global.window = {
-            requestAnimationFrame: (callback) => {
+            requestAnimationFrame: (callback: FrameRequestCallback) => {
                 frames.push(callback);
                 return frames.length;
             },
-            cancelAnimationFrame: (handle) => {
+            cancelAnimationFrame: (handle: number) => {
                 cancelled.push(handle);
             }
-        };
+        } as unknown as Window & typeof globalThis;
         global.document = {
             visibilityState: "visible",
-            addEventListener: (event, callback) => {
+            addEventListener: (event: string, callback: () => void) => {
                 listeners.push([event, callback]);
             },
-            removeEventListener: (event, callback) => {
+            removeEventListener: (event: string, callback: () => void) => {
                 listeners = listeners.filter(
                     ([_event, _callback]) =>
                         _event !== event || _callback !== callback
                 );
             }
-        };
+        } as unknown as Document;
     });
 
     afterEach(() => {
-        delete global.document;
-        delete global.window;
+        delete (globalThis as { document?: unknown }).document;
+        delete (globalThis as { window?: unknown }).window;
     });
 
     describe("#start()", function () {
@@ -125,7 +122,7 @@ describe("EmulatorLogic", function () {
         });
 
         it("should not register the visibility listener once stopped", async () => {
-            let bootResolve = null;
+            let bootResolve = null as (() => void) | null;
             const emulator = buildEmulator(
                 () =>
                     new Promise((resolve) => {
@@ -136,7 +133,7 @@ describe("EmulatorLogic", function () {
             await sleep(20);
             assert.strictEqual(listeners.length, 0);
             await emulator.stop();
-            bootResolve();
+            bootResolve!();
             await start;
             assert.strictEqual(listeners.length, 0);
             assert.strictEqual(emulator.tickCount, 0);

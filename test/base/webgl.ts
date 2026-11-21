@@ -1,15 +1,15 @@
-const assert = require("assert");
+import assert from "assert";
 
-const { logger } = require("../../ts/logging.ts");
-const { PixelFormat } = require("../../ts/structs.ts");
-const {
+import { logger } from "../../ts/logging.ts";
+import { PixelFormat } from "../../ts/structs.ts";
+import {
     createRenderer,
     destroyRenderer,
     drawCanvas,
     drawFrame,
     FRAGMENT_SHADER,
     VERTEX_SHADER
-} = require("../../ts/webgl.ts");
+} from "../../ts/webgl.ts";
 
 /**
  * The fragment shader of the custom shader used in the tests,
@@ -24,30 +24,51 @@ void main() { color = vec4(1.0) - texture(image, texture_coordinates); }
 `;
 
 /**
+ * A call made to the WebGL2 context stub, made of the name of
+ * the method and its arguments.
+ */
+type Call = [string, ...unknown[]];
+
+/**
+ * A shader created by the WebGL2 context stub, with its source.
+ */
+type StubShader = { type: unknown; source: string };
+
+/**
+ * A program created by the WebGL2 context stub, with the shaders
+ * attached to it.
+ */
+type StubProgram = { shaders: StubShader[] };
+
+/**
  * The sequence of calls made to the WebGL2 context stub, each
  * of them made of the name of the method and its arguments.
  */
-let calls = [];
+let calls: Call[] = [];
 
 /**
  * The messages logged as warnings during the tests.
  */
-let warnings = [];
+let warnings: string[] = [];
 
 /**
  * Creates a WebGL2 context stub that records the calls made to
  * it, with a drawing surface of 640x576 pixels.
  *
- * @param {object} options The failures to be simulated by the
+ * @param options The failures to be simulated by the
  * stub, `create` to fail the creation of shaders and `compile` and
  * `link` with a text that makes the shaders whose source contains
  * it fail to compile or link.
- * @returns {object} The WebGL2 context stub.
+ * @returns The WebGL2 context stub.
  */
-const createContext = ({ create = false, compile, link } = {}) => {
+const createContext = ({
+    create = false,
+    compile,
+    link
+}: { create?: boolean; compile?: string; link?: string } = {}) => {
     const record =
-        (name, result) =>
-        (...args) => {
+        <T extends unknown[]>(name: string, result?: (...args: T) => unknown) =>
+        (...args: T) => {
             calls.push([name, ...args]);
             return result?.(...args);
         };
@@ -76,28 +97,39 @@ const createContext = ({ create = false, compile, link } = {}) => {
         TRIANGLE_STRIP: "TRIANGLE_STRIP",
         drawingBufferWidth: 640,
         drawingBufferHeight: 576,
-        createShader: record("createShader", (type) =>
+        createShader: record("createShader", (type: unknown) =>
             create ? null : { type: type }
         ),
-        shaderSource: record("shaderSource", (shader, source) => {
-            shader.source = source;
-        }),
+        shaderSource: record(
+            "shaderSource",
+            (shader: StubShader, source: string) => {
+                shader.source = source;
+            }
+        ),
         compileShader: record("compileShader"),
-        getShaderParameter: (shader) =>
+        getShaderParameter: (shader: StubShader) =>
             !compile || !shader.source.includes(compile),
         getShaderInfoLog: () => "compile error",
         deleteShader: record("deleteShader"),
-        createProgram: record("createProgram", () => ({ shaders: [] })),
-        attachShader: record("attachShader", (program, shader) => {
-            program.shaders.push(shader);
-        }),
+        createProgram: record("createProgram", (): StubProgram => ({
+            shaders: []
+        })),
+        attachShader: record(
+            "attachShader",
+            (program: StubProgram, shader: StubShader) => {
+                program.shaders.push(shader);
+            }
+        ),
         linkProgram: record("linkProgram"),
-        getProgramParameter: (program) =>
+        getProgramParameter: (program: StubProgram) =>
             !link ||
             !program.shaders.some((shader) => shader.source.includes(link)),
         getProgramInfoLog: () => "link error",
         deleteProgram: record("deleteProgram"),
-        getUniformLocation: (program, name) => ({ program, name }),
+        getUniformLocation: (program: StubProgram, name: string) => ({
+            program,
+            name
+        }),
         createVertexArray: record("createVertexArray", () => ({})),
         createBuffer: record("createBuffer", () => ({})),
         createTexture: record("createTexture", () => ({})),
@@ -120,34 +152,47 @@ const createContext = ({ create = false, compile, link } = {}) => {
         deleteTexture: record("deleteTexture"),
         deleteBuffer: record("deleteBuffer"),
         deleteVertexArray: record("deleteVertexArray")
-    };
+    } as unknown as WebGL2RenderingContext;
 };
 
 /**
  * Filters the recorded calls to the ones of the method with
  * the provided name.
  *
- * @param {string} name The name of the method.
- * @returns {Array} The calls made to the method, in order.
+ * @param name The name of the method.
+ * @returns The calls made to the method, in order.
  */
-const callsOf = (name) => calls.filter(([_name]) => _name === name);
+const callsOf = (name: string) => calls.filter(([_name]) => _name === name);
 
 /**
  * Builds the uniform calls expected for a draw operation, for
  * a program and an input with the provided size, into the drawing
  * surface (of 640x576 pixels) of the context stub.
  *
- * @param {object} program The program used in the draw operation.
- * @param {number} width The width of the input of the program.
- * @param {number} height The height of the input of the program.
- * @returns {Array} The expected uniform calls, in order.
+ * @param program The program used in the draw operation.
+ * @param width The width of the input of the program.
+ * @param height The height of the input of the program.
+ * @returns The expected uniform calls, in order.
  */
-const uniformsOf = (program, width, height) => [
+const uniformsOf = (
+    program: WebGLProgram,
+    width: number,
+    height: number
+): Call[] => [
     ["uniform1i", { program, name: "image" }, 0],
     ["uniform2f", { program, name: "input_resolution" }, width, height],
     ["uniform2f", { program, name: "output_resolution" }, 640, 576],
     ["uniform2f", { program, name: "origin" }, 0, 0]
 ];
+
+/**
+ * Reads a program created by the WebGL2 context stub, with the
+ * shaders attached to it.
+ *
+ * @param program The program created by the context stub.
+ * @returns The program as created by the context stub.
+ */
+const programOf = (program: WebGLProgram) => program as unknown as StubProgram;
 
 describe("WebGL", function () {
     beforeEach(() => {
@@ -157,7 +202,7 @@ describe("WebGL", function () {
     });
 
     afterEach(() => {
-        delete logger.warn;
+        delete (logger as { warn?: unknown }).warn;
     });
 
     describe("#createRenderer()", function () {
@@ -165,7 +210,9 @@ describe("WebGL", function () {
             const renderer = createRenderer(createContext(), 160, 144);
             assert.strictEqual(renderer.program, renderer.passthrough);
             assert.deepStrictEqual(
-                renderer.passthrough.shaders.map((shader) => shader.source),
+                programOf(renderer.passthrough).shaders.map(
+                    (shader) => shader.source
+                ),
                 [VERTEX_SHADER, FRAGMENT_SHADER]
             );
             assert.strictEqual(renderer.width, 160);
@@ -180,11 +227,15 @@ describe("WebGL", function () {
             });
             assert.notStrictEqual(renderer.program, renderer.passthrough);
             assert.deepStrictEqual(
-                renderer.program.shaders.map((shader) => shader.source),
+                programOf(renderer.program).shaders.map(
+                    (shader) => shader.source
+                ),
                 [VERTEX_SHADER, CUSTOM_FRAGMENT]
             );
             assert.deepStrictEqual(
-                renderer.passthrough.shaders.map((shader) => shader.source),
+                programOf(renderer.passthrough).shaders.map(
+                    (shader) => shader.source
+                ),
                 [VERTEX_SHADER, FRAGMENT_SHADER]
             );
         });
@@ -196,7 +247,9 @@ describe("WebGL", function () {
                 fragment: CUSTOM_FRAGMENT
             });
             assert.deepStrictEqual(
-                renderer.program.shaders.map((shader) => shader.source),
+                programOf(renderer.program).shaders.map(
+                    (shader) => shader.source
+                ),
                 [vertex, CUSTOM_FRAGMENT]
             );
         });
@@ -207,8 +260,8 @@ describe("WebGL", function () {
             });
             const deleted = callsOf("deleteShader").map(([, shader]) => shader);
             assert.deepStrictEqual(deleted, [
-                ...renderer.passthrough.shaders,
-                ...renderer.program.shaders
+                ...programOf(renderer.passthrough).shaders,
+                ...programOf(renderer.program).shaders
             ]);
         });
 
@@ -228,7 +281,7 @@ describe("WebGL", function () {
             // for the failed program must both be released, with no program
             // created for them
             const deleted = callsOf("deleteShader").map(
-                ([, shader]) => shader.source
+                ([, shader]) => (shader as StubShader).source
             );
             assert.deepStrictEqual(deleted, [
                 VERTEX_SHADER,
@@ -257,7 +310,9 @@ describe("WebGL", function () {
             assert.strictEqual(deleted.length, 1);
             assert.notStrictEqual(deleted[0], renderer.passthrough);
             assert.deepStrictEqual(
-                deleted[0].shaders.map((shader) => shader.source),
+                (deleted[0] as StubProgram).shaders.map(
+                    (shader) => shader.source
+                ),
                 [VERTEX_SHADER, CUSTOM_FRAGMENT]
             );
             assert.strictEqual(callsOf("deleteShader").length, 4);
@@ -292,7 +347,7 @@ describe("WebGL", function () {
             // coordinates, the top of the surface (y = 1) must be mapped
             // to the first row of the image (t = 0)
             assert.deepStrictEqual(
-                Array.from(data),
+                Array.from(data as Float32Array),
                 [-1, -1, 0, 1, 1, -1, 1, 1, -1, 1, 0, 0, 1, 1, 1, 0]
             );
             assert.deepStrictEqual(callsOf("vertexAttribPointer"), [
@@ -452,7 +507,7 @@ describe("WebGL", function () {
             const renderer = createRenderer(createContext(), 160, 144, {
                 fragment: CUSTOM_FRAGMENT
             });
-            const canvas = { width: 320, height: 288 };
+            const canvas = { width: 320, height: 288 } as HTMLCanvasElement;
             calls = [];
             drawCanvas(renderer, canvas);
             assert.deepStrictEqual(calls, [
@@ -481,7 +536,10 @@ describe("WebGL", function () {
         it("should keep the texture of the frames", () => {
             const renderer = createRenderer(createContext(), 160, 144);
             drawFrame(renderer, new Uint8Array(160 * 144 * 3));
-            drawCanvas(renderer, { width: 320, height: 288 });
+            drawCanvas(renderer, {
+                width: 320,
+                height: 288
+            } as HTMLCanvasElement);
             calls = [];
             drawFrame(renderer, new Uint8Array(160 * 144 * 3));
             assert.strictEqual(callsOf("texSubImage2D").length, 1);
@@ -492,7 +550,10 @@ describe("WebGL", function () {
             const renderer = createRenderer(createContext(), 160, 144);
             destroyRenderer(renderer);
             calls = [];
-            drawCanvas(renderer, { width: 320, height: 288 });
+            drawCanvas(renderer, {
+                width: 320,
+                height: 288
+            } as HTMLCanvasElement);
             assert.deepStrictEqual(calls, []);
         });
     });
