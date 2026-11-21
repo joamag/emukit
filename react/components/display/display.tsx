@@ -385,6 +385,11 @@ const drawImageCanvas = async (
         img.onload = () => {
             resolve(img);
         };
+
+        // with WebGL the image is requested with CORS permission, as an
+        // image of another origin taints the off-screen canvas, which
+        // could then no longer be drawn by the renderer
+        if (canvasContents.renderer) img.crossOrigin = "anonymous";
         img.src = image;
     });
     const [imgWidth, imgHeight] = [

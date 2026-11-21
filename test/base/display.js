@@ -488,6 +488,47 @@ describe("Display", function () {
             assert.ok(uploads[1] > image);
         });
 
+        it("should load the image of the clear operation with CORS with WebGL", async () => {
+            const images = [];
+            global.Image = class {
+                width = 64;
+                height = 32;
+                set src(value) {
+                    images.push(this);
+                    this.onload();
+                }
+            };
+            const canvas = createCanvas(320, 288, createWebGL([]));
+            render(canvas, { shader: SHADER });
+            await clear(0x112233ff, "https://example.com/image.png");
+
+            // the image must be requested with CORS permission, set before
+            // its source, so that it does not taint the off-screen canvas
+            assert.strictEqual(images.length, 1);
+            assert.strictEqual(images[0].crossOrigin, "anonymous");
+        });
+
+        it("should load the image of the clear operation without CORS in 2D", async () => {
+            const images = [];
+            global.Image = class {
+                width = 64;
+                height = 32;
+                set src(value) {
+                    images.push(this);
+                    this.onload();
+                }
+            };
+            const canvas = createCanvas(320, 288);
+            render(canvas);
+            await clear(0x112233ff, "https://example.com/image.png");
+
+            // the 2D drawing keeps supporting the images of other origins
+            // that are served without CORS permission
+            assert.strictEqual(images.length, 1);
+            assert.strictEqual(images[0].crossOrigin, undefined);
+            assert.strictEqual(callsOf(canvas.calls, "drawImage").length, 1);
+        });
+
         it("should show the clear color with WebGL before the image loads", () => {
             global.Image = class {
                 set src(value) {}
