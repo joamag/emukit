@@ -1,35 +1,51 @@
-const assert = require("assert");
+import assert from "assert";
 
-const { downloadFromBuffer } = require("../../ts/util.ts");
+import { downloadFromBuffer } from "../../ts/util.ts";
+
+/**
+ * The anchor element created by the document stub, with the
+ * attributes that have been set on it.
+ */
+type Link = {
+    attributes: Record<string, string>;
+    setAttribute: (name: string, value: string) => void;
+    click: () => void;
+};
 
 /**
  * The set of blob parts that have been provided to the blob stub,
  * used to verify the data that is handed over for download.
  */
-let parts = [];
+let parts: Uint8Array[] = [];
 
 /**
  * The set of anchor elements that have been created by the document
  * stub, used to verify the download attributes.
  */
-let links = [];
+let links: Link[] = [];
+
+/**
+ * The original Blob and URL of the global object, that are going
+ * to be restored once each test is over, as they are part of Node.js.
+ */
+const { Blob, URL } = global;
 
 describe("Util", function () {
     beforeEach(() => {
         parts = [];
         links = [];
         global.Blob = class {
-            constructor(blobParts) {
+            constructor(blobParts: Uint8Array[]) {
                 parts.push(...blobParts);
             }
-        };
+        } as unknown as typeof Blob;
         global.URL = {
             createObjectURL: () => "blob:url",
             revokeObjectURL: () => undefined
-        };
+        } as unknown as typeof URL;
         global.document = {
             createElement: () => {
-                const link = {
+                const link: Link = {
                     attributes: {},
                     setAttribute: (name, value) => {
                         link.attributes[name] = value;
@@ -43,13 +59,13 @@ describe("Util", function () {
                 appendChild: () => undefined,
                 removeChild: () => undefined
             }
-        };
+        } as unknown as Document;
     });
 
     afterEach(() => {
-        delete global.Blob;
-        delete global.URL;
-        delete global.document;
+        global.Blob = Blob;
+        global.URL = URL;
+        delete (globalThis as { document?: unknown }).document;
     });
 
     describe("#downloadFromBuffer()", function () {
