@@ -27,7 +27,8 @@ import {
     loopModes,
     PixelFormat,
     RomInfo,
-    SaveState
+    SaveState,
+    Shader
 } from "../ts/index.ts";
 
 import {
@@ -88,6 +89,7 @@ type EmulatorAppProps = {
     nativeFullscreen?: boolean;
     background?: string;
     backgrounds?: string[];
+    shader?: Shader;
     onBackground?: (background: string) => void;
 };
 
@@ -106,6 +108,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
     nativeFullscreen = true,
     background,
     backgrounds = ["264653"],
+    shader,
     onBackground
 }) => {
     const [paused, setPaused] = useRecoilState(pausedState);
@@ -906,6 +909,7 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
                     options={displayOptions}
                     fullscreen={fullscreenState}
                     nativeFullscreen={nativeFullscreen}
+                    shader={shader}
                     onDrawHandler={onDrawHandler}
                     onClearHandler={onClearHandler}
                     onMinimize={onMinimize}
@@ -918,7 +922,8 @@ export const EmulatorApp: FC<EmulatorAppProps> = ({
             onClearHandler,
             displayOptions,
             fullscreenState,
-            nativeFullscreen
+            nativeFullscreen,
+            shader
         ]
     );
     const header = useMemo(
@@ -1465,7 +1470,8 @@ export const startApp = (
         sections = [],
         palette,
         background,
-        backgrounds
+        backgrounds,
+        shader
     }: {
         emulator: Emulator;
         strictMode?: boolean;
@@ -1477,6 +1483,7 @@ export const startApp = (
         palette?: string;
         background?: string;
         backgrounds?: string[];
+        shader?: Shader;
     }
 ) => {
     const elementRef = document.getElementById(element);
@@ -1495,6 +1502,7 @@ export const startApp = (
                 palette={palette}
                 background={background}
                 backgrounds={backgrounds}
+                shader={shader}
             />
         </RecoilRoot>
     );
